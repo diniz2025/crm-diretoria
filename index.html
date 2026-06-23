@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Diretoria</title>
+<style>
+:root{--azul:#1565A8;--azul-dark:#0d4a7a;--azul-light:#e8f1fb;--verde:#2e7d32;--amarelo:#f59e0b;--vermelho:#dc2626;--azul-info:#1976d2;--cinza:#64748b;--bg:#f1f5f9;--shadow:0 2px 8px rgba(0,0,0,.10)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e293b}
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d4a7a 0%,#1565A8 60%,#1e88e5 100%)}
+.login-box{background:#fff;border-radius:16px;padding:48px 40px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+.login-logo{width:80px;height:80px;background:var(--azul);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:36px}
+.login-box h1{color:var(--azul);font-size:22px;margin-bottom:4px}
+.login-box p{color:var(--cinza);font-size:13px;margin-bottom:28px}
+.login-box input{width:100%;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;margin-bottom:12px;outline:none;transition:border .2s}
+.login-box input:focus{border-color:var(--azul)}
+.btn-login{width:100%;padding:13px;background:var(--azul);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}
+.btn-login:hover{background:var(--azul-dark)}
+.login-error{color:var(--vermelho);font-size:13px;margin-top:10px;display:none}
+#app{display:none;min-height:100vh}
+.topbar{background:var(--azul);color:#fff;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.15);position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar h1{font-size:17px;font-weight:700}
+.topbar-user{font-size:13px;opacity:.85}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.btn-logout{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px}
+.nav-tabs{background:#fff;border-bottom:2px solid #e2e8f0;padding:0 24px;display:flex;gap:0;overflow-x:auto}
+.nav-tab{padding:14px 20px;font-size:14px;font-weight:500;color:var(--cinza);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:color .2s}
+.nav-tab:hover{color:var(--azul)}
+.nav-tab.active{color:var(--azul);border-bottom-color:var(--azul);font-weight:600}
+.main-content{padding:24px;max-width:1400px;margin:0 auto}
+.section{display:none}.section.active{display:block}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.kpi-card{background:#fff;border-radius:12px;padding:20px;box-shadow:var(--shadow);border-left:4px solid var(--azul)}
+.kpi-card.verde{border-left-color:var(--verde)}.kpi-card.amarelo{border-left-color:var(--amarelo)}.kpi-card.vermelho{border-left-color:var(--vermelho)}
+.kpi-label{font-size:12px;color:var(--cinza);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.kpi-valor{font-size:26px;font-weight:700;color:#1e293b}
+.kpi-sub{font-size:12px;color:var(--cinza);margin-top:4px}
+.card{background:#fff;border-radius:12px;box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden}
+.card-header{padding:16px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between}
+.card-header h2{font-size:15px;font-weight:600;color:#1e293b}
+.card-body{padding:20px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--azul-light);color:var(--azul);font-weight:600;padding:10px 12px;text-align:left}
+td{padding:10px 12px;border-bottom:1px solid #f1f5f9}
+tr:hover td{background:#f8fafc}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase}
+.badge-ok{background:#dcfce7;color:#166534}.badge-atencao{background:#fef9c3;color:#854d0e}.badge-urgente{background:#fee2e2;color:#991b1b}.badge-renovando{background:#dbeafe;color:#1e40af}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:13px;font-weight:500;color:#374151}
+.form-group input,.form-group select,.form-group textarea{padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;transition:border .2s;font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--azul)}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-actions{margin-top:20px;display:flex;gap:12px}
+.btn-primary{background:var(--azul);color:#fff;border:none;padding:11px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-primary:hover{background:var(--azul-dark)}
+.btn-secondary{background:#fff;color:var(--cinza);border:1.5px solid #e2e8f0;padding:11px 24px;border-radius:8px;font-size:14px;cursor:pointer}
+.filtros{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filtros select,.filtros input{padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none}
+.alerta-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;margin-bottom:8px;border-left:4px solid}
+.alerta-urgente{background:#fff1f2;border-color:var(--vermelho)}.alerta-atencao{background:#fffbeb;border-color:var(--amarelo)}.alerta-renovando{background:#eff6ff;border-color:var(--azul-info)}
+.alerta-icon{font-size:20px}
+.alerta-info h4{font-size:14px;font-weight:600}
+.alerta-info p{font-size:12px;color:var(--cinza)}
+.success-msg{background:#dcfce7;color:#166534;padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px;display:none}
+.btn-action{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none}
+.btn-edit{background:var(--azul-light);color:var(--azul)}
+@media(max-width:640px){.topbar{padding:0 14px}.topbar h1{font-size:15px}.main-content{padding:14px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.nav-tab{padding:12px 14px;font-size:13px}.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">🏛️</div>
+    <h1>CRM Diretoria</h1>
+    <p>Gestão de Carteira de Seguros</p>
+    <input type="text" id="inp-user" placeholder="Usuário" autocomplete="username"/>
+    <input type="password" id="inp-pass" placeholder="Senha" autocomplete="current-password" onkeypress="if(event.key==='Enter')doLogin()"/>
+    <button class="btn-login" onclick="doLogin()">Entrar</button>
+    <p class="login-error" id="login-error">Usuário ou senha incorretos.</p>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span style="font-size:22px">🏛️</span>
+      <h1>CRM Diretoria</h1>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="user-label"></span>
+      <button class="btn-logout" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showTab('dashboard',this)">📊 Dashboard</div>
+    <div class="nav-tab" onclick="showTab('contratos',this)">📋 Carteira</div>
+    <div class="nav-tab" onclick="showTab('alertas',this)">🔔 Alertas</div>
+    <div class="nav-tab" onclick="showTab('nova-venda',this)">➕ Nova Venda</div>
+  </div>
+  <div class="main-content">
+
+    <div id="sec-dashboard" class="section active">
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <div class="card">
+        <div class="card-header"><h2>📊 Carteira por Operadora</h2></div>
+        <div class="card-body"><table><thead><tr><th>Operadora</th><th>Contratos</th><th>Vidas</th><th>Prêmio Mensal</th></tr></thead><tbody id="tb-operadoras"></tbody></table></div>
+      </div>
+    </div>
+
+    <div id="sec-contratos" class="section">
+      <div class="card">
+        <div class="card-header"><h2>📋 Carteira de Clientes</h2></div>
+        <div class="card-body">
+          <div class="filtros">
+            <select id="filtro-op" onchange="renderContratos()">
+              <option value="">Todas as operadoras</option>
+              <option>Amil</option><option>Porto Seguro Saúde</option><option>Bradesco Saúde</option><option>SulAmérica</option><option>Hapvida</option><option>Unimed</option><option>Outras</option>
+            </select>
+            <select id="filtro-status" onchange="renderContratos()">
+              <option value="">Todos os status</option>
+              <option value="ok">✅ OK</option><option value="atencao">⚠️ Atenção</option><option value="urgente">🔴 Urgente</option><option value="renovando">🔵 Renovando</option>
+            </select>
+            <input type="text" id="filtro-busca" placeholder="Buscar cliente..." oninput="renderContratos()"/>
+          </div>
+          <div style="overflow-x:auto">
+            <table><thead><tr><th>Cliente</th><th>Operadora</th><th>Plano</th><th>Vidas</th><th>Prêmio</th><th>Renovação</th><th>Status</th><th>Consultor</th></tr></thead><tbody id="tb-contratos"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="sec-alertas" class="section">
+      <div class="card">
+        <div class="card-header"><h2>🔔 Alertas de Renovação</h2></div>
+        <div class="card-body" id="alertas-body"></div>
+      </div>
+    </div>
+
+    <div id="sec-nova-venda" class="section">
+      <div class="card">
+        <div class="card-header"><h2>➕ Cadastrar Nova Venda</h2></div>
+        <div class="card-body">
+          <div class="success-msg" id="success-msg">✅ Contrato cadastrado com sucesso!</div>
+          <form id="form-venda" onsubmit="salvarVenda(event)">
+            <div class="form-grid">
+              <div class="form-group"><label>Cliente / Empresa *</label><input type="text" name="cliente" required/></div>
+              <div class="form-group"><label>CNPJ / CPF *</label><input type="text" name="cnpj_cpf" required placeholder="00.000.000/0001-00"/></div>
+              <div class="form-group"><label>Operadora *</label>
+                <select name="operadora" required><option value="">Selecione...</option><option>Amil</option><option>Porto Seguro Saúde</option><option>Bradesco Saúde</option><option>SulAmérica</option><option>Hapvida</option><option>Unimed</option><option>Outras</option></select>
+              </div>
+              <div class="form-group"><label>Produto / Plano *</label><input type="text" name="produto_plano" required/></div>
+              <div class="form-group"><label>Data de Implantação *</label><input type="date" name="data_implantacao" required onchange="calcRenovacao(this)"/></div>
+              <div class="form-group"><label>Data de Renovação (auto)</label><input type="date" name="data_renovacao" id="inp-renovacao" readonly style="background:#f8fafc"/></div>
+              <div class="form-group"><label>Prêmio Mensal (R$) *</label><input type="number" name="premio_mensal" required step="0.01"/></div>
+              <div class="form-group"><label>Número de Vidas *</label><input type="number" name="numero_vidas" required min="1"/></div>
+              <div class="form-group"><label>Consultor / Vendedor</label><input type="text" name="consultor"/></div>
+              <div class="form-group"><label>Contato na Empresa</label><input type="text" name="contato_empresa"/></div>
+              <div class="form-group"><label>Telefone</label><input type="text" name="telefone"/></div>
+              <div class="form-group"><label>E-mail</label><input type="email" name="email"/></div>
+              <div class="form-group" style="grid-column:1/-1"><label>Observações</label><textarea name="observacoes"></textarea></div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary">💾 Salvar Contrato</button>
+              <button type="button" class="btn-secondary" onclick="document.getElementById('form-venda').reset()">Limpar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const USERS=[
+  {nome:'Administrador',usuario:'admin',senha:'admin123',perfil:'admin',regiao:'Nacional'},
+  {nome:'Nadjair Diniz Barbosa',usuario:'diniz',senha:'dcg2026',perfil:'admin',regiao:'Nacional'},
+  {nome:'Leonardo Henrique',usuario:'leonnardo',senha:'leo2026',perfil:'admin',regiao:'São Paulo'},
+  {nome:'Pedro',usuario:'pedro',senha:'pedro2026',perfil:'diretor',regiao:'Campinas'},
+  {nome:'Diego',usuario:'diego',senha:'diego2026',perfil:'diretor',regiao:'Rio de Janeiro'},
+  {nome:'Carol',usuario:'carol',senha:'carol2026',perfil:'corretor',regiao:'São Paulo'}
+];
+
+const DEMO=[
+  {id:'d1',cliente:'Empresa Alfa Ltda',cnpj_cpf:'11.222.333/0001-44',operadora:'Amil',produto_plano:'Amil 400 Apartamento',data_implantacao:'2025-09-01',data_renovacao:'2026-07-01',premio_mensal:8450,numero_vidas:22,consultor:'Diniz',contato_empresa:'Carlos Souza',telefone:'(11) 98001-1111',email:'carlos@empresaalfa.com.br',observacoes:'Cliente solicita reajuste menor que ANS',ativo:true},
+  {id:'d2',cliente:'Beta Distribuidora S/A',cnpj_cpf:'22.333.444/0001-55',operadora:'Bradesco Saúde',produto_plano:'Bradesco Saúde Nacional Flex',data_implantacao:'2025-10-15',data_renovacao:'2026-08-15',premio_mensal:12300,numero_vidas:35,consultor:'Leonardo',contato_empresa:'Mariana Lima',telefone:'(11) 97002-2222',email:'mariana@betadist.com.br',observacoes:'Negociando desconto na implantação',ativo:true},
+  {id:'d3',cliente:'Gama Serviços ME',cnpj_cpf:'33.444.555/0001-66',operadora:'SulAmérica',produto_plano:'SulAmérica Clássico Coletivo',data_implantacao:'2025-12-01',data_renovacao:'2026-10-01',premio_mensal:5870,numero_vidas:15,consultor:'Pedro',contato_empresa:'Roberto Alves',telefone:'(19) 96003-3333',email:'roberto@gamaservicos.com.br',observacoes:'Clínica de estética',ativo:true},
+  {id:'d4',cliente:'Delta Indústria Ltda',cnpj_cpf:'44.555.666/0001-77',operadora:'Porto Seguro Saúde',produto_plano:'Porto Saúde PME Plus',data_implantacao:'2025-11-01',data_renovacao:'2026-09-01',premio_mensal:19800,numero_vidas:58,consultor:'Diego',contato_empresa:'Fernanda Costa',telefone:'(21) 95004-4444',email:'fernanda@deltaindustria.com.br',observacoes:'Empresa quer incluir odonto',ativo:true},
+  {id:'d5',cliente:'Épsilon Tecnologia S/A',cnpj_cpf:'55.666.777/0001-88',operadora:'Hapvida',produto_plano:'Hapvida Empresarial Master',data_implantacao:'2026-01-01',data_renovacao:'2026-11-01',premio_mensal:7200,numero_vidas:40,consultor:'Carol',contato_empresa:'Thiago Mendes',telefone:'(11) 94005-5555',email:'thiago@epsilontech.com.br',observacoes:'Recém implantado — fidelizar',ativo:true}
+];
+
+let usuarioLogado=null;
+let contratos=[];
+
+function loadContratos(){
+  const s=localStorage.getItem('crm_contratos');
+  if(s){contratos=JSON.parse(s);}
+  else{contratos=DEMO;saveContratos();}
+}
+function saveContratos(){localStorage.setItem('crm_contratos',JSON.stringify(contratos));}
+
+function calcStatus(dr){
+  if(!dr)return'ok';
+  const d=Math.floor((new Date(dr)-new Date())/86400000);
+  if(d<0)return'renovando';
+  if(d<=30)return'urgente';
+  if(d<=60)return'atencao';
+  return'ok';
+}
+function diasP(dr){return Math.floor((new Date(dr)-new Date())/86400000);}
+function fmt(v){return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+function doLogin(){
+  const u=document.getElementById('inp-user').value.trim();
+  const p=document.getElementById('inp-pass').value.trim();
+  const match=USERS.find(x=>x.usuario===u&&x.senha===p);
+  if(match){
+    usuarioLogado=match;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('user-label').textContent=match.nome+' · '+match.regiao;
+    loadContratos();
+    renderAll();
+  }else{
+    document.getElementById('login-error').style.display='block';
+  }
+}
+function doLogout(){
+  usuarioLogado=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('inp-user').value='';
+  document.getElementById('inp-pass').value='';
+}
+
+function renderAll(){renderDashboard();renderContratos();renderAlertas();}
+
+function renderDashboard(){
+  const a=contratos.filter(c=>c.ativo!==false);
+  const tp=a.reduce((s,c)=>s+(c.premio_mensal||0),0);
+  const tv=a.reduce((s,c)=>s+(c.numero_vidas||0),0);
+  const tm=a.length?tp/a.length:0;
+  const al=a.filter(c=>['urgente','atencao','renovando'].includes(calcStatus(c.data_renovacao))).length;
+  document.getElementById('kpi-grid').innerHTML=`
+    <div class="kpi-card"><div class="kpi-label">Contratos Ativos</div><div class="kpi-valor">${a.length}</div><div class="kpi-sub">na carteira</div></div>
+    <div class="kpi-card verde"><div class="kpi-label">Prêmio Mensal Total</div><div class="kpi-valor">R$ ${fmt(tp)}</div><div class="kpi-sub">receita recorrente</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total de Vidas</div><div class="kpi-valor">${tv}</div><div class="kpi-sub">beneficiários</div></div>
+    <div class="kpi-card"><div class="kpi-label">Ticket Médio</div><div class="kpi-valor">R$ ${fmt(tm)}</div><div class="kpi-sub">por contrato</div></div>
+    <div class="kpi-card ${al>0?'vermelho':'verde'}"><div class="kpi-label">Alertas Renovação</div><div class="kpi-valor">${al}</div><div class="kpi-sub">${al>0?'requer atenção':'tudo em dia'}</div></div>`;
+  const ops=['Amil','Porto Seguro Saúde','Bradesco Saúde','SulAmérica','Hapvida','Unimed','Outras'];
+  let h='';
+  ops.forEach(op=>{
+    const cc=a.filter(c=>c.operadora===op);
+    if(!cc.length)return;
+    h+=`<tr><td><b>${op}</b></td><td>${cc.length}</td><td>${cc.reduce((s,c)=>s+(c.numero_vidas||0),0)}</td><td>R$ ${fmt(cc.reduce((s,c)=>s+(c.premio_mensal||0),0))}</td></tr>`;
+  });
+  document.getElementById('tb-operadoras').innerHTML=h||'<tr><td colspan="4" style="text-align:center;color:#64748b">Sem contratos</td></tr>';
+}
+
+function renderContratos(){
+  const fo=document.getElementById('filtro-op').value;
+  const fs=document.getElementById('filtro-status').value;
+  const fb=(document.getElementById('filtro-busca').value||'').toLowerCase();
+  const bmap={ok:'<span class="badge badge-ok">✅ OK</span>',atencao:'<span class="badge badge-atencao">⚠️ Atenção</span>',urgente:'<span class="badge badge-urgente">🔴 Urgente</span>',renovando:'<span class="badge badge-renovando">🔵 Renovando</span>'};
+  let lista=contratos.filter(c=>c.ativo!==false);
+  if(fo)lista=lista.filter(c=>c.operadora===fo);
+  if(fs)lista=lista.filter(c=>calcStatus(c.data_renovacao)===fs);
+  if(fb)lista=lista.filter(c=>(c.cliente||'').toLowerCase().includes(fb));
+  document.getElementById('tb-contratos').innerHTML=lista.map(c=>`
+    <tr>
+      <td><b>${c.cliente}</b><br><small style="color:#64748b">${c.cnpj_cpf||''}</small></td>
+      <td>${c.operadora}</td><td>${c.produto_plano||''}</td><td>${c.numero_vidas||0}</td>
+      <td>R$ ${fmt(c.premio_mensal||0)}</td>
+      <td>${c.data_renovacao?new Date(c.data_renovacao+'T12:00:00').toLocaleDateString('pt-BR'):'-'}</td>
+      <td>${bmap[calcStatus(c.data_renovacao)]||''}</td>
+      <td>${c.consultor||'-'}</td>
+    </tr>`).join('')||'<tr><td colspan="8" style="text-align:center;color:#64748b;padding:20px">Nenhum contrato encontrado</td></tr>';
+}
+
+function renderAlertas(){
+  const a=contratos.filter(c=>c.ativo!==false);
+  const urg=a.filter(c=>calcStatus(c.data_renovacao)==='urgente');
+  const ate=a.filter(c=>calcStatus(c.data_renovacao)==='atencao');
+  const ren=a.filter(c=>calcStatus(c.data_renovacao)==='renovando');
+  let h='';
+  if(!urg.length&&!ate.length&&!ren.length){h='<div style="text-align:center;padding:40px;color:#64748b">✅ Nenhum alerta — todos os contratos em dia!</div>';}
+  urg.forEach(c=>{const d=diasP(c.data_renovacao);h+=`<div class="alerta-item alerta-urgente"><span class="alerta-icon">🔴</span><div class="alerta-info" style="flex:1"><h4>${c.cliente}</h4><p>${c.operadora} · ${c.numero_vidas} vidas · R$ ${fmt(c.premio_mensal)} · ${d} dias para renovar</p></div><span class="badge badge-urgente">URGENTE</span></div>`;});
+  ate.forEach(c=>{const d=diasP(c.data_renovacao);h+=`<div class="alerta-item alerta-atencao"><span class="alerta-icon">⚠️</span><div class="alerta-info" style="flex:1"><h4>${c.cliente}</h4><p>${c.operadora} · ${c.numero_vidas} vidas · R$ ${fmt(c.premio_mensal)} · ${d} dias para renovar</p></div><span class="badge badge-atencao">ATENÇÃO</span></div>`;});
+  ren.forEach(c=>{h+=`<div class="alerta-item alerta-renovando"><span class="alerta-icon">🔵</span><div class="alerta-info" style="flex:1"><h4>${c.cliente}</h4><p>${c.operadora} · ${c.numero_vidas} vidas · R$ ${fmt(c.premio_mensal)} · Vencido — em renovação</p></div><span class="badge badge-renovando">RENOVANDO</span></div>`;});
+  document.getElementById('alertas-body').innerHTML=h;
+}
+
+function calcRenovacao(inp){
+  const d=new Date(inp.value+'T12:00:00');
+  if(isNaN(d))return;
+  d.setMonth(d.getMonth()+10);
+  document.getElementById('inp-renovacao').value=d.toISOString().split('T')[0];
+}
+
+function salvarVenda(e){
+  e.preventDefault();
+  const f=e.target;
+  const novo={
+    id:'c'+Date.now(),
+    cliente:f.cliente.value,cnpj_cpf:f.cnpj_cpf.value,operadora:f.operadora.value,
+    produto_plano:f.produto_plano.value,data_implantacao:f.data_implantacao.value,
+    data_renovacao:document.getElementById('inp-renovacao').value,
+    premio_mensal:parseFloat(f.premio_mensal.value)||0,numero_vidas:parseInt(f.numero_vidas.value)||0,
+    consultor:f.consultor.value||usuarioLogado?.nome||'',contato_empresa:f.contato_empresa.value,
+    telefone:f.telefone.value,email:f.email.value,observacoes:f.observacoes.value,ativo:true
+  };
+  contratos.push(novo);
+  saveContratos();
+  const msg=document.getElementById('success-msg');
+  msg.style.display='block';
+  f.reset();
+  setTimeout(()=>msg.style.display='none',4000);
+  renderAll();
+}
+
+function showTab(tab,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+tab).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
