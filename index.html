@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRM Diretoria — Intelligence Suite</title>
+<title>Dental M.I — Intelligence Suite</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
@@ -85,8 +80,8 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
 <div id="login-screen">
   <div class="login-box">
     <img src="logo-dental.png" class="login-logo" alt="Logo">
-    <h1>Intelligence Suite</h1>
-    <p>Acesse o painel estratégico da diretoria</p>
+    <h1>M.I Intelligence</h1>
+    <p>Acesse o painel estratégico de produção</p>
     <input type="text" id="inp-user" placeholder="Usuário" autocomplete="username"/>
     <input type="password" id="inp-pass" placeholder="Senha" autocomplete="current-password" onkeypress="if(event.key==='Enter')doLogin()"/>
     <button class="btn-login" style="width:100%" onclick="doLogin()">Entrar no Sistema</button>
@@ -98,7 +93,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
   <div class="topbar">
     <div class="topbar-left">
       <img src="logo-dental.png" style="height:44px;border-radius:6px">
-      <h1>CRM Diretoria</h1>
+      <h1>Dental M.I — CRM</h1>
     </div>
     <div class="topbar-right">
       <span id="user-label" style="font-size:13px;font-weight:600;margin-right:16px"></span>
@@ -112,7 +107,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
     <div class="nav-tab" onclick="showTab('carteira',this)">📋 Carteira</div>
     <div class="nav-tab" onclick="showTab('documentos',this)">📁 Documentos</div>
     <div class="nav-tab" onclick="showTab('alertas',this)">🔔 Alertas</div>
-    <div class="nav-tab" onclick="showTab('venda',this)">➕ Nova Venda</div>
+    <div class="nav-tab" onclick="showTab('venda',this)">➕ Nova Operação</div>
   </div>
 
   <div class="main-content">
@@ -210,25 +205,25 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
 
 <script>
 /**
- * CRM Diretoria v2.0 - Intelligence Suite
+ * Dental M.I — Intelligence Suite v2.0
  * 
  * CONFORMIDADE:
- * 1. Política de Segurança DCG: Estrutura sem segredos (Anti-caixa-preta).
+ * 1. Política de Segurança: Estrutura sem segredos (Anti-caixa-preta).
  * 2. Soberania Tecnológica: Portabilidade extrema via exportação CSV/JSON.
- * 3. Software Livre: Código aberto, transparente e auditável.
+ * 3. Software Livre: Código aberto e transparente.
  * 
- * Engenharia: Accio (Master Builder) para Diniz (CEO)
+ * Engenharia: Accio (Master Builder)
  */
 
 const USERS=[
-  {usuario:'diniz',senha:'dcg2026',nome:'Nadjair Diniz',cargo:'CEO'},
+  {usuario:'diniz',senha:'dcg2026',nome:'Diretoria M.I',cargo:'CEO'},
   {usuario:'leonnardo',senha:'leo2026',nome:'Leonardo Henrique',cargo:'Diretor'},
   {usuario:'pedro',senha:'pedro2026',nome:'Pedro',cargo:'Gerente'},
   {usuario:'diego',senha:'diego2026',nome:'Diego',cargo:'Gerente'}
 ];
 
 let db = JSON.parse(localStorage.getItem('crm_v2_db')) || [
-  {id:1,cliente:'Logística Brasil S/A',operadora:'Amil',vidas:45,premio:12500,data:'2026-07-15',consultor:'Diniz'},
+  {id:1,cliente:'Empresa Alfa Ltda',operadora:'Amil',vidas:45,premio:12500,data:'2026-07-15',consultor:'M.I Credit'},
   {id:2,cliente:'Indústria Metalúrgica',operadora:'Bradesco',vidas:120,premio:38000,data:'2026-08-10',consultor:'Leonardo'},
   {id:3,cliente:'Escola Saber',operadora:'SulAmérica',vidas:30,premio:8900,data:'2026-06-28',consultor:'Pedro'}
 ];
@@ -391,7 +386,7 @@ function salvarVenda(e){
   localStorage.setItem('crm_v2_db', JSON.stringify(db));
   f.reset();
   renderAll();
-  alert('Contrato salvo com sucesso!');
+  alert('Operação salva com sucesso!');
 }
 
 function exportarDados(formato){
