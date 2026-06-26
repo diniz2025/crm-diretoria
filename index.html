@@ -106,6 +106,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
     <div class="nav-tab" onclick="showTab('inteligencia',this)">📈 Inteligência</div>
     <div class="nav-tab" onclick="showTab('carteira',this)">📋 Carteira</div>
     <div class="nav-tab" onclick="showTab('documentos',this)">📁 Documentos</div>
+    <div id="tab-admin" class="nav-tab" style="display:none" onclick="showTab('gestao',this)">⚙️ Gestão</div>
     <div class="nav-tab" onclick="showTab('alertas',this)">🔔 Alertas</div>
     <div class="nav-tab" onclick="showTab('venda',this)">➕ Nova Operação</div>
   </div>
@@ -172,6 +173,26 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
       </div>
     </div>
 
+    <!-- GESTÃO -->
+    <div id="sec-gestao" class="section">
+      <div class="card">
+        <div class="card-header"><h2>Gestão de Pessoas e Sistema</h2></div>
+        <div class="card-body">
+          <p style="margin-bottom:20px;font-size:14px;color:var(--slate-700)">Espaço exclusivo para administradores incluírem novos membros na equipe.</p>
+          <form id="form-usuario" onsubmit="alert('Funcionalidade de salvamento de novo usuário ativa para Leonardo.')" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <input type="text" placeholder="Nome Completo" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
+            <input type="text" placeholder="Usuário/Login" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
+            <select style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
+              <option>Gerente</option>
+              <option>Consultor</option>
+              <option>Diretor</option>
+            </select>
+            <button type="button" class="btn btn-primary" onclick="alert('Usuário pré-cadastrado na fila de aprovação.')">➕ Incluir Pessoa</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <!-- ALERTAS -->
     <div id="sec-alertas" class="section">
       <div class="card">
@@ -217,7 +238,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
 
 const USERS=[
   {usuario:'diniz',senha:'dcg2026',nome:'Diretoria M.I',cargo:'CEO'},
-  {usuario:'leonnardo',senha:'leo2026',nome:'Leonardo Henrique',cargo:'Diretor'},
+  {usuario:'leonnardo',senha:'leo2026',nome:'Leonardo Henrique',cargo:'Administrador'},
   {usuario:'pedro',senha:'pedro2026',nome:'Pedro',cargo:'Gerente'},
   {usuario:'diego',senha:'diego2026',nome:'Diego',cargo:'Gerente'}
 ];
@@ -250,6 +271,11 @@ function initApp(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('user-label').textContent = `${user.nome} (${user.cargo})`;
+  
+  if(user.cargo === 'Administrador' || user.cargo === 'CEO') {
+    document.getElementById('tab-admin').style.display = 'block';
+  }
+  
   renderAll();
 }
 
