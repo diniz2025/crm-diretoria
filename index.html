@@ -1,4 +1,4 @@
-<title>Dental M.I — Intelligence Suite</title>
+<title>Dental M.I Gestão</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
@@ -72,7 +72,21 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
 .badge{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase}
 .bg-urgente{background:#fee2e2;color:#991b1b}.bg-atencao{background:#fef9c3;color:#854d0e}.bg-ok{background:#dcfce7;color:#166534}
 
+.row-click{cursor:pointer;transition:background 0.15s}
+.row-click:hover{background:var(--azul-light)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.active{display:flex}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.4)}
+.modal-head{padding:20px 24px;border-bottom:1px solid var(--slate-200);display:flex;align-items:center;justify-content:space-between}
+.modal-head h2{font-size:17px;font-weight:700}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--slate-700);line-height:1}
+.modal-body{padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.modal-body .full{grid-column:span 2}
+.modal-body label{font-size:12px;font-weight:600;color:var(--slate-700);display:block;margin-bottom:4px}
+.modal-body input,.modal-body select{width:100%;padding:11px 12px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--slate-200);display:flex;justify-content:space-between;gap:12px}
 @media(max-width:1024px){.stats-grid{grid-template-columns:1fr}}
+@media(max-width:640px){.modal-body{grid-template-columns:1fr}.modal-body .full{grid-column:span 1}}
 </style>
 </head>
 <body>
@@ -80,7 +94,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
 <div id="login-screen">
   <div class="login-box">
     <img src="logo-dental.png" class="login-logo" alt="Logo">
-    <h1>M.I Intelligence</h1>
+    <h1>Dental M.I Gestão</h1>
     <p>Acesse o painel estratégico de produção</p>
     <input type="text" id="inp-user" placeholder="Usuário" autocomplete="username"/>
     <input type="password" id="inp-pass" placeholder="Senha" autocomplete="current-password" onkeypress="if(event.key==='Enter')doLogin()"/>
@@ -93,7 +107,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
   <div class="topbar">
     <div class="topbar-left">
       <img src="logo-dental.png" style="height:44px;border-radius:6px">
-      <h1>Dental M.I — CRM</h1>
+      <h1>Dental M.I Gestão</h1>
     </div>
     <div class="topbar-right">
       <span id="user-label" style="font-size:13px;font-weight:600;margin-right:16px"></span>
@@ -233,6 +247,69 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
           </form>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE EDIÇÃO -->
+  <div class="modal-overlay" id="modal-edit">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>✏️ Editar Cliente</h2>
+        <button class="modal-close" onclick="fecharModal()">&times;</button>
+      </div>
+      <form id="form-edit" onsubmit="salvarEdicao(event)">
+        <input type="hidden" id="edit-id">
+        <div class="modal-body">
+          <div class="full">
+            <label>Cliente / Empresa</label>
+            <input type="text" id="edit-cliente" required>
+          </div>
+          <div>
+            <label>Operadora</label>
+            <select id="edit-operadora" required>
+              <option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option>
+            </select>
+          </div>
+          <div>
+            <label>Nº de Vidas</label>
+            <input type="number" id="edit-vidas" required min="1">
+          </div>
+          <div>
+            <label>Prêmio Mensal (R$)</label>
+            <input type="number" id="edit-premio" required step="0.01">
+          </div>
+          <div>
+            <label>Data de Renovação</label>
+            <input type="date" id="edit-data" required>
+          </div>
+          <div>
+            <label>Estágio</label>
+            <select id="edit-estagio" required>
+              <option>Prospecção</option><option>Proposta</option><option>Negociação</option><option>Implantado</option><option>Renovação</option>
+            </select>
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="edit-status">
+              <option value="auto">Automático (pela data)</option>
+              <option value="ok">🟢 Em dia</option>
+              <option value="atencao">🟡 Atenção</option>
+              <option value="urgente">🔴 Urgente</option>
+            </select>
+          </div>
+          <div class="full" id="edit-vendedor-wrap">
+            <label>Vendedor Responsável</label>
+            <select id="edit-vendedor"></select>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn" style="background:#fee2e2;color:#991b1b" onclick="excluirContrato()">🗑️ Excluir</button>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">💾 Salvar</button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -415,7 +492,7 @@ function renderCarteira(){
   if(busca) data = data.filter(c => (c.cliente||'').toLowerCase().includes(busca));
   if(fVend) data = data.filter(c => c.consultor === fVend);
   if(fEst) data = data.filter(c => (c.estagio||'') === fEst);
-  if(fStat) data = data.filter(c => calcStatus(c.data) === fStat);
+  if(fStat) data = data.filter(c => statusDoContrato(c) === fStat);
 
   const info = document.getElementById('carteira-info');
   if(info) info.textContent = `${data.length} contrato(s) · ${isMaster()?'visão total':'apenas seus dados'}`;
@@ -423,9 +500,9 @@ function renderCarteira(){
   const stMap = {ok:'🟢 Em dia', atencao:'🟡 Atenção', urgente:'🔴 Urgente'};
   const body = document.getElementById('body-carteira');
   body.innerHTML = data.map(c=>{
-    const st = calcStatus(c.data);
+    const st = statusDoContrato(c);
     return `
-      <tr>
+      <tr class="row-click" onclick="abrirEdicao(${c.id})" title="Clique para editar">
         <td><b>${c.cliente}</b></td>
         <td>${c.operadora}</td>
         <td>${c.vidas}</td>
@@ -439,9 +516,14 @@ function renderCarteira(){
   }).join('') || '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--slate-700)">Nenhum contrato encontrado.</td></tr>';
 }
 
+// Status automático pela data de renovação
 function calcStatus(dataRenov){
   const dias = Math.floor((new Date(dataRenov)-new Date())/86400000);
   return dias < 30 ? 'urgente' : (dias < 60 ? 'atencao' : 'ok');
+}
+// Status efetivo: manual (se definido) ou automático
+function statusDoContrato(c){
+  return (c.statusManual && c.statusManual !== 'auto') ? c.statusManual : calcStatus(c.data);
 }
 
 function renderAlertas(){
@@ -484,6 +566,81 @@ function exportarDados(formato){
   a.href = url;
   a.download = `relatorio-producao.${formato}`;
   a.click();
+}
+
+// ===== EDIÇÃO DE CLIENTE (MODAL) =====
+function abrirEdicao(id){
+  const c = db.find(x => x.id === id);
+  if(!c) return;
+
+  // Segurança: vendedor só edita o próprio cliente
+  const user = JSON.parse(localStorage.getItem('crm_user'));
+  if(!isMaster() && c.consultor !== user.nome){
+    alert('Você só pode editar seus próprios clientes.');
+    return;
+  }
+
+  document.getElementById('edit-id').value = c.id;
+  document.getElementById('edit-cliente').value = c.cliente;
+  document.getElementById('edit-operadora').value = c.operadora;
+  document.getElementById('edit-vidas').value = c.vidas;
+  document.getElementById('edit-premio').value = c.premio;
+  document.getElementById('edit-data').value = c.data;
+  document.getElementById('edit-estagio').value = c.estagio || 'Implantado';
+  document.getElementById('edit-status').value = c.statusManual || 'auto';
+
+  // Vendedor: só Master pode reatribuir
+  const wrap = document.getElementById('edit-vendedor-wrap');
+  const selVend = document.getElementById('edit-vendedor');
+  if(isMaster()){
+    wrap.style.display = '';
+    const nomes = [...new Set(USERS.map(u=>u.nome).concat(db.map(c=>c.consultor)))];
+    selVend.innerHTML = nomes.map(n=>`<option value="${n}">${n}</option>`).join('');
+    selVend.value = c.consultor;
+  } else {
+    wrap.style.display = 'none';
+  }
+
+  document.getElementById('modal-edit').classList.add('active');
+}
+
+function fecharModal(){
+  document.getElementById('modal-edit').classList.remove('active');
+}
+
+function salvarEdicao(e){
+  e.preventDefault();
+  const id = parseInt(document.getElementById('edit-id').value);
+  const c = db.find(x => x.id === id);
+  if(!c) return;
+
+  c.cliente = document.getElementById('edit-cliente').value;
+  c.operadora = document.getElementById('edit-operadora').value;
+  c.vidas = parseInt(document.getElementById('edit-vidas').value);
+  c.premio = parseFloat(document.getElementById('edit-premio').value);
+  c.data = document.getElementById('edit-data').value;
+  c.estagio = document.getElementById('edit-estagio').value;
+  c.statusManual = document.getElementById('edit-status').value;
+  if(isMaster()){
+    c.consultor = document.getElementById('edit-vendedor').value;
+  }
+
+  localStorage.setItem('crm_v2_db', JSON.stringify(db));
+  fecharModal();
+  renderAll();
+  alert('Cliente atualizado com sucesso!');
+}
+
+function excluirContrato(){
+  const id = parseInt(document.getElementById('edit-id').value);
+  const c = db.find(x => x.id === id);
+  if(!c) return;
+  if(!confirm(`Tem certeza que deseja excluir o cliente "${c.cliente}"? Esta ação não pode ser desfeita.`)) return;
+  db = db.filter(x => x.id !== id);
+  localStorage.setItem('crm_v2_db', JSON.stringify(db));
+  fecharModal();
+  renderAll();
+  alert('Cliente excluído.');
 }
 
 function showTab(tab, el){
