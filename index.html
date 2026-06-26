@@ -105,7 +105,6 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
     <div class="nav-tab active" onclick="showTab('dashboard',this)">📊 Dashboard</div>
     <div class="nav-tab" onclick="showTab('inteligencia',this)">📈 Inteligência</div>
     <div class="nav-tab" onclick="showTab('carteira',this)">📋 Carteira</div>
-    <div class="nav-tab" onclick="showTab('documentos',this)">📁 Documentos</div>
     <div id="tab-admin" class="nav-tab" style="display:none" onclick="showTab('gestao',this)">⚙️ Gestão</div>
     <div class="nav-tab" onclick="showTab('alertas',this)">🔔 Alertas</div>
     <div class="nav-tab" onclick="showTab('venda',this)">➕ Nova Operação</div>
@@ -148,27 +147,37 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
     <!-- CARTEIRA -->
     <div id="sec-carteira" class="section">
       <div class="card">
-        <div class="card-header"><h2>Gestão de Carteira</h2></div>
-        <div class="card-body" style="overflow-x:auto">
-          <table id="table-carteira">
-            <thead><tr><th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Renovação</th><th>Status</th></tr></thead>
-            <tbody id="body-carteira"></tbody>
-          </table>
+        <div class="card-header">
+          <h2>Gestão de Carteira</h2>
+          <span id="carteira-info" style="font-size:12px;color:var(--slate-700);font-weight:500"></span>
         </div>
-      </div>
-    </div>
-
-    <!-- DOCUMENTOS -->
-    <div id="sec-documentos" class="section">
-      <div class="card">
-        <div class="card-header"><h2>Centro de Importação de Documentos</h2></div>
         <div class="card-body">
-          <div class="dropzone" onclick="document.getElementById('file-input').click()">
-            <p>💾 <b>Arraste ou clique para importar PDFs, Word ou Excel</b></p>
-            <p style="font-size:12px;color:var(--slate-700);margin-top:8px">Os arquivos serão vinculados à inteligência do CRM</p>
-            <input type="file" id="file-input" style="display:none" multiple onchange="handleFiles(this.files)">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+            <input type="text" id="f-busca" placeholder="🔍 Buscar cliente..." oninput="renderCarteira()" style="flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
+            <select id="f-vendedor" onchange="renderCarteira()" style="padding:10px 14px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
+              <option value="">👤 Todos os vendedores</option>
+            </select>
+            <select id="f-status" onchange="renderCarteira()" style="padding:10px 14px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
+              <option value="">Todos os status</option>
+              <option value="ok">🟢 Em dia</option>
+              <option value="atencao">🟡 Atenção</option>
+              <option value="urgente">🔴 Urgente</option>
+            </select>
+            <select id="f-estagio" onchange="renderCarteira()" style="padding:10px 14px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
+              <option value="">Todos os estágios</option>
+              <option>Prospecção</option>
+              <option>Proposta</option>
+              <option>Negociação</option>
+              <option>Implantado</option>
+              <option>Renovação</option>
+            </select>
           </div>
-          <div class="file-list" id="file-list"></div>
+          <div style="overflow-x:auto">
+            <table id="table-carteira">
+              <thead><tr><th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th><th>Renovação</th><th>Status</th><th>Vendedor</th></tr></thead>
+              <tbody id="body-carteira"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -215,6 +224,10 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
             </select>
             <input type="number" name="premio" placeholder="Prêmio Mensal (R$)" required step="0.01" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
             <input type="number" name="vidas" placeholder="Nº de Vidas" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
+            <select name="estagio" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
+              <option value="">Estágio do Negócio</option>
+              <option>Prospecção</option><option>Proposta</option><option>Negociação</option><option selected>Implantado</option><option>Renovação</option>
+            </select>
             <input type="date" name="data" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
             <button type="submit" class="btn btn-primary" style="grid-column:span 2;justify-content:center">💾 Salvar na Base de Dados</button>
           </form>
@@ -243,15 +256,36 @@ const USERS=[
   {usuario:'diego',senha:'diego2026',nome:'Diego',cargo:'Gerente'}
 ];
 
+// Perfis com visão TOTAL da base (veem tudo de todos os vendedores)
+const PERFIS_MASTER = ['CEO', 'Administrador'];
+
 let db = JSON.parse(localStorage.getItem('crm_v2_db')) || [
-  {id:1,cliente:'Empresa Alfa Ltda',operadora:'Amil',vidas:45,premio:12500,data:'2026-07-15',consultor:'M.I Credit'},
-  {id:2,cliente:'Indústria Metalúrgica',operadora:'Bradesco',vidas:120,premio:38000,data:'2026-08-10',consultor:'Leonardo'},
-  {id:3,cliente:'Escola Saber',operadora:'SulAmérica',vidas:30,premio:8900,data:'2026-06-28',consultor:'Pedro'}
+  {id:1,cliente:'Empresa Alfa Ltda',operadora:'Amil',vidas:45,premio:12500,data:'2026-07-15',estagio:'Implantado',consultor:'Leonardo Henrique'},
+  {id:2,cliente:'Indústria Metalúrgica',operadora:'Bradesco',vidas:120,premio:38000,data:'2026-08-10',estagio:'Renovação',consultor:'Pedro'},
+  {id:3,cliente:'Escola Saber',operadora:'SulAmérica',vidas:30,premio:8900,data:'2026-06-28',estagio:'Negociação',consultor:'Diego'},
+  {id:4,cliente:'Construtora Horizonte',operadora:'Amil',vidas:62,premio:21500,data:'2026-09-05',estagio:'Proposta',consultor:'Pedro'},
+  {id:5,cliente:'Clínica Vida Plena',operadora:'Porto',vidas:18,premio:6200,data:'2026-07-22',estagio:'Implantado',consultor:'Diego'}
 ];
 
-let files = JSON.parse(localStorage.getItem('crm_v2_files')) || [];
 let currentChart1 = null;
 let currentChart2 = null;
+
+/**
+ * SEGURANÇA / ISOLAMENTO DE DADOS:
+ * - CEO (Diretoria) e Administrador (Leonardo) veem TODA a base.
+ * - Demais usuários veem APENAS os contratos que eles mesmos cadastraram.
+ */
+function getVisibleData(){
+  const user = JSON.parse(localStorage.getItem('crm_user'));
+  if(!user) return [];
+  if(PERFIS_MASTER.includes(user.cargo)) return db;
+  return db.filter(c => c.consultor === user.nome);
+}
+
+function isMaster(){
+  const user = JSON.parse(localStorage.getItem('crm_user'));
+  return user && PERFIS_MASTER.includes(user.cargo);
+}
 
 function doLogin(){
   const u=document.getElementById('inp-user').value;
@@ -285,28 +319,29 @@ function doLogout(){
 }
 
 function renderAll(){
+  popularFiltroVendedores();
   renderDashboard();
   renderInteligencia();
   renderCarteira();
-  renderDocumentos();
   renderAlertas();
 }
 
 function renderDashboard(){
-  const totalPremio = db.reduce((s,c)=>s+c.premio,0);
-  const totalVidas = db.reduce((s,c)=>s+c.vidas,0);
-  const ticketMedio = db.length ? totalPremio/db.length : 0;
+  const data = getVisibleData();
+  const totalPremio = data.reduce((s,c)=>s+c.premio,0);
+  const totalVidas = data.reduce((s,c)=>s+c.vidas,0);
+  const ticketMedio = data.length ? totalPremio/data.length : 0;
 
   document.getElementById('kpi-grid').innerHTML = `
-    <div class="kpi-card"><span class="kpi-label">Faturamento Total</span><span class="kpi-valor">R$ ${totalPremio.toLocaleString()}</span></div>
+    <div class="kpi-card"><span class="kpi-label">Faturamento ${isMaster()?'Total':'(meu)'}</span><span class="kpi-valor">R$ ${totalPremio.toLocaleString()}</span></div>
     <div class="kpi-card"><span class="kpi-label">Total de Vidas</span><span class="kpi-valor">${totalVidas}</span></div>
     <div class="kpi-card"><span class="kpi-label">Ticket Médio</span><span class="kpi-valor">R$ ${ticketMedio.toFixed(2)}</span></div>
-    <div class="kpi-card"><span class="kpi-label">Contratos</span><span class="kpi-valor">${db.length}</span></div>
+    <div class="kpi-card"><span class="kpi-label">Contratos</span><span class="kpi-valor">${data.length}</span></div>
   `;
 
   // Chart Operadoras
   const ops = {};
-  db.forEach(c=> ops[c.operadora] = (ops[c.operadora]||0) + c.premio);
+  data.forEach(c=> ops[c.operadora] = (ops[c.operadora]||0) + c.premio);
   const ctx = document.getElementById('chartOperadoras').getContext('2d');
   if(currentChart1) currentChart1.destroy();
   currentChart1 = new Chart(ctx, {
@@ -318,9 +353,9 @@ function renderDashboard(){
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
   });
 
-  // Ranking
+  // Ranking (só faz sentido para Master que vê todos)
   const r = {};
-  db.forEach(c=> r[c.consultor] = (r[c.consultor]||0) + c.premio);
+  data.forEach(c=> r[c.consultor] = (r[c.consultor]||0) + c.premio);
   const sorted = Object.entries(r).sort((a,b)=>b[1]-a[1]);
   document.getElementById('ranking-consultores').innerHTML = `
     <ul class="ranking-list" style="padding:20px">
@@ -329,13 +364,14 @@ function renderDashboard(){
           <span><b>${i+1}º</b> ${name}</span>
           <span style="font-weight:700">R$ ${val.toLocaleString()}</span>
         </li>
-      `).join('')}
+      `).join('') || '<li style="padding:20px;text-align:center;color:var(--slate-700)">Sem dados de produção.</li>'}
     </ul>
   `;
 }
 
 function renderInteligencia(){
-  const projecao = db.reduce((s,c)=>s+c.premio,0) * 1.15; // Simulação de Crescimento 15%
+  const data = getVisibleData();
+  const projecao = data.reduce((s,c)=>s+c.premio,0) * 1.15;
   document.getElementById('grid-inteligencia').innerHTML = `
     <div class="kpi-card"><span class="kpi-label">Projeção 12 Meses</span><span class="kpi-valor">R$ ${(projecao*12).toLocaleString()}</span></div>
     <div class="kpi-card"><span class="kpi-label">ROI Estimado</span><span class="kpi-valor">24.5%</span></div>
@@ -353,47 +389,70 @@ function renderInteligencia(){
   });
 }
 
+// Popula o filtro de vendedores apenas para perfis Master
+function popularFiltroVendedores(){
+  const sel = document.getElementById('f-vendedor');
+  if(!sel) return;
+  if(!isMaster()){
+    sel.style.display = 'none';
+    return;
+  }
+  sel.style.display = '';
+  const vendedores = [...new Set(db.map(c=>c.consultor))].sort();
+  sel.innerHTML = '<option value="">👤 Todos os vendedores</option>' +
+    vendedores.map(v=>`<option value="${v}">${v}</option>`).join('');
+}
+
 function renderCarteira(){
+  let data = getVisibleData();
+
+  // Filtros (apenas leem os elementos se existirem)
+  const busca = (document.getElementById('f-busca')?.value || '').toLowerCase();
+  const fVend = document.getElementById('f-vendedor')?.value || '';
+  const fStat = document.getElementById('f-status')?.value || '';
+  const fEst = document.getElementById('f-estagio')?.value || '';
+
+  if(busca) data = data.filter(c => (c.cliente||'').toLowerCase().includes(busca));
+  if(fVend) data = data.filter(c => c.consultor === fVend);
+  if(fEst) data = data.filter(c => (c.estagio||'') === fEst);
+  if(fStat) data = data.filter(c => calcStatus(c.data) === fStat);
+
+  const info = document.getElementById('carteira-info');
+  if(info) info.textContent = `${data.length} contrato(s) · ${isMaster()?'visão total':'apenas seus dados'}`;
+
+  const stMap = {ok:'🟢 Em dia', atencao:'🟡 Atenção', urgente:'🔴 Urgente'};
   const body = document.getElementById('body-carteira');
-  body.innerHTML = db.map(c=>{
-    const dias = Math.floor((new Date(c.data)-new Date())/86400000);
-    const status = dias < 30 ? 'urgente' : (dias < 60 ? 'atencao' : 'ok');
+  body.innerHTML = data.map(c=>{
+    const st = calcStatus(c.data);
     return `
       <tr>
-        <td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td>
-        <td>R$ ${c.premio.toLocaleString()}</td><td>${new Date(c.data).toLocaleDateString()}</td>
-        <td><span class="badge bg-${status}">${status}</span></td>
+        <td><b>${c.cliente}</b></td>
+        <td>${c.operadora}</td>
+        <td>${c.vidas}</td>
+        <td>R$ ${c.premio.toLocaleString()}</td>
+        <td><span class="badge" style="background:var(--azul-light);color:var(--azul)">${c.estagio||'—'}</span></td>
+        <td>${new Date(c.data).toLocaleDateString()}</td>
+        <td><span class="badge bg-${st}">${stMap[st]}</span></td>
+        <td>${c.consultor}</td>
       </tr>
     `;
-  }).join('');
+  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--slate-700)">Nenhum contrato encontrado.</td></tr>';
 }
 
-function handleFiles(newFiles){
-  for(let f of newFiles){
-    files.push({name: f.name, size: (f.size/1024).toFixed(1)+'KB', date: new Date().toLocaleString()});
-  }
-  localStorage.setItem('crm_v2_files', JSON.stringify(files));
-  renderDocumentos();
-}
-
-function renderDocumentos(){
-  const list = document.getElementById('file-list');
-  list.innerHTML = files.map(f=>`
-    <div class="file-item">
-      <span>📄 <b>${f.name}</b> (${f.size})</span>
-      <span style="color:var(--slate-700)">${f.date}</span>
-    </div>
-  `).join('') || '<p style="text-align:center;padding:20px;color:var(--slate-700)">Nenhum documento importado.</p>';
+function calcStatus(dataRenov){
+  const dias = Math.floor((new Date(dataRenov)-new Date())/86400000);
+  return dias < 30 ? 'urgente' : (dias < 60 ? 'atencao' : 'ok');
 }
 
 function renderAlertas(){
-  const alertas = db.filter(c=> (new Date(c.data)-new Date())/86400000 < 60);
+  const data = getVisibleData();
+  const alertas = data.filter(c=> (new Date(c.data)-new Date())/86400000 < 60);
   document.getElementById('alertas-body').innerHTML = alertas.map(c=>`
     <div style="padding:16px;border-bottom:1px solid var(--slate-100);display:flex;justify-content:space-between;align-items:center">
-      <div><b>${c.cliente}</b> - ${c.operadora}</div>
+      <div><b>${c.cliente}</b> - ${c.operadora} <span style="color:var(--slate-700);font-size:12px">(${c.consultor})</span></div>
       <div style="color:var(--vermelho);font-weight:700">Renovação em ${new Date(c.data).toLocaleDateString()}</div>
     </div>
-  `).join('') || '<p>Sem alertas críticos.</p>';
+  `).join('') || '<p style="padding:20px;text-align:center;color:var(--slate-700)">Sem alertas críticos.</p>';
 }
 
 function salvarVenda(e){
@@ -405,6 +464,7 @@ function salvarVenda(e){
     operadora: f.operadora.value,
     vidas: parseInt(f.vidas.value),
     premio: parseFloat(f.premio.value),
+    estagio: f.estagio.value,
     data: f.data.value,
     consultor: JSON.parse(localStorage.getItem('crm_user')).nome
   };
@@ -416,12 +476,13 @@ function salvarVenda(e){
 }
 
 function exportarDados(formato){
-  const data = JSON.stringify(db, null, 2);
+  // Exporta apenas os dados visíveis ao usuário (respeitando o isolamento)
+  const data = JSON.stringify(getVisibleData(), null, 2);
   const blob = new Blob([data], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `relatorio-diretoria.${formato}`;
+  a.download = `relatorio-producao.${formato}`;
   a.click();
 }
 
