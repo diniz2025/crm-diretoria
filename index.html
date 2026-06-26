@@ -72,6 +72,17 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
 .badge{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase}
 .bg-urgente{background:#fee2e2;color:#991b1b}.bg-atencao{background:#fef9c3;color:#854d0e}.bg-ok{background:#dcfce7;color:#166534}
 
+.funil-grid{display:flex;gap:16px;overflow-x:auto;padding-bottom:12px}
+.funil-col{flex:1;min-width:220px;background:var(--slate-100);border-radius:12px;padding:12px}
+.funil-col-head{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:10px;font-weight:700;font-size:13px;color:var(--slate-800)}
+.funil-col-head .count{background:var(--brand);color:#fff;border-radius:20px;padding:2px 10px;font-size:11px}
+.funil-card{background:#fff;border:1px solid var(--slate-200);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow-sm)}
+.funil-card:hover{border-color:var(--brand);transform:translateY(-2px)}
+.funil-card h4{font-size:13px;font-weight:700;margin-bottom:4px}
+.funil-card p{font-size:11px;color:var(--slate-700);margin:2px 0}
+.funil-card .valor{font-weight:700;color:var(--brand);font-size:13px;margin-top:6px}
+.notif-dot{display:inline-block;width:8px;height:8px;background:var(--vermelho);border-radius:50%;margin-left:6px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .row-click{cursor:pointer;transition:background 0.15s}
 .row-click:hover{background:var(--azul-light)}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:1000;align-items:center;justify-content:center;padding:20px}
@@ -119,6 +130,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
     <div class="nav-tab active" onclick="showTab('dashboard',this)">📊 Dashboard</div>
     <div class="nav-tab" onclick="showTab('inteligencia',this)">📈 Inteligência</div>
     <div class="nav-tab" onclick="showTab('carteira',this)">📋 Carteira</div>
+    <div class="nav-tab" onclick="showTab('funil',this)">🎯 Funil de Vendas</div>
     <div id="tab-admin" class="nav-tab" style="display:none" onclick="showTab('gestao',this)">⚙️ Gestão</div>
     <div class="nav-tab" onclick="showTab('alertas',this)">🔔 Alertas</div>
     <div class="nav-tab" onclick="showTab('venda',this)">➕ Nova Operação</div>
@@ -180,6 +192,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
             <select id="f-estagio" onchange="renderCarteira()" style="padding:10px 14px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
               <option value="">Todos os estágios</option>
               <option>Prospecção</option>
+              <option>Agendamento</option>
               <option>Proposta</option>
               <option>Negociação</option>
               <option>Implantado</option>
@@ -192,6 +205,19 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
               <tbody id="body-carteira"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FUNIL DE VENDAS -->
+    <div id="sec-funil" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2>🎯 Funil de Vendas (Pipeline)</h2>
+          <span style="font-size:12px;color:var(--slate-700)">Clique em um card para editar</span>
+        </div>
+        <div class="card-body">
+          <div class="funil-grid" id="funil-grid"></div>
         </div>
       </div>
     </div>
@@ -238,11 +264,19 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
             </select>
             <input type="number" name="premio" placeholder="Prêmio Mensal (R$)" required step="0.01" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
             <input type="number" name="vidas" placeholder="Nº de Vidas" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-            <select name="estagio" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
+            <select name="estagio" required onchange="toggleAgendamento(this)" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
               <option value="">Estágio do Negócio</option>
-              <option>Prospecção</option><option>Proposta</option><option>Negociação</option><option selected>Implantado</option><option>Renovação</option>
+              <option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option selected>Implantado</option><option>Renovação</option>
             </select>
             <input type="date" name="data" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
+            <div id="wrap-agendamento" style="display:none;grid-column:span 2">
+              <label style="font-size:12px;font-weight:600;color:var(--slate-700);display:block;margin-bottom:4px">📅 Data/Hora do Agendamento (gera notificação)</label>
+              <input type="datetime-local" name="agendamento" style="width:100%;padding:12px;border:1px solid var(--slate-200);border-radius:8px">
+            </div>
+            <div style="grid-column:span 2">
+              <label style="font-size:12px;font-weight:600;color:var(--slate-700);display:block;margin-bottom:4px">📝 Descrição / Feedback</label>
+              <textarea name="feedback" rows="3" placeholder="Anote o feedback do cliente, observações da negociação..." style="width:100%;padding:12px;border:1px solid var(--slate-200);border-radius:8px;font-family:inherit;resize:vertical"></textarea>
+            </div>
             <button type="submit" class="btn btn-primary" style="grid-column:span 2;justify-content:center">💾 Salvar na Base de Dados</button>
           </form>
         </div>
@@ -285,7 +319,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
           <div>
             <label>Estágio</label>
             <select id="edit-estagio" required>
-              <option>Prospecção</option><option>Proposta</option><option>Negociação</option><option>Implantado</option><option>Renovação</option>
+              <option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option>Implantado</option><option>Renovação</option>
             </select>
           </div>
           <div>
@@ -296,6 +330,14 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
               <option value="atencao">🟡 Atenção</option>
               <option value="urgente">🔴 Urgente</option>
             </select>
+          </div>
+          <div class="full">
+            <label>📅 Data/Hora do Agendamento</label>
+            <input type="datetime-local" id="edit-agendamento">
+          </div>
+          <div class="full">
+            <label>📝 Descrição / Feedback</label>
+            <textarea id="edit-feedback" rows="3" style="width:100%;padding:11px 12px;border:1px solid var(--slate-200);border-radius:8px;font-family:inherit;resize:vertical"></textarea>
           </div>
           <div class="full" id="edit-vendedor-wrap">
             <label>Vendedor Responsável</label>
@@ -336,12 +378,14 @@ const USERS=[
 // Perfis com visão TOTAL da base (veem tudo de todos os vendedores)
 const PERFIS_MASTER = ['CEO', 'Administrador'];
 
+const ESTAGIOS = ['Prospecção','Agendamento','Proposta','Negociação','Implantado','Renovação'];
+
 let db = JSON.parse(localStorage.getItem('crm_v2_db')) || [
-  {id:1,cliente:'Empresa Alfa Ltda',operadora:'Amil',vidas:45,premio:12500,data:'2026-07-15',estagio:'Implantado',consultor:'Leonardo Henrique'},
-  {id:2,cliente:'Indústria Metalúrgica',operadora:'Bradesco',vidas:120,premio:38000,data:'2026-08-10',estagio:'Renovação',consultor:'Pedro'},
-  {id:3,cliente:'Escola Saber',operadora:'SulAmérica',vidas:30,premio:8900,data:'2026-06-28',estagio:'Negociação',consultor:'Diego'},
-  {id:4,cliente:'Construtora Horizonte',operadora:'Amil',vidas:62,premio:21500,data:'2026-09-05',estagio:'Proposta',consultor:'Pedro'},
-  {id:5,cliente:'Clínica Vida Plena',operadora:'Porto',vidas:18,premio:6200,data:'2026-07-22',estagio:'Implantado',consultor:'Diego'}
+  {id:1,cliente:'Empresa Alfa Ltda',operadora:'Amil',vidas:45,premio:12500,data:'2026-07-15',estagio:'Implantado',feedback:'Cliente fidelizado, renovação tranquila.',agendamento:'',consultor:'Leonardo Henrique'},
+  {id:2,cliente:'Indústria Metalúrgica',operadora:'Bradesco',vidas:120,premio:38000,data:'2026-08-10',estagio:'Renovação',feedback:'Negociar reajuste abaixo da ANS.',agendamento:'',consultor:'Pedro'},
+  {id:3,cliente:'Escola Saber',operadora:'SulAmérica',vidas:30,premio:8900,data:'2026-06-28',estagio:'Negociação',feedback:'Aguardando aprovação da diretoria do cliente.',agendamento:'',consultor:'Diego'},
+  {id:4,cliente:'Construtora Horizonte',operadora:'Amil',vidas:62,premio:21500,data:'2026-09-05',estagio:'Proposta',feedback:'Proposta enviada por e-mail.',agendamento:'',consultor:'Pedro'},
+  {id:5,cliente:'Clínica Vida Plena',operadora:'Porto',vidas:18,premio:6200,data:'2026-07-22',estagio:'Agendamento',feedback:'Reunião de apresentação marcada.',agendamento:'2026-06-27T14:00',consultor:'Diego'}
 ];
 
 let currentChart1 = null;
@@ -386,6 +430,11 @@ function initApp(){
   if(user.cargo === 'Administrador' || user.cargo === 'CEO') {
     document.getElementById('tab-admin').style.display = 'block';
   }
+
+  // Solicita permissão para notificações de agendamento
+  if('Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
+  }
   
   renderAll();
 }
@@ -400,7 +449,9 @@ function renderAll(){
   renderDashboard();
   renderInteligencia();
   renderCarteira();
+  renderFunil();
   renderAlertas();
+  checarAgendamentos();
 }
 
 function renderDashboard(){
@@ -537,6 +588,11 @@ function renderAlertas(){
   `).join('') || '<p style="padding:20px;text-align:center;color:var(--slate-700)">Sem alertas críticos.</p>';
 }
 
+function toggleAgendamento(sel){
+  const wrap = document.getElementById('wrap-agendamento');
+  wrap.style.display = (sel.value === 'Agendamento') ? 'block' : 'none';
+}
+
 function salvarVenda(e){
   e.preventDefault();
   const f = e.target;
@@ -548,13 +604,20 @@ function salvarVenda(e){
     premio: parseFloat(f.premio.value),
     estagio: f.estagio.value,
     data: f.data.value,
+    agendamento: f.agendamento ? f.agendamento.value : '',
+    feedback: f.feedback ? f.feedback.value : '',
     consultor: JSON.parse(localStorage.getItem('crm_user')).nome
   };
   db.push(novo);
   localStorage.setItem('crm_v2_db', JSON.stringify(db));
+
+  // Automação Callix (integração externa via webhook)
+  callixSync(novo, 'novo_cliente');
+
   f.reset();
+  document.getElementById('wrap-agendamento').style.display = 'none';
   renderAll();
-  alert('Operação salva com sucesso!');
+  alert('Operação salva com sucesso!' + (novo.agendamento ? '\n📅 Notificação de agendamento ativada.' : ''));
 }
 
 function exportarDados(formato){
@@ -588,6 +651,8 @@ function abrirEdicao(id){
   document.getElementById('edit-data').value = c.data;
   document.getElementById('edit-estagio').value = c.estagio || 'Implantado';
   document.getElementById('edit-status').value = c.statusManual || 'auto';
+  document.getElementById('edit-agendamento').value = c.agendamento || '';
+  document.getElementById('edit-feedback').value = c.feedback || '';
 
   // Vendedor: só Master pode reatribuir
   const wrap = document.getElementById('edit-vendedor-wrap');
@@ -621,11 +686,17 @@ function salvarEdicao(e){
   c.data = document.getElementById('edit-data').value;
   c.estagio = document.getElementById('edit-estagio').value;
   c.statusManual = document.getElementById('edit-status').value;
+  c.agendamento = document.getElementById('edit-agendamento').value;
+  c.feedback = document.getElementById('edit-feedback').value;
   if(isMaster()){
     c.consultor = document.getElementById('edit-vendedor').value;
   }
 
   localStorage.setItem('crm_v2_db', JSON.stringify(db));
+
+  // Automação Callix: registra feedback atualizado
+  callixSync(c, 'feedback');
+
   fecharModal();
   renderAll();
   alert('Cliente atualizado com sucesso!');
@@ -641,6 +712,121 @@ function excluirContrato(){
   fecharModal();
   renderAll();
   alert('Cliente excluído.');
+}
+
+// ===== FUNIL DE VENDAS (PIPELINE) =====
+function renderFunil(){
+  const data = getVisibleData();
+  const grid = document.getElementById('funil-grid');
+  if(!grid) return;
+  grid.innerHTML = ESTAGIOS.map(est => {
+    const cards = data.filter(c => (c.estagio||'Implantado') === est);
+    const total = cards.reduce((s,c)=>s+c.premio,0);
+    return `
+      <div class="funil-col">
+        <div class="funil-col-head">
+          <span>${est}</span>
+          <span class="count">${cards.length}</span>
+        </div>
+        <div style="font-size:11px;color:var(--slate-700);padding:0 10px 8px">R$ ${total.toLocaleString()}</div>
+        ${cards.map(c=>{
+          const temAgenda = c.estagio==='Agendamento' && c.agendamento;
+          return `
+          <div class="funil-card" onclick="abrirEdicao(${c.id})">
+            <h4>${c.cliente}${temAgenda?'<span class="notif-dot"></span>':''}</h4>
+            <p>${c.operadora} · ${c.vidas} vidas</p>
+            ${temAgenda?`<p style="color:var(--vermelho);font-weight:600">📅 ${new Date(c.agendamento).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</p>`:''}
+            ${c.feedback?`<p style="font-style:italic">"${c.feedback.substring(0,50)}${c.feedback.length>50?'...':''}"</p>`:''}
+            <div class="valor">R$ ${c.premio.toLocaleString()}</div>
+            <p style="margin-top:4px;color:var(--slate-700)">${c.consultor}</p>
+          </div>`;
+        }).join('') || '<p style="text-align:center;padding:16px;font-size:11px;color:var(--slate-700)">Vazio</p>'}
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== NOTIFICAÇÕES DE AGENDAMENTO =====
+function checarAgendamentos(){
+  const data = getVisibleData();
+  const agora = new Date();
+  const limite = new Date(agora.getTime() + 24*60*60*1000); // próximas 24h
+  const proximos = data.filter(c => {
+    if(c.estagio!=='Agendamento' || !c.agendamento) return false;
+    const dt = new Date(c.agendamento);
+    return dt >= agora && dt <= limite;
+  });
+
+  let badge = document.getElementById('notif-badge');
+  if(proximos.length > 0){
+    if(!badge){
+      badge = document.createElement('div');
+      badge.id = 'notif-badge';
+      badge.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#fff;border:1px solid var(--slate-200);border-left:4px solid var(--vermelho);border-radius:12px;padding:16px 20px;box-shadow:0 10px 30px rgba(0,0,0,0.15);z-index:900;max-width:320px';
+      document.body.appendChild(badge);
+    }
+    badge.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
+        <div>
+          <div style="font-weight:700;font-size:13px;margin-bottom:6px">🔔 Agendamentos próximos (${proximos.length})</div>
+          ${proximos.map(c=>`<div style="font-size:12px;color:var(--slate-700);margin:3px 0">• <b>${c.cliente}</b> — ${new Date(c.agendamento).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`).join('')}
+        </div>
+        <button onclick="this.closest('#notif-badge').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--slate-700)">&times;</button>
+      </div>
+    `;
+    // Notificação nativa do navegador (se permitido)
+    if('Notification' in window && Notification.permission === 'granted'){
+      proximos.forEach(c=> new Notification('📅 Agendamento Dental M.I', {body:`${c.cliente} — ${new Date(c.agendamento).toLocaleString('pt-BR')}`}));
+    }
+  } else if(badge){
+    badge.remove();
+  }
+}
+
+/**
+ * ===== INTEGRAÇÃO CALLIX (Discador / Telefonia) =====
+ * STUB de automação. Para ativar a integração REAL, configure:
+ *  - CALLIX_WEBHOOK_URL: endpoint do seu backend (Supabase Edge Function/Function)
+ *    que recebe o evento e chama a API do Callix com seu token.
+ * Enquanto não houver backend, os eventos ficam registrados localmente (fila).
+ */
+const CALLIX_WEBHOOK_URL = ''; // <-- preencher com a URL do backend/Supabase quando disponível
+
+async function callixSync(contrato, evento){
+  const payload = {
+    evento: evento, // 'novo_cliente' | 'feedback'
+    cliente: contrato.cliente,
+    operadora: contrato.operadora,
+    estagio: contrato.estagio,
+    feedback: contrato.feedback || '',
+    agendamento: contrato.agendamento || '',
+    vendedor: contrato.consultor,
+    timestamp: new Date().toISOString()
+  };
+
+  // Sem backend configurado: registra na fila local (auditoria/portabilidade)
+  if(!CALLIX_WEBHOOK_URL){
+    const fila = JSON.parse(localStorage.getItem('callix_fila') || '[]');
+    fila.push(payload);
+    localStorage.setItem('callix_fila', JSON.stringify(fila));
+    console.log('[Callix] Evento enfileirado (backend não configurado):', payload);
+    return;
+  }
+
+  // Com backend: envia para o webhook que conversa com a API do Callix
+  try {
+    await fetch(CALLIX_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    console.log('[Callix] Evento enviado com sucesso:', evento);
+  } catch(err){
+    console.error('[Callix] Falha ao sincronizar:', err);
+    const fila = JSON.parse(localStorage.getItem('callix_fila') || '[]');
+    fila.push(payload);
+    localStorage.setItem('callix_fila', JSON.stringify(fila));
+  }
 }
 
 function showTab(tab, el){
