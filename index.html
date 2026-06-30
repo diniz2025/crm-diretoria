@@ -1,5 +1,6 @@
 <title>Dental M.I Gestão</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --brand:#1EAD6F; 
@@ -368,28 +369,69 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
  * Engenharia: Accio (Master Builder)
  */
 
-const USERS=[
-  {usuario:'diniz',senha:'dcg2026',nome:'Diretoria M.I',cargo:'CEO'},
-  {usuario:'leonnardo',senha:'leo2026',nome:'Leonardo Henrique',cargo:'Administrador'},
-  {usuario:'pedro',senha:'pedro2026',nome:'Pedro',cargo:'Gerente'},
-  {usuario:'diego',senha:'diego2026',nome:'Diego',cargo:'Gerente'}
-];
+// ===== CONFIGURAÇÃO SUPABASE =====
+const SUPABASE_URL = 'https://lleyoetkisvtfmmypnei.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_xRUj2f0WVBrQbx0VJSz7XQ_OnxAFmG7';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Perfis com visão TOTAL da base (veem tudo de todos os vendedores)
 const PERFIS_MASTER = ['CEO', 'Administrador'];
 
 const ESTAGIOS = ['Prospecção','Agendamento','Proposta','Negociação','Implantado','Renovação'];
 
-let db = JSON.parse(localStorage.getItem('crm_v2_db')) || [
-  {id:1,cliente:'Empresa Alfa Ltda',operadora:'Amil',vidas:45,premio:12500,data:'2026-07-15',estagio:'Implantado',feedback:'Cliente fidelizado, renovação tranquila.',agendamento:'',consultor:'Leonardo Henrique'},
-  {id:2,cliente:'Indústria Metalúrgica',operadora:'Bradesco',vidas:120,premio:38000,data:'2026-08-10',estagio:'Renovação',feedback:'Negociar reajuste abaixo da ANS.',agendamento:'',consultor:'Pedro'},
-  {id:3,cliente:'Escola Saber',operadora:'SulAmérica',vidas:30,premio:8900,data:'2026-06-28',estagio:'Negociação',feedback:'Aguardando aprovação da diretoria do cliente.',agendamento:'',consultor:'Diego'},
-  {id:4,cliente:'Construtora Horizonte',operadora:'Amil',vidas:62,premio:21500,data:'2026-09-05',estagio:'Proposta',feedback:'Proposta enviada por e-mail.',agendamento:'',consultor:'Pedro'},
-  {id:5,cliente:'Clínica Vida Plena',operadora:'Porto',vidas:18,premio:6200,data:'2026-07-22',estagio:'Agendamento',feedback:'Reunião de apresentação marcada.',agendamento:'2026-06-27T14:00',consultor:'Diego'}
-];
+// USERS é carregado do Supabase no login
+let USERS = [];
+let db = []; // contratos carregados do Supabase
 
 let currentChart1 = null;
 let currentChart2 = null;
+
+// Converte registro do Supabase (snake_case) -> formato interno do app
+function fromDB(r){
+  return {
+    id: r.id,
+    cliente: r.cliente,
+    cnpj: r.cnpj || '',
+    operadora: r.operadora,
+    vidas: r.vidas,
+    premio: Number(r.premio),
+    estagio: r.estagio,
+    statusManual: r.status_manual || 'auto',
+    data: r.data_renovacao,
+    agendamento: r.agendamento ? r.agendamento.substring(0,16) : '',
+    feedback: r.feedback || '',
+    consultor: r.consultor
+  };
+}
+// Converte formato interno -> Supabase (snake_case)
+function toDB(c){
+  return {
+    cliente: c.cliente,
+    cnpj: c.cnpj || null,
+    operadora: c.operadora,
+    vidas: c.vidas,
+    premio: c.premio,
+    estagio: c.estagio,
+    status_manual: c.statusManual || 'auto',
+    data_renovacao: c.data || null,
+    agendamento: c.agendamento ? c.agendamento : null,
+    feedback: c.feedback || null,
+    consultor: c.consultor
+  };
+}
+
+// Carrega todos os contratos do Supabase para a memória
+async function carregarDados(){
+  const { data, error } = await sb.from('contratos').select('*').order('id',{ascending:true});
+  if(error){ console.error('Erro ao carregar contratos:', error); alert('Erro ao conectar ao banco: '+error.message); return; }
+  db = (data||[]).map(fromDB);
+}
+
+// Registra atividade (auditoria)
+async function logAtividade(acao, detalhe){
+  const user = JSON.parse(localStorage.getItem('crm_user'));
+  try { await sb.from('atividades').insert({usuario:user?.nome||'?', acao, detalhe}); } catch(e){}
+}
 
 /**
  * SEGURANÇA / ISOLAMENTO DE DADOS:
@@ -408,19 +450,31 @@ function isMaster(){
   return user && PERFIS_MASTER.includes(user.cargo);
 }
 
-function doLogin(){
-  const u=document.getElementById('inp-user').value;
-  const p=document.getElementById('inp-pass').value;
-  const user=USERS.find(x=>x.usuario===u && x.senha===p);
-  if(user){
+async function doLogin(){
+  const u=document.getElementById('inp-user').value.trim();
+  const p=document.getElementById('inp-pass').value.trim();
+  const btn=document.querySelector('.btn-login');
+  btn.textContent='Verificando...'; btn.disabled=true;
+
+  // Valida credenciais contra a tabela usuarios do Supabase
+  const { data, error } = await sb.from('usuarios')
+    .select('usuario,nome,cargo,senha,ativo')
+    .eq('usuario', u).eq('senha', p).maybeSingle();
+
+  btn.textContent='Entrar no Sistema'; btn.disabled=false;
+
+  if(error){ alert('Erro de conexão: '+error.message); return; }
+  if(data && data.ativo !== false){
+    const user = {usuario:data.usuario, nome:data.nome, cargo:data.cargo};
     localStorage.setItem('crm_user', JSON.stringify(user));
+    logAtividade('login', 'Acesso ao sistema');
     initApp();
   } else {
     document.getElementById('login-error').style.display='block';
   }
 }
 
-function initApp(){
+async function initApp(){
   const user = JSON.parse(localStorage.getItem('crm_user'));
   if(!user) return;
   document.getElementById('login-screen').style.display='none';
@@ -435,7 +489,8 @@ function initApp(){
   if('Notification' in window && Notification.permission === 'default'){
     Notification.requestPermission();
   }
-  
+
+  await carregarDados();
   renderAll();
 }
 
@@ -593,12 +648,12 @@ function toggleAgendamento(sel){
   wrap.style.display = (sel.value === 'Agendamento') ? 'block' : 'none';
 }
 
-function salvarVenda(e){
+async function salvarVenda(e){
   e.preventDefault();
   const f = e.target;
   const novo = {
-    id: Date.now(),
     cliente: f.cliente.value,
+    cnpj: f.cnpj ? f.cnpj.value : '',
     operadora: f.operadora.value,
     vidas: parseInt(f.vidas.value),
     premio: parseFloat(f.premio.value),
@@ -608,16 +663,18 @@ function salvarVenda(e){
     feedback: f.feedback ? f.feedback.value : '',
     consultor: JSON.parse(localStorage.getItem('crm_user')).nome
   };
-  db.push(novo);
-  localStorage.setItem('crm_v2_db', JSON.stringify(db));
 
-  // Automação Callix (integração externa via webhook)
-  callixSync(novo, 'novo_cliente');
+  const { error } = await sb.from('contratos').insert(toDB(novo));
+  if(error){ alert('Erro ao salvar: '+error.message); return; }
+
+  logAtividade('criar', 'Novo cliente: '+novo.cliente);
+  callixSync(novo, 'novo_cliente'); // automação Callix
 
   f.reset();
   document.getElementById('wrap-agendamento').style.display = 'none';
+  await carregarDados();
   renderAll();
-  alert('Operação salva com sucesso!' + (novo.agendamento ? '\n📅 Notificação de agendamento ativada.' : ''));
+  alert('Operação salva na nuvem!' + (novo.agendamento ? '\n📅 Notificação de agendamento ativada.' : ''));
 }
 
 function exportarDados(formato){
@@ -673,45 +730,53 @@ function fecharModal(){
   document.getElementById('modal-edit').classList.remove('active');
 }
 
-function salvarEdicao(e){
+async function salvarEdicao(e){
   e.preventDefault();
   const id = parseInt(document.getElementById('edit-id').value);
   const c = db.find(x => x.id === id);
   if(!c) return;
 
-  c.cliente = document.getElementById('edit-cliente').value;
-  c.operadora = document.getElementById('edit-operadora').value;
-  c.vidas = parseInt(document.getElementById('edit-vidas').value);
-  c.premio = parseFloat(document.getElementById('edit-premio').value);
-  c.data = document.getElementById('edit-data').value;
-  c.estagio = document.getElementById('edit-estagio').value;
-  c.statusManual = document.getElementById('edit-status').value;
-  c.agendamento = document.getElementById('edit-agendamento').value;
-  c.feedback = document.getElementById('edit-feedback').value;
-  if(isMaster()){
-    c.consultor = document.getElementById('edit-vendedor').value;
-  }
+  const atualizado = {
+    cliente: document.getElementById('edit-cliente').value,
+    operadora: document.getElementById('edit-operadora').value,
+    vidas: parseInt(document.getElementById('edit-vidas').value),
+    premio: parseFloat(document.getElementById('edit-premio').value),
+    data: document.getElementById('edit-data').value,
+    estagio: document.getElementById('edit-estagio').value,
+    statusManual: document.getElementById('edit-status').value,
+    agendamento: document.getElementById('edit-agendamento').value,
+    feedback: document.getElementById('edit-feedback').value,
+    consultor: isMaster() ? document.getElementById('edit-vendedor').value : c.consultor
+  };
 
-  localStorage.setItem('crm_v2_db', JSON.stringify(db));
+  const payload = toDB(atualizado);
+  payload.atualizado_em = new Date().toISOString();
+  const { error } = await sb.from('contratos').update(payload).eq('id', id);
+  if(error){ alert('Erro ao atualizar: '+error.message); return; }
 
-  // Automação Callix: registra feedback atualizado
-  callixSync(c, 'feedback');
+  logAtividade('editar', 'Cliente: '+atualizado.cliente);
+  callixSync(atualizado, 'feedback'); // automação Callix
 
   fecharModal();
+  await carregarDados();
   renderAll();
-  alert('Cliente atualizado com sucesso!');
+  alert('Cliente atualizado na nuvem!');
 }
 
-function excluirContrato(){
+async function excluirContrato(){
   const id = parseInt(document.getElementById('edit-id').value);
   const c = db.find(x => x.id === id);
   if(!c) return;
   if(!confirm(`Tem certeza que deseja excluir o cliente "${c.cliente}"? Esta ação não pode ser desfeita.`)) return;
-  db = db.filter(x => x.id !== id);
-  localStorage.setItem('crm_v2_db', JSON.stringify(db));
+
+  const { error } = await sb.from('contratos').delete().eq('id', id);
+  if(error){ alert('Erro ao excluir: '+error.message); return; }
+
+  logAtividade('excluir', 'Cliente: '+c.cliente);
   fecharModal();
+  await carregarDados();
   renderAll();
-  alert('Cliente excluído.');
+  alert('Cliente excluído da nuvem.');
 }
 
 // ===== FUNIL DE VENDAS (PIPELINE) =====
@@ -836,6 +901,7 @@ function showTab(tab, el){
   el.classList.add('active');
 }
 
+// Restaura sessão ao recarregar a página
 if(localStorage.getItem('crm_user')) initApp();
 </script>
 </body>
