@@ -135,6 +135,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
     <div id="tab-admin" class="nav-tab" style="display:none" onclick="showTab('gestao',this)">⚙️ Gestão</div>
     <div class="nav-tab" onclick="showTab('alertas',this)">🔔 Alertas</div>
     <div class="nav-tab" onclick="showTab('venda',this)">➕ Nova Operação</div>
+    <div id="tab-financeiro" class="nav-tab" style="display:none" onclick="showTab('financeiro',this)">💰 Gestão Financeira</div>
   </div>
 
   <div class="main-content">
@@ -265,6 +266,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
             </select>
             <input type="number" name="premio" placeholder="Prêmio Mensal (R$)" required step="0.01" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
             <input type="number" name="comissao" placeholder="Comissão (%)" step="0.1" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
+            <input type="number" name="agenciamento" placeholder="Agenciamento (%)" step="0.1" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
             <input type="number" name="vidas" placeholder="Nº de Vidas" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
             <select name="estagio" required onchange="toggleAgendamento(this)" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
               <option value="">Estágio do Negócio</option>
@@ -281,6 +283,33 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
             </div>
             <button type="submit" class="btn btn-primary" style="grid-column:span 2;justify-content:center">💾 Salvar na Base de Dados</button>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINANCEIRO -->
+  <div id="sec-financeiro" class="section">
+    <div class="card">
+      <div class="card-header">
+        <h2>💰 Gestão Financeira Estratégica</h2>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-export" onclick="gerarRelatorioFinanceiro('comissoes')">Relatório Comissões</button>
+          <button class="btn btn-export" onclick="gerarRelatorioFinanceiro('impostos')">Relatório Impostos/Contas</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <p style="margin-bottom:20px;font-size:14px;color:var(--slate-700)">Módulo de gestão de pagamentos, tributos e repasses (v1.0).</p>
+        <div class="kpi-grid">
+          <div class="kpi-card"><span class="kpi-label">Total Comissões (mês)</span><span class="kpi-valor" id="fin-total-comissao">R$ 0,00</span></div>
+          <div class="kpi-card"><span class="kpi-label">Total Agenciamento</span><span class="kpi-valor" id="fin-total-agenciamento">R$ 0,00</span></div>
+          <div class="kpi-card"><span class="kpi-label">Previsão Impostos</span><span class="kpi-valor" id="fin-total-impostos">R$ 0,00</span></div>
+        </div>
+        <div style="overflow-x:auto">
+          <table id="table-financeiro">
+            <thead><tr><th>Beneficiário</th><th>Papel</th><th>Base Calculada</th><th>Repasse Estimado</th><th>Status</th></tr></thead>
+            <tbody id="body-financeiro"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -317,6 +346,10 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
           <div>
             <label>Comissão (%)</label>
             <input type="number" id="edit-comissao" step="0.1">
+          </div>
+          <div>
+            <label>Agenciamento (%)</label>
+            <input type="number" id="edit-agenciamento" step="0.1">
           </div>
           <div>
             <label>Data de Renovação</label>
@@ -401,6 +434,7 @@ function fromDB(r){
     vidas: r.vidas,
     premio: Number(r.premio),
     comissao: Number(r.comissao || 0),
+    agenciamento: Number(r.agenciamento || 0),
     estagio: r.estagio,
     statusManual: r.status_manual || 'auto',
     data: r.data_renovacao,
@@ -418,6 +452,7 @@ function toDB(c){
     vidas: c.vidas,
     premio: c.premio,
     comissao: c.comissao || 0,
+    agenciamento: c.agenciamento || 0,
     estagio: c.estagio,
     status_manual: c.statusManual || 'auto',
     data_renovacao: c.data || null,
@@ -490,6 +525,7 @@ async function initApp(){
   
   if(user.cargo === 'Administrador' || user.cargo === 'CEO') {
     document.getElementById('tab-admin').style.display = 'block';
+    document.getElementById('tab-financeiro').style.display = 'block';
   }
 
   // Solicita permissão para notificações de agendamento
@@ -512,8 +548,59 @@ function renderAll(){
   renderInteligencia();
   renderCarteira();
   renderFunil();
+  renderFinanceiro();
   renderAlertas();
   checarAgendamentos();
+}
+
+function renderFinanceiro(){
+  const data = getVisibleData();
+  const totalCom = data.reduce((s,c)=> s + (c.premio * (c.comissao/100)), 0);
+  const totalAg = data.reduce((s,c)=> s + (c.premio * (c.agenciamento/100)), 0);
+  const totalImp = (totalCom + totalAg) * 0.15; // Simulação: 15% de impostos
+
+  if(document.getElementById('fin-total-comissao')){
+    document.getElementById('fin-total-comissao').textContent = `R$ ${totalCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+    document.getElementById('fin-total-agenciamento').textContent = `R$ ${totalAg.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+    document.getElementById('fin-total-impostos').textContent = `R$ ${totalImp.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+  }
+
+  const body = document.getElementById('body-financeiro');
+  if(body){
+    // Consolida por vendedor
+    const repasses = {};
+    data.forEach(c => {
+      const val = c.premio * (c.comissao/100);
+      repasses[c.consultor] = (repasses[c.consultor]||0) + val;
+    });
+    body.innerHTML = Object.entries(repasses).map(([vend, total]) => `
+      <tr>
+        <td><b>${vend}</b></td>
+        <td>Consultor/Gerente</td>
+        <td>R$ ${(total * 10).toLocaleString()} (est.)</td>
+        <td><b>R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}</b></td>
+        <td><span class="badge bg-ok">Calculado</span></td>
+      </tr>
+    `).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px">Sem dados financeiros.</td></tr>';
+  }
+}
+
+async function gerarRelatorioFinanceiro(tipo){
+  const data = getVisibleData();
+  let content = "RELATORIO FINANCEIRO DENTAL M.I\n";
+  content += "Tipo: " + tipo + "\nData: " + new Date().toLocaleString() + "\n\n";
+  
+  data.forEach(c => {
+    content += `${c.cliente} | ${c.consultor} | Premio: ${c.premio} | Com: ${c.comissao}% | Ag: ${c.agenciamento}%\n`;
+  });
+
+  const blob = new Blob([content], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `financeiro-${tipo}.txt`;
+  a.click();
+  logAtividade('export_financeiro', tipo);
 }
 
 function renderDashboard(){
@@ -666,6 +753,7 @@ async function salvarVenda(e){
     vidas: parseInt(f.vidas.value),
     premio: parseFloat(f.premio.value),
     comissao: parseFloat(f.comissao.value) || 0,
+    agenciamento: parseFloat(f.agenciamento.value) || 0,
     estagio: f.estagio.value,
     data: f.data.value,
     agendamento: f.agendamento ? f.agendamento.value : '',
@@ -715,6 +803,7 @@ function abrirEdicao(id){
   document.getElementById('edit-vidas').value = c.vidas;
   document.getElementById('edit-premio').value = c.premio;
   document.getElementById('edit-comissao').value = c.comissao || 0;
+  document.getElementById('edit-agenciamento').value = c.agenciamento || 0;
   document.getElementById('edit-data').value = c.data;
   document.getElementById('edit-estagio').value = c.estagio || 'Implantado';
   document.getElementById('edit-status').value = c.statusManual || 'auto';
@@ -752,6 +841,7 @@ async function salvarEdicao(e){
     vidas: parseInt(document.getElementById('edit-vidas').value),
     premio: parseFloat(document.getElementById('edit-premio').value),
     comissao: parseFloat(document.getElementById('edit-comissao').value) || 0,
+    agenciamento: parseFloat(document.getElementById('edit-agenciamento').value) || 0,
     data: document.getElementById('edit-data').value,
     estagio: document.getElementById('edit-estagio').value,
     statusManual: document.getElementById('edit-status').value,
