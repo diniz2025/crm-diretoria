@@ -65,24 +65,28 @@ tr:hover td { background: var(--brand-light); }
 .btn-login:hover { transform: translateY(-2px); background: var(--brand-dark); box-shadow: 0 8px 20px rgba(30,173,111,0.4); }
 .btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
 .btn-secondary { background: var(--bg); color: var(--text-main); border: 1px solid var(--border); }
-#loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: none; align-items: center; justify-content: center; }
+#loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 15px; }
 .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+#debug-status { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 10000; background: var(--border); }
+#debug-bar { height: 100%; width: 0; background: var(--brand); transition: width 0.3s; }
 </style>
 </head>
 <body>
 
-<div id="loading-overlay"><div class="spinner"></div></div>
+<div id="debug-status"><div id="debug-bar"></div></div>
+<div id="loading-overlay"><div class="spinner"></div><div id="loading-text" style="font-size:12px;font-weight:700;color:var(--text-muted)">Conectando ao Supabase...</div></div>
 
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <img src="logo-dental.png" style="height:60px;margin-bottom:24px;border-radius:12px">
     <h1 style="font-family:'Manrope';font-weight:800;letter-spacing:-1px;font-size:26px">Dental M.I Gestão</h1>
-    <p style="opacity:0.6;margin-bottom:40px;font-size:14px">Sistema Conectado v5.4</p>
+    <p style="opacity:0.6;margin-bottom:40px;font-size:14px">Sistema Conectado v5.5</p>
     <input type="text" id="inp-user" placeholder="Usuário">
     <input type="password" id="inp-pass" placeholder="Senha">
     <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px;font-size:13px;opacity:0.9">
-      <input type="checkbox" id="check-terms" style="width:16px;height:16px;margin:0;cursor:pointer">
+      <input type="checkbox" id="check-terms" checked style="width:16px;height:16px;margin:0;cursor:pointer">
       <label for="check-terms" style="cursor:pointer">Aceito os <a href="#" onclick="abrirTermos(event)" style="color:var(--brand);font-weight:700">Termos LGPD</a></label>
     </div>
     <button class="btn-login" id="btn-entrar" onclick="doLogin()">Entrar</button>
@@ -90,6 +94,7 @@ tr:hover td { background: var(--brand-light); }
   </div>
 </div>
 
+<!-- APP -->
 <div id="app" class="app-container" style="display:none">
   <aside class="sidebar">
     <div class="sidebar-logo"><img src="logo-dental.png"><h1>Dental M.I</h1></div>
@@ -127,7 +132,6 @@ tr:hover td { background: var(--brand-light); }
     </header>
 
     <div class="content-area">
-      <!-- DASHBOARD -->
       <section id="view-dashboard" class="view-content active">
         <div class="grid" id="stats-grid"></div>
         <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:24px">
@@ -135,30 +139,27 @@ tr:hover td { background: var(--brand-light); }
           <div class="table-container"><div style="padding:20px; font-weight:800; border-bottom:1px solid var(--border)">TOP PRODUTORES</div><div id="ranking-list"></div></div>
         </div>
       </section>
-      <!-- FUNIL -->
       <section id="view-funil" class="view-content" style="display:none"><div class="kanban" id="funil-kanban"></div></section>
-      <!-- CARTEIRA -->
       <section id="view-carteira" class="view-content" style="display:none"><div class="table-container"><table><thead><tr id="head-carteira"></tr></thead><tbody id="table-body-carteira"></tbody></table></div></section>
-      <!-- FINANCEIRO -->
-      <section id="view-financeiro" class="view-content" style="display:none"><div class="grid"><div class="stat-card"><div class="stat-label">Comissões</div><div class="stat-value" id="fin-com">R$ 0</div></div><div class="stat-card"><div class="stat-label">Agenciamentos</div><div class="stat-value" id="fin-age">R$ 0</div></div><div class="stat-card"><div class="stat-label">Impostos (6%)</div><div class="stat-value" id="fin-imp">R$ 0</div></div></div><div class="table-container"><table><thead><tr><th>Demonstrativo</th><th>Base Bruta</th><th>Cálculo</th><th>Status</th></tr></thead><tbody id="table-body-fin"></tbody></table></div></section>
-      <!-- AUDITORIA -->
+      <section id="view-financeiro" class="view-content" style="display:none"><div class="grid"><div class="stat-card"><div class="stat-label">Comissões</div><div class="stat-value" id="fin-com">R$ 0</div></div><div class="stat-card"><div class="stat-label">Agenciamentos</div><div class="stat-value" id="fin-age">R$ 0</div></div><div class="stat-card"><div class="stat-label">Impostos (6%)</div><div class="stat-value" id="fin-imp">R$ 0</div></div></div><div class="table-container"><table><thead><tr><th>Demonstrativo</th><th>Valor Base</th><th>Cálculo</th><th>Status</th></tr></thead><tbody id="table-body-fin"></tbody></table></div></section>
       <section id="view-auditoria" class="view-content" style="display:none"><div class="table-container"><table><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Detalhe</th></tr></thead><tbody id="table-body-auditoria"></tbody></table></div></section>
-      <!-- DEV -->
       <section id="view-dev" class="view-content" style="display:none"><div class="stat-card"><h3>Soberania</h3><button class="btn btn-secondary" style="margin-top:15px" onclick="exportarBackup()">📥 Exportar Base (JSON)</button></div></section>
-      <!-- VENDA -->
-      <section id="view-venda" class="view-content" style="display:none"><div class="stat-card" style="max-width:800px;margin:0 auto"><h2>Nova Operação Comercial</h2><form id="form-venda" onsubmit="salvarVenda(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><input type="text" name="cliente" id="venda-cliente" placeholder="Empresa/Cliente" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" name="cnpj" id="venda-cnpj" placeholder="CNPJ ou CPF" required style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCNPJ('venda', this)">🔍 Consultar</button></div><input type="email" name="email" id="venda-email" placeholder="E-mail" style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="text" name="telefone" id="venda-telefone" placeholder="Telefone" style="padding:12px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" name="cep" id="venda-cep" placeholder="CEP" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCEP('venda', this)">🔍 Endereço</button></div><input type="text" name="logradouro" id="venda-logradouro" placeholder="Logradouro" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px"><select name="operadora" required style="padding:12px;border:1px solid var(--border);border-radius:10px"><option value="">Operadora</option><option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option></select><select name="estagio" required style="padding:12px;border:1px solid var(--border);border-radius:10px"><option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option selected>Implantado</option><option>Renovação</option></select><input type="number" name="vidas" placeholder="Nº Vidas" required style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="number" name="premio" placeholder="Prêmio Mensal (R$)" required step="0.01" style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="date" name="data" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px"><button type="submit" class="btn-login" style="grid-column:span 2;margin-top:10px">💾 Salvar na Nuvem</button></form></div></section>
+      <section id="view-venda" class="view-content" style="display:none"><div class="stat-card" style="max-width:800px;margin:0 auto"><h2>Nova Operação</h2><form id="form-venda" onsubmit="salvarVenda(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><input type="text" name="cliente" id="venda-cliente" placeholder="Empresa/Cliente" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" name="cnpj" id="venda-cnpj" placeholder="CNPJ ou CPF" required style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCNPJ('venda', this)">🔍 Consultar</button></div><input type="email" name="email" id="venda-email" placeholder="E-mail" style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="text" name="telefone" id="venda-telefone" placeholder="Telefone" style="padding:12px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" name="cep" id="venda-cep" placeholder="CEP" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCEP('venda', this)">🔍 Endereço</button></div><input type="text" name="logradouro" id="venda-logradouro" placeholder="Logradouro" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px"><select name="operadora" required style="padding:12px;border:1px solid var(--border);border-radius:10px"><option value="">Operadora</option><option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option></select><select name="estagio" required style="padding:12px;border:1px solid var(--border);border-radius:10px"><option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option selected>Implantado</option><option>Renovação</option></select><input type="number" name="vidas" placeholder="Nº Vidas" required style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="number" name="premio" placeholder="Prêmio Mensal (R$)" required step="0.01" style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="date" name="data" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px"><button type="submit" class="btn-login" style="grid-column:span 2;margin-top:10px">💾 Registrar na Nuvem</button></form></div></section>
     </div>
   </main>
 </div>
 
-<!-- MODALS -->
-<div class="modal-overlay" id="modal-edit"><div class="modal"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"><h3>Ficha do Cliente</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:26px;cursor:pointer;opacity:0.5">&times;</button></div><form id="form-edit" onsubmit="salvarEdicao(event)" style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px"><input type="hidden" id="edit-id"><input type="text" id="edit-cliente" placeholder="Cliente" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" id="edit-cnpj" placeholder="CNPJ/CPF" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCNPJ('edit', this)">🔍</button></div><input type="email" id="edit-email" placeholder="E-mail" style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="text" id="edit-telefone" placeholder="Telefone" style="padding:12px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" id="edit-cep" placeholder="CEP" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCEP('edit', this)">🔍</button></div><input type="text" id="edit-logradouro" placeholder="Logradouro" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px"><select id="edit-estagio" style="padding:12px;border:1px solid var(--border);border-radius:10px"><option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option>Implantado</option><option>Renovação</option></select><input type="date" id="edit-data" style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="number" id="edit-premio" step="0.01" style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="number" id="edit-comissao" placeholder="Comissão %" style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="number" id="edit-agenciamento" placeholder="Agenciamento %" style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="date" id="edit-pagamento" style="padding:12px;border:1px solid var(--border);border-radius:10px"><textarea id="edit-feedback" placeholder="Feedbacks" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px;height:80px;font-family:inherit"></textarea><div id="wrap-admin-vendedor" style="display:none; grid-column:span 2; background:var(--bg); padding:16px; border-radius:12px"><label style="font-size:11px; font-weight:800; color:var(--text-muted); display:block; margin-bottom:8px">REATRIBUIR VENDEDOR (ADMIN)</label><select id="edit-vendedor" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px"></select></div><button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar Alterações</button><div style="grid-column:span 2; display:flex; gap:10px; margin-top:8px"><button type="button" class="btn btn-secondary" style="flex:1" onclick="gerarPropostaPDF()">📄 Proposta PDF</button><button type="button" class="btn" style="flex:1; background:#25D366; color:white" onclick="enviarWhatsApp()">📱 WhatsApp</button><button type="button" class="btn" style="background:#fee2e2; color:var(--danger)" onclick="excluirContrato()">🗑️</button></div></form></div></div>
+<!-- MODAL EDIT -->
+<div class="modal-overlay" id="modal-edit"><div class="modal"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"><h3>Ficha do Cliente</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:26px;cursor:pointer;opacity:0.5">&times;</button></div><form id="form-edit" onsubmit="salvarEdicao(event)" style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px"><input type="hidden" id="edit-id"><input type="text" id="edit-cliente" placeholder="Cliente" style="grid-column:span 2;padding:10px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" id="edit-cnpj" placeholder="CNPJ/CPF" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCNPJ('edit', this)">🔍</button></div><input type="email" id="edit-email" placeholder="E-mail" style="padding:10px;border:1px solid var(--border);border-radius:10px"><input type="text" id="edit-telefone" placeholder="Telefone" style="padding:10px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" id="edit-cep" placeholder="CEP" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCEP('edit', this)">🔍</button></div><input type="text" id="edit-logradouro" placeholder="Logradouro" style="grid-column:span 2;padding:10px;border:1px solid var(--border);border-radius:10px"><select id="edit-estagio" style="padding:10px;border:1px solid var(--border);border-radius:10px"><option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option>Implantado</option><option>Renovação</option></select><input type="date" id="edit-data" style="padding:10px;border:1px solid var(--border);border-radius:10px"><input type="number" id="edit-premio" step="0.01" style="padding:10px;border:1px solid var(--border);border-radius:10px"><input type="number" id="edit-comissao" placeholder="Comissão %" style="padding:10px;border:1px solid var(--border);border-radius:10px"><input type="number" id="edit-agenciamento" placeholder="Agenciamento %" style="padding:10px;border:1px solid var(--border);border-radius:10px"><input type="date" id="edit-pagamento" style="padding:10px;border:1px solid var(--border);border-radius:10px"><textarea id="edit-feedback" placeholder="Feedback" style="grid-column:span 2;padding:10px;border:1px solid var(--border);border-radius:10px;height:60px;font-family:inherit"></textarea><div id="wrap-admin-vendedor" style="display:none; grid-column:span 2; background:var(--bg); padding:16px; border-radius:12px"><label style="font-size:11px; font-weight:800; color:var(--text-muted); display:block; margin-bottom:8px">REATRIBUIR VENDEDOR (ADMIN)</label><select id="edit-vendedor" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px"></select></div><button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar Alterações</button><div style="grid-column:span 2; display:flex; gap:10px; margin-top:8px"><button type="button" class="btn btn-secondary" style="flex:1" onclick="gerarPropostaPDF()">📄 Proposta PDF</button><button type="button" class="btn" style="flex:1; background:#25D366; color:white" onclick="enviarWhatsApp()">📱 WhatsApp</button><button type="button" class="btn" style="background:#fee2e2; color:var(--danger)" onclick="excluirContrato()">🗑️</button></div></form></div></div>
 
-<div class="modal-overlay" id="modal-manual"><div class="modal" style="max-width:650px"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>📖 Guia Dental M.I</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button></div><div style="padding:24px;font-size:14px">Instruções rápidas de uso do CRM Soberano.</div></div></div>
-<div class="modal-overlay" id="modal-gestores"><div class="modal" style="max-width:650px"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>🔑 Acesso Master</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button></div><div style="padding:24px;font-size:14px">Pedro, Sergio, Leonardo e Diego possuem acesso completo.</div></div></div>
-<div class="modal-overlay" id="modal-terms"><div class="modal" style="max-width:550px"><div style="padding:24px;border-bottom:1px solid var(--border)"><h3>Política LGPD</h3></div><div style="padding:24px;font-size:14px"><p>Aceito o tratamento dos dados sob normas da LGPD e Dental M.I Credit.</p></div><div style="padding:20px 24px;text-align:right"><button class="btn btn-login" style="width:auto;padding:12px 30px" onclick="document.getElementById('modal-terms').classList.remove('active');document.getElementById('check-terms').checked=true">Entendi e Aceito</button></div></div></div>
+<div class="modal-overlay" id="modal-manual"><div class="modal" style="max-width:650px"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>📖 Guia Dental M.I</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button></div><div style="padding:24px;font-size:14px;line-height:1.7"><p><b>Busca Global:</b> Use o campo no topo para pesquisar clientes instantaneamente.</p><p><b>Consultas 🔍:</b> Digite CNPJ ou CEP e clique na lupa para automação.</p></div></div></div>
+<div class="modal-overlay" id="modal-gestores"><div class="modal" style="max-width:650px"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>🔑 Acesso Master</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button></div><div style="padding:24px;font-size:14px;line-height:1.7"><p><b>Gestores (Diniz, Leonardo, Pedro, Sergio, Diego)</b> possuem acesso completo.</p></div></div></div>
+<div class="modal-overlay" id="modal-terms"><div class="modal" style="max-width:550px"><div style="padding:24px;border-bottom:1px solid var(--border)"><h3>Termos de Privacidade</h3></div><div style="padding:24px;font-size:14px"><p>Aceito o tratamento dos dados sob normas da LGPD.</p></div><div style="padding:20px 24px;text-align:right"><button class="btn btn-login" style="width:auto" onclick="document.getElementById('modal-terms').classList.remove('active');document.getElementById('check-terms').checked=true">Entendi e Aceito</button></div></div></div>
 
 <script>
+/** 
+ * v5.5 - MASTER FIX (RECONSTRUCTION) 
+ */
 const SUPABASE_URL = 'https://lleyoetkisvtfmmypnei.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_xRUj2f0WVBrQbx0VJSz7XQ_OnxAFmG7';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -170,13 +171,13 @@ let db = []; let currentChart = null; let filtroAtivo = '';
 async function doLogin(){
   const u = document.getElementById('inp-user').value.trim();
   const p = document.getElementById('inp-pass').value.trim();
-  if(!document.getElementById('check-terms').checked) return alert('Aceite os Termos LGPD.');
-  const btn = document.getElementById('btn-entrar'); btn.textContent = 'Verificando...'; btn.disabled = true;
+  if(!document.getElementById('check-terms').checked) return alert('Aceite os Termos.');
+  const btn = document.getElementById('btn-entrar'); btn.textContent = '...'; btn.disabled = true;
   try {
     const { data, error } = await sb.from('usuarios').select('*').eq('usuario',u).eq('senha',p).maybeSingle();
-    if(data){ localStorage.setItem('crm_user', JSON.stringify(data)); logAtividade('login', 'Acesso v5.4'); initApp(); }
+    if(data){ localStorage.setItem('crm_user', JSON.stringify(data)); initApp(); }
     else { document.getElementById('login-error').style.display='block'; }
-  } catch(e){ alert('Erro conexão Supabase'); } finally { btn.textContent = 'Entrar'; btn.disabled = false; }
+  } catch(e){ alert('Erro conexao'); } finally { btn.textContent = 'Entrar'; btn.disabled = false; }
 }
 
 async function initApp(){
@@ -188,8 +189,8 @@ async function initApp(){
   document.getElementById('user-name').textContent = user.nome;
   document.getElementById('user-role').textContent = user.cargo;
   document.getElementById('user-initials').textContent = user.nome.substring(0,2).toUpperCase();
-  if(PERFIS_MASTER.includes(user.cargo)) { 
-    document.getElementById('nav-admin').style.display = 'block'; 
+  if(PERFIS_MASTER.includes(user.cargo)) {
+    document.getElementById('nav-admin').style.display = 'block';
     document.getElementById('nav-financeiro').style.display = 'block';
     document.getElementById('btn-gestores').style.display = 'block';
   }
@@ -202,10 +203,10 @@ async function initApp(){
 async function carregarDados(){
   const { data } = await sb.from('contratos').select('*').order('id',{ascending:true});
   db = (data || []).map(r => ({
-    id: r.id, cliente: r.cliente, cnpj: r.cnpj || '', email: r.email || '', telefone: r.telefone || '',
+    id: r.id, cliente: r.cliente || 'S/N', cnpj: r.cnpj || '', email: r.email || '', telefone: r.telefone || '',
     cep: r.cep || '', logradouro: r.logradouro || '', bairro: r.bairro || '', cidade: r.cidade || '', uf: r.uf || '',
-    operadora: r.operadora, vidas: r.vidas, premio: Number(r.premio), comissao: Number(r.comissao || 0), agenciamento: Number(r.agenciamento || 0),
-    estagio: r.estagio, statusManual: r.status_manual || 'auto', dataPagamento: r.data_pagamento || '', data_renovacao: r.data_renovacao, feedback: r.feedback || '', consultor: r.consultor
+    operadora: r.operadora || '—', vidas: r.vidas || 0, premio: Number(r.premio || 0), comissao: Number(r.comissao || 0), agenciamento: Number(r.agenciamento || 0),
+    estagio: r.estagio || 'Implantado', statusManual: r.status_manual || 'auto', dataPagamento: r.data_pagamento || '', data_renovacao: r.data_renovacao || '2026-01-01', feedback: r.feedback || '', consultor: r.consultor || 'M.I'
   }));
 }
 
@@ -233,7 +234,7 @@ function renderDashboard(){
   currentChart = new Chart(ctx, { type:'bar', data:{ labels:Object.keys(ops), datasets:[{data:Object.values(ops), backgroundColor:'#1EAD6F', borderRadius:8 }] }, options:{maintainAspectRatio:false, plugins:{legend:{display:false}}} });
   const r = {}; data.forEach(c => r[c.consultor] = (r[c.consultor]||0) + c.premio);
   const sorted = Object.entries(r).sort((a,b)=>b[1]-a[1]);
-  document.getElementById('ranking-list').innerHTML = sorted.map(([n,v],i)=>`<div style="padding:12px; display:flex; justify-content:space-between; border-bottom:1px solid #f1f5f9; font-size:13.5px"><span><b>${i+1}º</b> ${n}</span><b>R$ ${v.toLocaleString()}</b></div>`).join('');
+  document.getElementById('ranking-list').innerHTML = sorted.map(([n,v],i)=>`<div style="padding:15px; display:flex; justify-content:space-between; border-bottom:1px solid #f1f5f9; font-size:13.5px"><span><b>${i+1}º</b> ${n}</span><b>R$ ${v.toLocaleString()}</b></div>`).join('');
 }
 
 function renderFunil(){
@@ -253,8 +254,9 @@ function renderCarteira(){
   const isM = PERFIS_MASTER.includes(JSON.parse(localStorage.getItem('crm_user')).cargo);
   document.getElementById('head-carteira').innerHTML = `<th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th>` + (isM ? `<th>Vendedor</th>` : '') + `<th>Status</th>`;
   document.getElementById('table-body-carteira').innerHTML = data.map(c => `
-    <tr onclick="abrirEdicao(${c.id})" style="cursor:pointer"><td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td><td>R$ ${c.premio.toLocaleString()}</td><td><span class="badge" style="background:var(--brand-light);color:var(--brand)">${c.estagio}</span></td>
-      ` + (isM ? `<td>${c.consultor}</td>` : '') + `<td><span class="badge" style="background:#dcfce7;color:#166534">Ativo</span></td></tr>`).join('') || '<tr><td colspan="8" style="text-align:center;padding:40px">Nenhum dado</td></tr>';
+    <tr onclick="abrirEdicao(${c.id})" style="cursor:pointer"><td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td><td>R$ ${c.premio.toLocaleString()}</td>
+      <td><span class="badge" style="background:var(--brand-light);color:var(--brand)">${c.estagio}</span></td>
+      ` + (isM ? `<td>${c.consultor}</td>` : '') + `<td><span class="badge" style="background:#dcfce7;color:#166534">Ativo</span></td></tr>`).join('') || '<tr><td colspan="8" style="text-align:center;padding:40px">Vazio</td></tr>';
 }
 
 function renderFinanceiro(){
@@ -265,14 +267,12 @@ function renderFinanceiro(){
   document.getElementById('fin-com').textContent = `R$ ${tCom.toLocaleString('pt-BR')}`;
   document.getElementById('fin-age').textContent = `R$ ${tAge.toLocaleString('pt-BR')}`;
   document.getElementById('fin-imp').textContent = `R$ ${(tBruto*0.06).toLocaleString('pt-BR')}`;
-  document.getElementById('table-body-fin').innerHTML = `<tr><td>Entrada Prêmios</td><td>R$ ${tBruto.toLocaleString()}</td><td>R$ ${tBruto.toLocaleString()}</td><td><span class="badge bg-ok">Previsto</span></td></tr>
-    <tr><td>Saída Comissões</td><td>-</td><td>R$ ${tCom.toLocaleString()}</td><td><span class="badge" style="background:#fee2e2;color:#991b1b">Pagar</span></td></tr>`;
 }
 
 async function renderAuditoria(){
-  if(!PERFIS_MASTER.includes(JSON.parse(localStorage.getItem('crm_user')).cargo)) return;
+  if(!isMaster()) return;
   const { data } = await sb.from('atividades').select('*').order('data',{ascending:false}).limit(20);
-  document.getElementById('table-body-auditoria').innerHTML = (data||[]).map(a => `<tr><td style="font-size:12px">${new Date(a.data).toLocaleString()}</td><td><b>${a.usuario}</b></td><td>${a.acao}</td><td>${a.detalhe}</td></tr>`).join('');
+  document.getElementById('table-body-auditoria').innerHTML = (data||[]).map(a => `<tr><td>${new Date(a.data).toLocaleString()}</td><td><b>${a.usuario}</b></td><td>${a.acao}</td><td>${a.detalhe}</td></tr>`).join('');
 }
 
 function showView(view, el){
@@ -290,8 +290,6 @@ function abrirEdicao(id){
   document.getElementById('edit-cnpj').value = c.cnpj;
   document.getElementById('edit-email').value = c.email;
   document.getElementById('edit-telefone').value = c.telefone;
-  document.getElementById('edit-cep').value = c.cep;
-  document.getElementById('edit-logradouro').value = c.logradouro;
   document.getElementById('edit-estagio').value = c.estagio;
   document.getElementById('edit-data').value = c.data_renovacao;
   document.getElementById('edit-premio').value = c.premio;
@@ -299,8 +297,7 @@ function abrirEdicao(id){
   document.getElementById('edit-agenciamento').value = c.agenciamento;
   document.getElementById('edit-pagamento').value = c.dataPagamento;
   document.getElementById('edit-feedback').value = c.feedback;
-  const user = JSON.parse(localStorage.getItem('crm_user'));
-  if(PERFIS_MASTER.includes(user.cargo)){
+  if(isMaster()){
     document.getElementById('wrap-admin-vendedor').style.display = 'block';
     const s = document.getElementById('edit-vendedor');
     const u = ['Leonardo Henrique','Sergio','Pedro','Diego','Diretoria M.I'];
@@ -311,30 +308,29 @@ function abrirEdicao(id){
 }
 
 async function consultarCNPJ(ctx, btn){
-  const i = (ctx==='venda'?document.getElementById('venda-cnpj'):document.getElementById('edit-cnpj'));
-  const cnpj = i.value.replace(/\D/g,'');
+  const cnpj = (ctx==='venda'?document.getElementById('venda-cnpj'):document.getElementById('edit-cnpj')).value.replace(/\D/g,'');
   if(cnpj.length!==14) return alert('CNPJ Inválido');
-  const oldText = btn.textContent; btn.textContent = '...';
+  btn.textContent = '...';
   try {
     const r = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
     const d = await r.json();
     const n = d.nome_fantasia || d.razao_social;
     if(ctx==='venda'){ document.getElementById('venda-cliente').value=n; document.getElementById('venda-email').value=d.email||''; document.getElementById('venda-telefone').value=d.ddd_telefone_1||''; }
     else { document.getElementById('edit-cliente').value=n; document.getElementById('edit-email').value=d.email||''; document.getElementById('edit-telefone').value=d.ddd_telefone_1||''; }
-  } catch(e){ alert('Erro busca'); } finally { btn.textContent = oldText; }
+  } catch(e){ alert('Erro busca'); } finally { btn.textContent = '🔍'; }
 }
 
 async function consultarCEP(ctx, btn){
     const i = (ctx==='venda'?document.getElementById('venda-cep'):document.getElementById('edit-cep'));
     const cep = i.value.replace(/\D/g,'');
     if(cep.length!==8) return alert('CEP Inválido');
-    const oldText = btn.textContent; btn.textContent = '...';
+    btn.textContent = '...';
     try {
         const r = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
         const d = await r.json();
         if(ctx==='venda') document.getElementById('venda-logradouro').value=d.street;
         else document.getElementById('edit-logradouro').value=d.street;
-    } catch(e){} finally { btn.textContent = oldText; }
+    } catch(e){} finally { btn.textContent = '🔍'; }
 }
 
 async function salvarVenda(e){
@@ -342,7 +338,6 @@ async function salvarVenda(e){
   const f = e.target;
   const payload = {
     cliente: f.cliente.value, cnpj: f.cnpj.value, email: f.email.value, telefone: f.telefone.value,
-    cep: f.cep.value, logradouro: f.logradouro.value,
     operadora: f.operadora.value, vidas: f.vidas.value, premio: f.premio.value, estagio: f.estagio.value, data_renovacao: f.data.value,
     consultor: JSON.parse(localStorage.getItem('crm_user')).nome
   };
@@ -357,7 +352,6 @@ async function salvarEdicao(e){
   const payload = {
     cliente: document.getElementById('edit-cliente').value, cnpj: document.getElementById('edit-cnpj').value,
     email: document.getElementById('edit-email').value, telefone: document.getElementById('edit-telefone').value,
-    cep: document.getElementById('edit-cep').value, logradouro: document.getElementById('edit-logradouro').value,
     estagio: document.getElementById('edit-estagio').value, data_renovacao: document.getElementById('edit-data').value,
     premio: document.getElementById('edit-premio').value, comissao: document.getElementById('edit-comissao').value,
     agenciamento: document.getElementById('edit-agenciamento').value, data_pagamento: document.getElementById('edit-pagamento').value,
