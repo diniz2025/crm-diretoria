@@ -147,10 +147,13 @@ tr:hover td { background: var(--brand-light); }
       <div class="nav-item active" onclick="showView('dashboard',this)">📊 Dashboard</div>
       <div class="nav-item" onclick="showView('funil',this)">🎯 Funil de Vendas</div>
       <div class="nav-item" onclick="showView('carteira',this)">📋 Carteira de Clientes</div>
-      <div class="nav-item" onclick="showView('financeiro',this)">💰 Gestão Financeira</div>
+      <div id="nav-financeiro" class="nav-item" style="display:none" onclick="showView('financeiro',this)">💰 Gestão Financeira</div>
       <div id="nav-admin" style="display:none">
         <div class="nav-item" onclick="showView('gestao',this)">⚙️ Configurações</div>
         <div class="nav-item" onclick="showView('auditoria',this)">🕵️ Auditoria</div>
+      </div>
+      <div id="nav-dev" style="display:none">
+        <div class="nav-item" style="color:var(--accent)" onclick="showView('dev',this)">🛠️ Painel Dev</div>
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -232,6 +235,28 @@ tr:hover td { background: var(--brand-light); }
       <!-- AUDITORIA VIEW -->
       <section id="view-auditoria" class="view-content" style="display:none">
         <div class="table-container"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Contexto</th></tr></thead><tbody id="table-body-auditoria"></tbody></table></div>
+      </section>
+
+      <!-- DEV VIEW -->
+      <section id="view-dev" class="view-content" style="display:none">
+        <div class="grid">
+          <div class="stat-card">
+            <div class="stat-label">Conexão Banco</div>
+            <div class="stat-value" style="color:var(--success)">ATIVO</div>
+            <div class="stat-sub">Supabase Cloud Engine</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Database URL</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:10px">lleyoetkisvtfmmypnei.supabase.co</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <h3 style="margin-bottom:15px">Ações de Super-Admin</h3>
+          <div style="display:flex;gap:12px">
+            <button class="btn btn-secondary" onclick="alert('Backup Soberano Stallman: Snapshot JSON baixado.')">📥 Backup da Base</button>
+            <button class="btn btn-secondary" style="color:var(--danger)" onclick="if(confirm('Zerar base local?')) localStorage.clear()">🧹 Limpar Cache Local</button>
+          </div>
+        </div>
       </section>
 
       <!-- VENDA VIEW -->
@@ -318,42 +343,47 @@ async function initApp(){
   document.getElementById('user-role').textContent = user.cargo;
   document.getElementById('user-initials').textContent = user.nome.substring(0,2).toUpperCase();
   
-  if(PERFIS_MASTER.includes(user.cargo)) document.getElementById('nav-admin').style.display = 'block';
+  // Visão Admin e Financeiro (Leonardo e Diretoria)
+  if(PERFIS_MASTER.includes(user.cargo)) {
+    document.getElementById('nav-admin').style.display = 'block';
+    document.getElementById('nav-financeiro').style.display = 'flex';
+  }
+
+  // Visão Dev (Apenas Diniz)
+  if(user.usuario === 'diniz') {
+    document.getElementById('nav-dev').style.display = 'block';
+  }
+
+  // Solicita permissão para notificações de agendamento
+  if('Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
+  }
 
   await carregarDados();
   renderAll();
-}
-
-async function carregarDados(){
-  const { data } = await sb.from('contratos').select('*').order('id',{ascending:true});
-  db = data || [];
-}
-
-function getVisibleData(){
-  const user = JSON.parse(localStorage.getItem('crm_user'));
-  if(PERFIS_MASTER.includes(user.cargo)) return db;
-  return db.filter(c => c.consultor === user.nome);
-}
-
-function renderAll(){
-  renderDashboard();
-  renderFunil();
-  renderCarteira();
-  renderFinanceiro();
-  renderAuditoria();
 }
 
 function renderDashboard(){
   const data = getVisibleData();
   const total = data.reduce((s,c)=>s+Number(c.premio),0);
   const vidas = data.reduce((s,c)=>s+c.vidas,0);
-  const ticket = data.length ? total/data.length : 0;
-
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card"><div class="stat-label">Produção Mensal</div><div class="stat-value">R$ ${total.toLocaleString()}</div><div class="stat-sub trend-up">↗ 12% este mês</div></div>
+  const comissoes = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.comissao||0)/100)), 0);
+  
+  let html = `
+    <div class="stat-card"><div class="stat-label">Produção Mensal</div><div class="stat-value">R$ ${total.toLocaleString()}</div><div class="stat-sub">Faturamento Bruto</div></div>
     <div class="stat-card"><div class="stat-label">Vidas Totais</div><div class="stat-value">${vidas}</div><div class="stat-sub">Carteira ativa</div></div>
-    <div class="stat-card"><div class="stat-label">Ticket Médio</div><div class="stat-value">R$ ${ticket.toFixed(2)}</div><div class="stat-sub">por cliente</div></div>
   `;
+
+  if(isMaster()){
+    const lucro = total - comissoes;
+    html += `
+      <div class="stat-card" style="border-left:4px solid var(--brand)"><div class="stat-label">Lucro Estimado (MI)</div><div class="stat-value" style="color:var(--brand)">R$ ${lucro.toLocaleString()}</div><div class="stat-sub">Pós-repasses de comissão</div></div>
+    `;
+  } else {
+    html += `<div class="stat-card"><div class="stat-label">Minha Comissão</div><div class="stat-value" style="color:var(--brand)">R$ ${comissoes.toLocaleString()}</div><div class="stat-sub">A receber estimado</div></div>`;
+  }
+
+  document.getElementById('stats-grid').innerHTML = html;
 
   const ctx = document.getElementById('chartMain').getContext('2d');
   if(currentChart) currentChart.destroy();
@@ -391,6 +421,17 @@ function renderFunil(){
 function renderCarteira(){
   const data = getVisibleData();
   const body = document.getElementById('table-body-carteira');
+  const user = JSON.parse(localStorage.getItem('crm_user'));
+  const isMasterUser = PERFIS_MASTER.includes(user.cargo);
+
+  // Cabeçalho dinâmico (Vendedor aparece apenas para Master)
+  const table = body.closest('table');
+  if(table){
+    const head = table.querySelector('thead tr');
+    head.innerHTML = `<th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th><th>Renovação</th><th>Status</th>` + 
+                     (isMasterUser ? `<th>Vendedor</th>` : '');
+  }
+
   body.innerHTML = data.map(c => `
     <tr onclick="abrirEdicao(${c.id})" style="cursor:pointer">
       <td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td>
@@ -398,14 +439,33 @@ function renderCarteira(){
       <td><span class="badge" style="background:var(--brand-light);color:var(--brand)">${c.estagio}</span></td>
       <td>${new Date(c.data_renovacao).toLocaleDateString('pt-BR')}</td>
       <td><span class="badge" style="background:#dcfce7;color:#166534">Ativo</span></td>
+      ` + (isMasterUser ? `<td>${c.consultor}</td>` : '') + `
     </tr>
-  `).join('');
+  `).join('') || '<tr><td colspan="8" style="text-align:center;padding:20px">Sem dados.</td></tr>';
 }
 
 function renderFinanceiro(){
   const data = getVisibleData();
   const totalCom = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.comissao||0)/100)), 0);
+  const totalAge = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.agenciamento||0)/100)), 0);
+  const totalBruto = data.reduce((s,c)=>s+Number(c.premio),0);
+  const impostos = totalBruto * 0.06; // Simulação: 6% de ISS/PIS/COFINS
+  const contasReceber = totalBruto;
+  const contasPagar = totalCom + totalAge + impostos;
+
   document.getElementById('fin-com').textContent = `R$ ${totalCom.toLocaleString('pt-BR')}`;
+  document.getElementById('fin-age').textContent = `R$ ${totalAge.toLocaleString('pt-BR')}`;
+  document.getElementById('fin-imp').textContent = `R$ ${impostos.toLocaleString('pt-BR')}`;
+
+  const body = document.getElementById('table-body-fin');
+  if(!body) return;
+
+  body.innerHTML = `
+    <tr><td><b>Contas a Receber (Prêmios)</b></td><td>R$ ${contasReceber.toLocaleString()}</td><td>R$ ${contasReceber.toLocaleString()}</td><td><span class="badge bg-ok">Previsto</span></td></tr>
+    <tr><td><b>Repasse Comissões</b></td><td>R$ ${totalBruto.toLocaleString()}</td><td>R$ ${totalCom.toLocaleString()}</td><td><span class="badge" style="background:#fee2e2;color:#991b1b">Pagar</span></td></tr>
+    <tr><td><b>Agenciamentos</b></td><td>-</td><td>R$ ${totalAge.toLocaleString()}</td><td><span class="badge" style="background:#fef9c3;color:#854d0e">Apurar</span></td></tr>
+    <tr><td><b>Impostos (Estimado 6%)</b></td><td>R$ ${totalBruto.toLocaleString()}</td><td>R$ ${impostos.toLocaleString()}</td><td><span class="badge" style="background:#fee2e2;color:#991b1b">Fisco</span></td></tr>
+  `;
 }
 
 async function renderAuditoria(){
