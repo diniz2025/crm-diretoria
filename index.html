@@ -130,6 +130,10 @@ tr:hover td { background: var(--brand-light); }
     <p style="opacity:0.6;margin-bottom:40px;font-size:14px">Dental M.I Gestão Inteligente v4.0</p>
     <input type="text" id="inp-user" placeholder="Seu usuário" autocomplete="username">
     <input type="password" id="inp-pass" placeholder="Sua senha" autocomplete="current-password">
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:24px;font-size:13px;opacity:0.8">
+      <input type="checkbox" id="check-terms" style="width:16px;height:16px;margin:0;cursor:pointer">
+      <label for="check-terms" style="cursor:pointer">Aceito os <a href="#" onclick="abrirTermos(event)" style="color:var(--brand);text-decoration:none;font-weight:600">Termos de Privacidade (LGPD)</a></label>
+    </div>
     <button class="btn-login" onclick="doLogin()">Acessar Painel</button>
     <p id="login-error" style="color:var(--danger);margin-top:20px;display:none;font-size:13px">Acesso negado. Verifique os dados.</p>
   </div>
@@ -299,9 +303,39 @@ tr:hover td { background: var(--brand-light); }
       <input type="date" id="edit-data" style="padding:12px;border:1px solid var(--border);border-radius:8px">
       <input type="number" id="edit-premio" step="0.01" style="padding:12px;border:1px solid var(--border);border-radius:8px">
       <input type="number" id="edit-comissao" placeholder="Comissão %" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+      <input type="number" id="edit-agenciamento" placeholder="Agenciamento %" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+      <input type="date" id="edit-pagamento" style="padding:12px;border:1px solid var(--border);border-radius:8px">
       <textarea id="edit-feedback" placeholder="Feedback/Observações" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px;height:80px"></textarea>
       <button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar Alterações</button>
     </form>
+  </div>
+</div>
+
+<!-- MODAL TERMOS LGPD -->
+<div class="modal-overlay" id="modal-terms">
+  <div class="modal" style="max-width:700px">
+    <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+      <h2 style="font-size:18px;font-weight:800">📋 Política de Privacidade e LGPD</h2>
+      <button onclick="document.getElementById('modal-terms').classList.remove('active')" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button>
+    </div>
+    <div style="padding:24px; max-height:60vh; overflow-y:auto; font-size:14px; line-height:1.6; color:var(--text-main)">
+      <p style="margin-bottom:16px">Este sistema da <b>Dental M.I Credit</b> segue rigorosamente a Lei Geral de Proteção de Dados (LGPD) e diretrizes de Soberania Tecnológica.</p>
+      
+      <h4 style="margin:20px 0 10px; color:var(--sidebar)">1. Coleta e Uso de Dados</h4>
+      <p>Os dados coletados (Clientes, CNPJ/CPF, Vidas e Prêmios) são de uso exclusivo para a gestão de seguros da Dental M.I Credit. Não compartilhamos informações com terceiros para fins comerciais.</p>
+      
+      <h4 style="margin:20px 0 10px; color:var(--sidebar)">2. Segurança e Isolamento</h4>
+      <p>O acesso é segregado por cargo: vendedores visualizam apenas sua própria carteira. Todas as interações são auditadas eletronicamente.</p>
+      
+      <h4 style="margin:20px 0 10px; color:var(--sidebar)">3. Propriedade Intelectual</h4>
+      <p>O código deste CRM é Software Livre sob gestão da Dental M.I Credit, garantindo que a empresa tenha total soberania e portabilidade sobre seus ativos digitais.</p>
+      
+      <h4 style="margin:20px 0 10px; color:var(--sidebar)">4. Responsabilidade Jurídica (LTDA)</h4>
+      <p>O usuário compromete-se a registrar feedbacks reais de consultoria, criando prova documental para proteção da empresa em eventuais disputas.</p>
+    </div>
+    <div style="padding:20px 24px; background:var(--bg); text-align:right">
+      <button class="btn-login" style="width:auto; padding:10px 32px" onclick="document.getElementById('modal-terms').classList.remove('active'); document.getElementById('check-terms').checked=true">Entendi e Aceito</button>
+    </div>
   </div>
 </div>
 
@@ -324,15 +358,27 @@ let currentChart = null;
 async function doLogin(){
   const u=document.getElementById('inp-user').value.trim();
   const p=document.getElementById('inp-pass').value.trim();
+  const accepted = document.getElementById('check-terms').checked;
+
+  if(!accepted) {
+    alert('Você precisa aceitar os Termos de Privacidade para acessar o painel.');
+    return;
+  }
+
   const { data, error } = await sb.from('usuarios').select('*').eq('usuario',u).eq('senha',p).maybeSingle();
   
   if(data){
     localStorage.setItem('crm_user', JSON.stringify(data));
-    logAtividade('login', 'Entrada no sistema v4.0');
+    logAtividade('login', 'Entrada no sistema v4.0 com aceite LGPD');
     initApp();
   } else {
     document.getElementById('login-error').style.display='block';
   }
+}
+
+function abrirTermos(e){
+  e.preventDefault();
+  document.getElementById('modal-terms').classList.add('active');
 }
 
 async function initApp(){
