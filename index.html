@@ -129,7 +129,7 @@ tr:hover td { background: var(--brand-light); }
   <div class="login-card">
     <img src="logo-dental.png" style="height:60px;margin-bottom:32px;border-radius:12px">
     <h1 style="font-size:28px;margin-bottom:8px">Bem-vindo</h1>
-    <p style="opacity:0.6;margin-bottom:40px;font-size:14px">Dental M.I Gestão Inteligente v4.0</p>
+    <p style="opacity:0.6;margin-bottom:40px;font-size:14px">Dental M.I Gestão Inteligente v4.8</p>
     <input type="text" id="inp-user" placeholder="Seu usuário" autocomplete="username">
     <input type="password" id="inp-pass" placeholder="Sua senha" autocomplete="current-password">
     <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:24px;font-size:13px;opacity:0.8">
@@ -179,6 +179,8 @@ tr:hover td { background: var(--brand-light); }
     <header class="top-header">
       <h2 class="view-title" id="view-title">Dashboard</h2>
       <div style="display:flex;gap:12px">
+        <button class="btn btn-secondary" style="font-size:13px; padding:10px 16px" onclick="abrirManual()">📖 Manual de Uso</button>
+        <button id="btn-gestores" class="btn btn-secondary" style="display:none; font-size:13px; padding:10px 16px" onclick="abrirAcessoGestores()">🔑 Acesso Gestores</button>
         <button class="btn-login" style="padding:10px 20px;font-size:13px" onclick="showView('venda')">➕ Nova Operação</button>
       </div>
     </header>
@@ -225,7 +227,7 @@ tr:hover td { background: var(--brand-light); }
       <section id="view-gestao" class="view-content" style="display:none">
          <div class="stat-card">
            <h3 style="margin-bottom:20px">Nova Conta de Usuário</h3>
-           <form onsubmit="alert('Acesso negado: Use o Supabase Admin.'); return false;" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+           <form onsubmit="alert('Use o painel administrativo do Supabase.'); return false;" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
              <input type="text" placeholder="Nome Completo" style="padding:12px;border:1px solid var(--border);border-radius:8px">
              <input type="text" placeholder="Usuário" style="padding:12px;border:1px solid var(--border);border-radius:8px">
              <button class="btn-login" style="grid-column:span 2">➕ Criar Usuário</button>
@@ -323,6 +325,49 @@ tr:hover td { background: var(--brand-light); }
   </div>
 </div>
 
+<!-- MODAL MANUAL -->
+<div class="modal-overlay" id="modal-manual">
+  <div class="modal" style="max-width:700px">
+    <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+      <h2 style="font-size:18px;font-weight:800">📖 Manual de Uso e Documentos</h2>
+      <button onclick="document.getElementById('modal-manual').classList.remove('active')" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button>
+    </div>
+    <div style="padding:24px; max-height:60vh; overflow-y:auto; font-size:14px; line-height:1.6; color:var(--text-main)">
+      <h3>Como usar o CRM Dental M.I:</h3>
+      <ul style="margin:16px 0; padding-left:20px">
+        <li><b>Dashboard:</b> Visão geral de faturamento e produção por operadora.</li>
+        <li><b>Funil de Vendas:</b> Gestão visual (Drag & Drop) do estágio de cada negócio.</li>
+        <li><b>Carteira:</b> Listagem completa com filtros de busca e vendedor.</li>
+        <li><b>Consultas 🔍:</b> Use a lupa no CNPJ e CEP para preenchimento automático.</li>
+        <li><b>Propostas:</b> Clique em um cliente na Carteira para gerar o PDF ou enviar via WhatsApp.</li>
+      </ul>
+      <p>Este sistema foi projetado para alta produtividade e segurança total dos dados.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GESTORES -->
+<div class="modal-overlay" id="modal-gestores">
+  <div class="modal" style="max-width:700px">
+    <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+      <h2 style="font-size:18px;font-weight:800">🔑 Guia de Acesso Master (Gestores)</h2>
+      <button onclick="document.getElementById('modal-gestores').classList.remove('active')" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button>
+    </div>
+    <div style="padding:24px; max-height:60vh; overflow-y:auto; font-size:14px; line-height:1.6; color:var(--text-main)">
+      <p>Instruções específicas para: <b>Pedro, Sergio, Leonardo e Diego</b>.</p>
+      <h4 style="margin-top:20px">Acesso a Tudo como Master:</h4>
+      <p>Como Administradores, vocês têm visão total da base comercial e financeira da Dental M.I Credit.</p>
+      <ul style="margin:16px 0; padding-left:20px">
+        <li>Podem visualizar contratos de <b>todos os vendedores</b>.</li>
+        <li>Acesso ao painel de <b>Gestão Financeira</b> com cálculo de repasses e impostos.</li>
+        <li>Capacidade de <b>reatribuir clientes</b> entre vendedores no modal de edição.</li>
+        <li>Acesso à aba de <b>Auditoria</b> para monitorar atividades.</li>
+      </ul>
+      <p style="color:var(--brand);font-weight:700">Responsabilidade: Toda ação administrativa é registrada no log de auditoria.</p>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-terms">
   <div class="modal" style="max-width:700px">
     <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
@@ -365,7 +410,11 @@ async function initApp(){
   document.getElementById('app').style.display='flex';
   document.getElementById('user-name').textContent = user.nome;
   document.getElementById('user-role').textContent = user.cargo;
-  if(PERFIS_MASTER.includes(user.cargo)) { document.getElementById('nav-admin').style.display = 'block'; document.getElementById('nav-financeiro').style.display = 'flex'; }
+  if(PERFIS_MASTER.includes(user.cargo)) { 
+    document.getElementById('nav-admin').style.display = 'block'; 
+    document.getElementById('nav-financeiro').style.display = 'flex';
+    document.getElementById('btn-gestores').style.display = 'block';
+  }
   if(user.usuario === 'diniz') document.getElementById('nav-dev').style.display = 'block';
   await carregarDados();
   renderAll();
@@ -497,6 +546,8 @@ function enviarWhatsApp(){
   window.open(`https://api.whatsapp.com/send?phone=${fone}&text=${texto}`);
 }
 
+function abrirManual(){ document.getElementById('modal-manual').classList.add('active'); }
+function abrirAcessoGestores(){ document.getElementById('modal-gestores').classList.add('active'); }
 function abrirTermos(e){ e.preventDefault(); document.getElementById('modal-terms').classList.add('active'); }
 function doLogout(){ localStorage.removeItem('crm_user'); location.reload(); }
 if(localStorage.getItem('crm_user')) initApp();
