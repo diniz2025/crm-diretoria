@@ -32,10 +32,9 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); overflow: hidden; }
 
-/* LAYOUT TIPO SAAS PROFISSIONAL */
 .app-container { display: flex; height: 100vh; width: 100vw; }
 
-/* SIDEBAR - STEVE JOBS STYLE (DARK & CLEAN) */
+/* SIDEBAR */
 .sidebar {
   width: 260px; background: var(--sidebar); height: 100%; display: flex; flex-direction: column;
   padding: 24px; color: white; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -65,61 +64,70 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .view-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
 .content-area { flex: 1; overflow-y: auto; padding: 32px; scroll-behavior: smooth; }
 
-/* COMPONENTES CARDS */
+/* COMPONENTS */
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 32px; }
 .stat-card {
   background: white; padding: 24px; border-radius: var(--radius); border: 1px solid var(--border);
   box-shadow: var(--shadow); transition: transform 0.2s;
 }
 .stat-card:hover { transform: translateY(-2px); }
-.stat-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-.stat-value { font-size: 30px; font-weight: 800; color: var(--sidebar); }
+.stat-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: 800; color: var(--sidebar); }
 .stat-sub { font-size: 12px; margin-top: 8px; font-weight: 500; }
 
-/* TABELAS MODERNAS */
 .table-container { background: white; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
 table { width: 100%; border-collapse: collapse; }
-th { background: #fdfdfd; padding: 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); text-transform: uppercase; }
-td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
+th { background: #fdfdfd; padding: 14px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); text-transform: uppercase; }
+td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 13.5px; }
 tr:hover td { background: var(--brand-light); }
-.badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.badge { padding: 4px 10px; border-radius: 6px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; }
 
-/* MODAL STEVE JOBS (PULSE & BLUR) */
+/* KANBAN */
+.kanban { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 16px; align-items: flex-start; }
+.kanban-col { background: #f1f5f9; min-width: 260px; border-radius: 12px; padding: 12px; border: 1px solid var(--border); }
+.kanban-col h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.kanban-card {
+  background: white; border-radius: 10px; padding: 14px; margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: grab; border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.kanban-card:hover { border-color: var(--brand); transform: translateY(-2px); }
+
+/* MODALS */
 .modal-overlay {
   display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); 
-  backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; padding: 20px;
+  backdrop-filter: blur(6px); z-index: 2000; align-items: center; justify-content: center; padding: 20px;
 }
-.modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
-.modal { background: white; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; }
+.modal-overlay.active { display: flex; }
+.modal { background: white; border-radius: 16px; width: 100%; max-width: 650px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); overflow: hidden; }
 
-/* LOGIN GLASSMORPHISM */
+/* LOGIN */
 #login-screen {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
   background: radial-gradient(circle at top left, #1e293b, #0f172a);
 }
 .login-card {
-  background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 32px; padding: 60px 50px; width: 100%; max-width: 440px; text-align: center; color: white;
+  background: rgba(255,255,255,0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 28px; padding: 50px; width: 100%; max-width: 420px; text-align: center; color: white;
 }
 .login-card input {
-  width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-  padding: 16px; border-radius: 12px; color: white; margin-bottom: 16px; outline: none; font-size: 16px;
+  width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+  padding: 14px 16px; border-radius: 10px; color: white; margin-bottom: 16px; outline: none; font-size: 15px;
 }
 .btn-login {
-  width: 100%; background: var(--brand); color: white; padding: 16px; border: none;
-  border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  width: 100%; background: var(--brand); color: white; padding: 14px; border: none;
+  border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s;
 }
 .btn-login:hover { transform: scale(1.02); background: #22c55e; }
 
-/* FUNIL KANBAN MODERNIZADO */
-.kanban { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; }
-.kanban-col { background: #eff6ff; min-width: 280px; border-radius: 16px; padding: 16px; border: 1px solid #dbeafe; }
-.kanban-card {
-  background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); cursor: grab; border: 1px solid var(--border);
-}
+.btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
+.btn-secondary { background: var(--slate-100); color: var(--slate-800); }
 
-@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@media(max-width: 768px) {
+  .sidebar { width: 70px; padding: 16px 10px; }
+  .sidebar-logo h1, .user-profile div, .nav-item span { display: none; }
+  .top-header { padding: 0 16px; }
+}
 </style>
 </head>
 <body>
@@ -127,157 +135,135 @@ tr:hover td { background: var(--brand-light); }
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
-    <img src="logo-dental.png" style="height:60px;margin-bottom:32px;border-radius:12px">
-    <h1 style="font-size:28px;margin-bottom:8px">Bem-vindo</h1>
-    <p style="opacity:0.6;margin-bottom:40px;font-size:14px">Dental M.I Gestão Inteligente v4.8</p>
-    <input type="text" id="inp-user" placeholder="Seu usuário" autocomplete="username">
-    <input type="password" id="inp-pass" placeholder="Sua senha" autocomplete="current-password">
-    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:24px;font-size:13px;opacity:0.8">
-      <input type="checkbox" id="check-terms" style="width:16px;height:16px;margin:0;cursor:pointer">
-      <label for="check-terms" style="cursor:pointer">Aceito os <a href="#" onclick="abrirTermos(event)" style="color:var(--brand);text-decoration:none;font-weight:600">Termos de Privacidade (LGPD)</a></label>
+    <img src="logo-dental.png" style="height:50px;margin-bottom:24px;border-radius:10px">
+    <h1 style="font-size:24px;margin-bottom:6px">Dental M.I Gestão</h1>
+    <p style="opacity:0.6;margin-bottom:32px;font-size:13px">Engenharia Autônoma v4.9</p>
+    <input type="text" id="inp-user" placeholder="Usuário" autocomplete="username">
+    <input type="password" id="inp-pass" placeholder="Senha" autocomplete="current-password">
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px;font-size:12px;opacity:0.8">
+      <input type="checkbox" id="check-terms" style="cursor:pointer">
+      <label for="check-terms" style="cursor:pointer">Aceito os <a href="#" onclick="abrirTermos(event)" style="color:var(--brand);text-decoration:none">Termos LGPD</a></label>
     </div>
-    <button class="btn-login" onclick="doLogin()">Acessar Painel</button>
-    <p id="login-error" style="color:var(--danger);margin-top:20px;display:none;font-size:13px">Acesso negado. Verifique os dados.</p>
+    <button class="btn-login" onclick="doLogin()">Entrar</button>
+    <p id="login-error" style="color:var(--danger);margin-top:15px;display:none;font-size:12px">Acesso inválido.</p>
   </div>
 </div>
 
-<!-- APP UI -->
+<!-- APP -->
 <div id="app" class="app-container" style="display:none">
-  <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <img src="logo-dental.png">
-      <h1>Dental M.I</h1>
-    </div>
+    <div class="sidebar-logo"><img src="logo-dental.png"><h1>Dental M.I</h1></div>
     <nav class="nav-menu">
-      <div class="nav-item active" onclick="showView('dashboard',this)">📊 Dashboard</div>
-      <div class="nav-item" onclick="showView('funil',this)">🎯 Funil de Vendas</div>
-      <div class="nav-item" onclick="showView('carteira',this)">📋 Carteira de Clientes</div>
-      <div id="nav-financeiro" class="nav-item" style="display:none" onclick="showView('financeiro',this)">💰 Gestão Financeira</div>
+      <div class="nav-item active" onclick="showView('dashboard',this)">📊 <span>Dashboard</span></div>
+      <div class="nav-item" onclick="showView('funil',this)">🎯 <span>Funil</span></div>
+      <div class="nav-item" onclick="showView('carteira',this)">📋 <span>Carteira</span></div>
+      <div id="nav-financeiro" class="nav-item" style="display:none" onclick="showView('financeiro',this)">💰 <span>Financeiro</span></div>
       <div id="nav-admin" style="display:none">
-        <div class="nav-item" onclick="showView('gestao',this)">⚙️ Configurações</div>
-        <div class="nav-item" onclick="showView('auditoria',this)">🕵️ Auditoria</div>
+        <div class="nav-item" onclick="showView('gestao',this)">⚙️ <span>Configurações</span></div>
+        <div class="nav-item" onclick="showView('auditoria',this)">🕵️ <span>Auditoria</span></div>
       </div>
       <div id="nav-dev" style="display:none">
-        <div class="nav-item" style="color:var(--accent)" onclick="showView('dev',this)">🛠️ Painel Dev</div>
+        <div class="nav-item" style="color:var(--accent)" onclick="showView('dev',this)">🛠️ <span>Painel Dev</span></div>
       </div>
     </nav>
     <div class="sidebar-footer">
       <div class="user-profile">
         <div class="user-avatar" id="user-initials">MI</div>
-        <div>
-          <div style="font-size:13px;font-weight:700" id="user-name">Usuário</div>
-          <div style="font-size:11px;opacity:0.5" id="user-role">Cargo</div>
-        </div>
+        <div><div style="font-size:12px;font-weight:700" id="user-name">Usuário</div><div style="font-size:10px;opacity:0.5" id="user-role">Cargo</div></div>
       </div>
-      <div class="nav-item" onclick="doLogout()" style="color:var(--danger)">🚪 Sair</div>
+      <div class="nav-item" onclick="doLogout()" style="color:var(--danger)">🚪 <span>Sair</span></div>
     </div>
   </aside>
 
-  <!-- CONTENT -->
   <main class="main-view">
     <header class="top-header">
       <h2 class="view-title" id="view-title">Dashboard</h2>
-      <div style="display:flex;gap:12px">
-        <button class="btn btn-secondary" style="font-size:13px; padding:10px 16px" onclick="abrirManual()">📖 Manual de Uso</button>
-        <button id="btn-gestores" class="btn btn-secondary" style="display:none; font-size:13px; padding:10px 16px" onclick="abrirAcessoGestores()">🔑 Acesso Gestores</button>
-        <button class="btn-login" style="padding:10px 20px;font-size:13px" onclick="showView('venda')">➕ Nova Operação</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" onclick="abrirManual()">📖 Manual</button>
+        <button id="btn-gestores" class="btn btn-secondary" style="display:none" onclick="abrirAcessoGestores()">🔑 Gestores</button>
+        <button class="btn-login" style="padding:8px 16px;font-size:13px" onclick="showView('venda')">➕ Nova Operação</button>
       </div>
     </header>
 
     <div class="content-area">
+      <!-- DASHBOARD -->
       <section id="view-dashboard" class="view-content active">
         <div class="grid" id="stats-grid"></div>
-        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:24px">
-          <div class="stat-card" style="height:400px"><canvas id="chartMain"></canvas></div>
-          <div class="table-container">
-            <th style="padding:20px;display:block">TOP PRODUTORES</th>
-            <div id="ranking-list"></div>
-          </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px">
+          <div class="stat-card" style="height:350px"><canvas id="chartMain"></canvas></div>
+          <div class="table-container"><th style="padding:15px;display:block">TOP PRODUTORES</th><div id="ranking-list"></div></div>
         </div>
       </section>
 
+      <!-- FUNIL -->
       <section id="view-funil" class="view-content" style="display:none">
         <div class="kanban" id="funil-kanban"></div>
       </section>
 
+      <!-- CARTEIRA -->
       <section id="view-carteira" class="view-content" style="display:none">
         <div class="table-container">
-          <div style="padding:20px;display:flex;gap:12px;border-bottom:1px solid var(--border)">
-            <input type="text" id="q-busca" placeholder="Buscar cliente..." oninput="renderCarteira()" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border)">
+          <div style="padding:16px;display:flex;gap:10px;border-bottom:1px solid var(--border)">
+            <input type="text" id="q-busca" placeholder="Pesquisar..." oninput="renderCarteira()" style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid var(--border);font-size:14px">
           </div>
-          <table>
-            <thead><tr><th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th><th>Renovação</th><th>Status</th></tr></thead>
+          <table id="table-carteira">
+            <thead><tr><th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th><th>Vendedor</th><th>Status</th></tr></thead>
             <tbody id="table-body-carteira"></tbody>
           </table>
         </div>
       </section>
 
+      <!-- FINANCEIRO -->
       <section id="view-financeiro" class="view-content" style="display:none">
         <div class="grid">
           <div class="stat-card"><div class="stat-label">Comissões</div><div class="stat-value" id="fin-com">R$ 0</div></div>
           <div class="stat-card"><div class="stat-label">Agenciamentos</div><div class="stat-value" id="fin-age">R$ 0</div></div>
-          <div class="stat-card"><div class="stat-label">Impostos Estimados</div><div class="stat-value" id="fin-imp">R$ 0</div></div>
+          <div class="stat-card"><div class="stat-label">Impostos (6%)</div><div class="stat-value" id="fin-imp">R$ 0</div></div>
         </div>
-        <div class="table-container">
-            <table><thead><tr><th>Beneficiário</th><th>Prêmio Base</th><th>Repasse (R$)</th><th>Status</th></tr></thead><tbody id="table-body-fin"></tbody></table>
-        </div>
+        <div class="table-container"><table><thead><tr><th>Contexto</th><th>Base</th><th>Valor</th><th>Ação</th></tr></thead><tbody id="table-body-fin"></tbody></table></div>
       </section>
 
+      <!-- GESTÃO -->
       <section id="view-gestao" class="view-content" style="display:none">
-         <div class="stat-card">
-           <h3 style="margin-bottom:20px">Nova Conta de Usuário</h3>
-           <form onsubmit="alert('Use o painel administrativo do Supabase.'); return false;" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-             <input type="text" placeholder="Nome Completo" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-             <input type="text" placeholder="Usuário" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-             <button class="btn-login" style="grid-column:span 2">➕ Criar Usuário</button>
-           </form>
-         </div>
+         <div class="stat-card"><h3>Equipe</h3><p style="font-size:13px;color:var(--text-muted);margin-bottom:20px">Gestão de usuários centralizada no Supabase.</p></div>
       </section>
 
+      <!-- AUDITORIA -->
       <section id="view-auditoria" class="view-content" style="display:none">
         <div class="table-container"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Contexto</th></tr></thead><tbody id="table-body-auditoria"></tbody></table></div>
       </section>
 
+      <!-- DEV -->
       <section id="view-dev" class="view-content" style="display:none">
-        <div class="grid">
-          <div class="stat-card">
-            <div class="stat-label">Conexão Banco</div>
-            <div class="stat-value" style="color:var(--success)">ATIVO</div>
-            <div class="stat-sub">Supabase Cloud Engine</div>
-          </div>
-        </div>
+        <div class="stat-card"><h3>Soberania Stallman</h3><button class="btn btn-secondary" onclick="exportarBackup()">📥 Snapshot Total Banco</button></div>
       </section>
 
+      <!-- VENDA -->
       <section id="view-venda" class="view-content" style="display:none">
-        <div class="stat-card" style="max-width:800px;margin:0 auto">
-          <h2 style="margin-bottom:24px">Nova Operação Comercial</h2>
-          <form id="form-venda" onsubmit="salvarVenda(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-            <input type="text" name="cliente" id="venda-cliente" placeholder="Nome da Empresa/Cliente" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px">
-            <div style="grid-column:span 2;display:flex;gap:8px">
+        <div class="stat-card" style="max-width:700px;margin:0 auto">
+          <h2 style="margin-bottom:20px">Nova Operação</h2>
+          <form id="form-venda" onsubmit="salvarVenda(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <input type="text" name="cliente" id="venda-cliente" placeholder="Empresa" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px">
+            <div style="grid-column:span 2;display:flex;gap:6px">
               <input type="text" name="cnpj" id="venda-cnpj" placeholder="CNPJ/CPF" required style="flex:1;padding:12px;border:1px solid var(--border);border-radius:8px">
-              <button type="button" class="btn-login" style="width:auto;padding:0 20px" onclick="consultarCNPJ('venda')">🔍</button>
+              <button type="button" class="btn btn-secondary" onclick="consultarCNPJ('venda')">🔍</button>
             </div>
-            <input type="email" name="email" id="venda-email" placeholder="E-mail de Contato" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+            <input type="email" name="email" id="venda-email" placeholder="E-mail" style="padding:12px;border:1px solid var(--border);border-radius:8px">
             <input type="text" name="telefone" id="venda-telefone" placeholder="Telefone" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-            <div style="grid-column:span 2;display:flex;gap:8px">
-              <input type="text" name="cep" id="venda-cep" placeholder="CEP" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:8px">
-              <button type="button" class="btn-login" style="width:auto;padding:0 20px" onclick="consultarCEP('venda')">🔍</button>
+            <div style="grid-column:span 2;display:flex;gap:6px">
+                <input type="text" name="cep" id="venda-cep" placeholder="CEP" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:8px">
+                <button type="button" class="btn btn-secondary" onclick="consultarCEP('venda')">🔍</button>
             </div>
-            <input type="text" name="logradouro" id="venda-logradouro" placeholder="Endereço" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px">
-            <input type="text" name="bairro" id="venda-bairro" placeholder="Bairro" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-            <input type="text" name="cidade" id="venda-cidade" placeholder="Cidade" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-            <input type="text" name="uf" id="venda-uf" placeholder="UF" style="padding:12px;border:1px solid var(--border);border-radius:8px">
             <select name="operadora" required style="padding:12px;border:1px solid var(--border);border-radius:8px">
               <option value="">Operadora</option><option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option>
             </select>
             <select name="estagio" required style="padding:12px;border:1px solid var(--border);border-radius:8px">
               <option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option selected>Implantado</option>
             </select>
-            <input type="number" name="vidas" placeholder="Nº de Vidas" required style="padding:12px;border:1px solid var(--border);border-radius:8px">
-            <input type="number" name="premio" placeholder="Prêmio Mensal (R$)" required step="0.01" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+            <input type="number" name="vidas" placeholder="Vidas" required style="padding:12px;border:1px solid var(--border);border-radius:8px">
+            <input type="number" name="premio" placeholder="Prêmio (R$)" required step="0.01" style="padding:12px;border:1px solid var(--border);border-radius:8px">
             <input type="date" name="data" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px">
-            <button type="submit" class="btn-login" style="grid-column:span 2">💾 Registrar na Base Soberana</button>
+            <button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar no Supabase</button>
           </form>
         </div>
       </section>
@@ -285,101 +271,75 @@ tr:hover td { background: var(--brand-light); }
   </main>
 </div>
 
-<!-- MODAL DE EDIÇÃO -->
+<!-- MODAL EDIT -->
 <div class="modal-overlay" id="modal-edit">
   <div class="modal">
-    <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
-      <h2 style="font-size:18px;font-weight:800">Detalhes da Operação</h2>
+    <div style="padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <h3 id="edit-title">Detalhes</h3>
       <button onclick="fecharModal()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button>
     </div>
-    <form id="form-edit" onsubmit="salvarEdicao(event)" style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <form id="form-edit" onsubmit="salvarEdicao(event)" style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <input type="hidden" id="edit-id">
-      <input type="text" id="edit-cliente" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px">
-      <div style="grid-column:span 2;display:flex;gap:8px">
-        <input type="text" id="edit-cnpj" placeholder="CNPJ/CPF" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:8px">
-        <button type="button" class="btn-login" style="width:auto;padding:0 20px" onclick="consultarCNPJ('edit')">🔍</button>
+      <input type="text" id="edit-cliente" placeholder="Cliente" style="grid-column:span 2;padding:10px;border:1px solid var(--border);border-radius:8px">
+      <div style="grid-column:span 2;display:flex;gap:6px">
+        <input type="text" id="edit-cnpj" placeholder="CNPJ/CPF" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:8px">
+        <button type="button" class="btn btn-secondary" onclick="consultarCNPJ('edit')">🔍</button>
       </div>
-      <input type="email" id="edit-email" placeholder="E-mail" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-      <input type="text" id="edit-telefone" placeholder="Telefone" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-      <div style="grid-column:span 2;display:flex;gap:8px">
-        <input type="text" id="edit-cep" placeholder="CEP" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:8px">
-        <button type="button" class="btn-login" style="width:auto;padding:0 20px" onclick="consultarCEP('edit')">🔍</button>
-      </div>
-      <input type="text" id="edit-logradouro" placeholder="Endereço" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px">
-      <input type="text" id="edit-bairro" placeholder="Bairro" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-      <input type="text" id="edit-cidade" placeholder="Cidade" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-      <input type="text" id="edit-uf" placeholder="UF" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-      <select id="edit-estagio" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+      <input type="email" id="edit-email" placeholder="E-mail" style="padding:10px;border:1px solid var(--border);border-radius:8px">
+      <input type="text" id="edit-telefone" placeholder="Telefone" style="padding:10px;border:1px solid var(--border);border-radius:8px">
+      <select id="edit-estagio" style="padding:10px;border:1px solid var(--border);border-radius:8px">
         <option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option>Implantado</option><option>Renovação</option>
       </select>
-      <input type="date" id="edit-data" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-      <input type="number" id="edit-premio" step="0.01" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-      <input type="number" id="edit-comissao" placeholder="Comissão %" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-      <input type="number" id="edit-agenciamento" placeholder="Agenciamento %" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-      <input type="date" id="edit-pagamento" style="padding:12px;border:1px solid var(--border);border-radius:8px">
-      <textarea id="edit-feedback" placeholder="Feedback/Observações" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px;height:80px"></textarea>
-      <button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar Alterações</button>
-      <button type="button" class="btn" style="grid-column:span 2; background:var(--sidebar); color:white" onclick="gerarPropostaPDF()">📄 Gerar Proposta Comercial (PDF)</button>
-      <button type="button" class="btn" style="grid-column:span 2; background:#25D366; color:white" onclick="enviarWhatsApp()">📱 Enviar Proposta por WhatsApp</button>
+      <input type="date" id="edit-data" style="padding:10px;border:1px solid var(--border);border-radius:8px">
+      <input type="number" id="edit-premio" placeholder="Prêmio" step="0.01" style="padding:10px;border:1px solid var(--border);border-radius:8px">
+      <input type="number" id="edit-comissao" placeholder="Comissão %" style="padding:10px;border:1px solid var(--border);border-radius:8px">
+      <input type="number" id="edit-agenciamento" placeholder="Agenciamento %" style="padding:10px;border:1px solid var(--border);border-radius:8px">
+      <input type="date" id="edit-pagamento" style="padding:10px;border:1px solid var(--border);border-radius:8px">
+      <textarea id="edit-feedback" placeholder="Feedback" style="grid-column:span 2;padding:10px;border:1px solid var(--border);border-radius:8px;height:60px"></textarea>
+      <div id="wrap-admin-vendedor" class="full" style="display:none; grid-column: span 2">
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted)">REATRIBUIR VENDEDOR</label>
+        <select id="edit-vendedor" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; margin-top:4px"></select>
+      </div>
+      <button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar</button>
+      <div style="grid-column:span 2;display:flex;gap:8px">
+        <button type="button" class="btn btn-secondary" style="flex:1" onclick="gerarPropostaPDF()">📄 PDF</button>
+        <button type="button" class="btn" style="flex:1;background:#25D366;color:white" onclick="enviarWhatsApp()">📱 WhatsApp</button>
+        <button type="button" class="btn" style="background:#fee2e2;color:var(--danger)" onclick="excluirContrato()">🗑️</button>
+      </div>
     </form>
   </div>
 </div>
 
 <!-- MODAL MANUAL -->
 <div class="modal-overlay" id="modal-manual">
-  <div class="modal" style="max-width:700px">
-    <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
-      <h2 style="font-size:18px;font-weight:800">📖 Manual de Uso e Documentos</h2>
-      <button onclick="document.getElementById('modal-manual').classList.remove('active')" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button>
-    </div>
-    <div style="padding:24px; max-height:60vh; overflow-y:auto; font-size:14px; line-height:1.6; color:var(--text-main)">
-      <h3>Como usar o CRM Dental M.I:</h3>
-      <ul style="margin:16px 0; padding-left:20px">
-        <li><b>Dashboard:</b> Visão geral de faturamento e produção por operadora.</li>
-        <li><b>Funil de Vendas:</b> Gestão visual (Drag & Drop) do estágio de cada negócio.</li>
-        <li><b>Carteira:</b> Listagem completa com filtros de busca e vendedor.</li>
-        <li><b>Consultas 🔍:</b> Use a lupa no CNPJ e CEP para preenchimento automático.</li>
-        <li><b>Propostas:</b> Clique em um cliente na Carteira para gerar o PDF ou enviar via WhatsApp.</li>
-      </ul>
-      <p>Este sistema foi projetado para alta produtividade e segurança total dos dados.</p>
+  <div class="modal" style="max-width:600px">
+    <div style="padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>📖 Manual Dental M.I</h3><button onclick="document.getElementById('modal-manual').classList.remove('active')" style="border:none;background:none;font-size:22px;cursor:pointer">&times;</button></div>
+    <div style="padding:20px;max-height:60vh;overflow-y:auto;font-size:14px;line-height:1.6">
+        <p><b>Dashboard:</b> Produção consolidada e Lucro Real (Master).</p>
+        <p><b>Funil:</b> Pipeline Kanban visual dos negócios.</p>
+        <p><b>Carteira:</b> Base de dados completa com filtros.</p>
+        <p><b>Consultas:</b> Use 🔍 no CNPJ/CEP para preenchimento automático.</p>
     </div>
   </div>
 </div>
 
 <!-- MODAL GESTORES -->
 <div class="modal-overlay" id="modal-gestores">
-  <div class="modal" style="max-width:700px">
-    <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
-      <h2 style="font-size:18px;font-weight:800">🔑 Guia de Acesso Master (Gestores)</h2>
-      <button onclick="document.getElementById('modal-gestores').classList.remove('active')" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button>
-    </div>
-    <div style="padding:24px; max-height:60vh; overflow-y:auto; font-size:14px; line-height:1.6; color:var(--text-main)">
-      <p>Instruções específicas para: <b>Pedro, Sergio, Leonardo e Diego</b>.</p>
-      <h4 style="margin-top:20px">Acesso a Tudo como Master:</h4>
-      <p>Como Administradores, vocês têm visão total da base comercial e financeira da Dental M.I Credit.</p>
-      <ul style="margin:16px 0; padding-left:20px">
-        <li>Podem visualizar contratos de <b>todos os vendedores</b>.</li>
-        <li>Acesso ao painel de <b>Gestão Financeira</b> com cálculo de repasses e impostos.</li>
-        <li>Capacidade de <b>reatribuir clientes</b> entre vendedores no modal de edição.</li>
-        <li>Acesso à aba de <b>Auditoria</b> para monitorar atividades.</li>
-      </ul>
-      <p style="color:var(--brand);font-weight:700">Responsabilidade: Toda ação administrativa é registrada no log de auditoria.</p>
+  <div class="modal" style="max-width:600px">
+    <div style="padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>🔑 Acesso Master</h3><button onclick="document.getElementById('modal-gestores').classList.remove('active')" style="border:none;background:none;font-size:22px;cursor:pointer">&times;</button></div>
+    <div style="padding:20px;font-size:14px">
+        <p>Gestores (Pedro, Sergio, Leonardo, Diego) veem toda a base.</p>
+        <p style="margin-top:10px">• Visualizar contratos de todos os vendedores.<br>• Reatribuir vendedor no Modal.<br>• Acesso total ao Financeiro e Auditoria.</p>
     </div>
   </div>
 </div>
 
+<!-- MODAL TERMS -->
 <div class="modal-overlay" id="modal-terms">
-  <div class="modal" style="max-width:700px">
-    <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
-      <h2 style="font-size:18px;font-weight:800">📋 Política de Privacidade e LGPD</h2>
-      <button onclick="document.getElementById('modal-terms').classList.remove('active')" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button>
-    </div>
-    <div style="padding:24px; max-height:60vh; overflow-y:auto; font-size:14px; line-height:1.6; color:var(--text-main)">
-      <p style="margin-bottom:16px">Este sistema da <b>Dental M.I Credit</b> segue rigorosamente a Lei Geral de Proteção de Dados (LGPD).</p>
-    </div>
-    <div style="padding:20px 24px; background:var(--bg); text-align:right">
-      <button class="btn-login" style="width:auto; padding:10px 32px" onclick="document.getElementById('modal-terms').classList.remove('active'); document.getElementById('check-terms').checked=true">Entendi e Aceito</button>
-    </div>
+  <div class="modal" style="max-width:500px">
+    <div style="padding:20px;border-bottom:1px solid var(--border)"><h3>Política LGPD</h3></div>
+    <div style="padding:20px;font-size:13px"><p>Seus dados e de seus clientes são protegidos pela Dental M.I Credit sob normas da LGPD. Uso exclusivo para gestão interna de apólices.</p></div>
+    <div style="padding:15px;text-align:right"><button class="btn btn-login" style="width:auto" onclick="document.getElementById('modal-terms').classList.remove('active');document.getElementById('check-terms').checked=true">Aceito</button></div>
   </div>
 </div>
 
@@ -390,17 +350,15 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const PERFIS_MASTER = ['CEO', 'Administrador'];
 const ESTAGIOS = ['Prospecção','Agendamento','Proposta','Negociação','Implantado','Renovação'];
-
-let db = []; 
-let currentChart = null;
+let db = []; let currentChart = null;
 
 async function doLogin(){
   const u=document.getElementById('inp-user').value.trim();
   const p=document.getElementById('inp-pass').value.trim();
-  const accepted = document.getElementById('check-terms').checked;
-  if(!accepted) { alert('Aceite os Termos.'); return; }
+  if(!document.getElementById('check-terms').checked) { alert('Aceite os Termos.'); return; }
   const { data } = await sb.from('usuarios').select('*').eq('usuario',u).eq('senha',p).maybeSingle();
-  if(data){ localStorage.setItem('crm_user', JSON.stringify(data)); initApp(); }
+  if(data){ localStorage.setItem('crm_user', JSON.stringify(data)); logAtividade('login','Acesso v4.9'); initApp(); }
+  else { document.getElementById('login-error').style.display='block'; }
 }
 
 async function initApp(){
@@ -410,12 +368,15 @@ async function initApp(){
   document.getElementById('app').style.display='flex';
   document.getElementById('user-name').textContent = user.nome;
   document.getElementById('user-role').textContent = user.cargo;
+  document.getElementById('user-initials').textContent = user.nome.substring(0,2).toUpperCase();
+  
   if(PERFIS_MASTER.includes(user.cargo)) { 
     document.getElementById('nav-admin').style.display = 'block'; 
-    document.getElementById('nav-financeiro').style.display = 'flex';
+    document.getElementById('nav-financeiro').style.display = 'block';
     document.getElementById('btn-gestores').style.display = 'block';
   }
   if(user.usuario === 'diniz') document.getElementById('nav-dev').style.display = 'block';
+  
   await carregarDados();
   renderAll();
 }
@@ -434,7 +395,14 @@ function fromDB(r){
   };
 }
 
-function renderAll(){ renderDashboard(); renderFunil(); renderCarteira(); renderFinanceiro(); }
+function toDB(c){
+  return {
+    cliente: c.cliente, cnpj: c.cnpj || null, email: c.email || null, telefone: c.telefone || null,
+    cep: c.cep || null, logradouro: c.logradouro || null, bairro: c.bairro || null, cidade: c.cidade || null, uf: c.uf || null,
+    operadora: c.operadora, vidas: c.vidas, premio: c.premio, comissao: c.comissao || 0, agenciamento: c.agenciamento || 0,
+    estagio: c.estagio, status_manual: c.statusManual || 'auto', data_pagamento: c.dataPagamento || null, data_renovacao: c.data_renovacao || null, feedback: c.feedback || null, consultor: c.consultor
+  };
+}
 
 function getVisibleData(){
   const user = JSON.parse(localStorage.getItem('crm_user'));
@@ -442,43 +410,94 @@ function getVisibleData(){
   return db.filter(c => c.consultor === user.nome);
 }
 
+function isMaster(){ return PERFIS_MASTER.includes(JSON.parse(localStorage.getItem('crm_user'))?.cargo); }
+
+function renderAll(){ renderDashboard(); renderFunil(); renderCarteira(); renderFinanceiro(); renderAuditoria(); }
+
 function renderDashboard(){
   const data = getVisibleData();
   const total = data.reduce((s,c)=>s+Number(c.premio),0);
-  document.getElementById('stats-grid').innerHTML = `<div class="stat-card"><div class="stat-label">Faturamento</div><div class="stat-value">R$ ${total.toLocaleString()}</div></div>`;
+  const vidas = data.reduce((s,c)=>s+c.vidas,0);
+  const comissoes = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.comissao||0)/100)), 0);
+  
+  let html = `<div class="stat-card"><div class="stat-label">Produção</div><div class="stat-value">R$ ${total.toLocaleString()}</div></div>
+              <div class="stat-card"><div class="stat-label">Vidas</div><div class="stat-value">${vidas}</div></div>`;
+  if(isMaster()){
+    html += `<div class="stat-card" style="border-left:4px solid var(--brand)"><div class="stat-label">Lucro Est. (MI)</div><div class="stat-value" style="color:var(--brand)">R$ ${(total-comissoes).toLocaleString()}</div></div>`;
+  } else {
+    html += `<div class="stat-card"><div class="stat-label">Minha Comissão</div><div class="stat-value" style="color:var(--brand)">R$ ${comissoes.toLocaleString()}</div></div>`;
+  }
+  document.getElementById('stats-grid').innerHTML = html;
+
+  const ctx = document.getElementById('chartMain').getContext('2d');
+  if(currentChart) currentChart.destroy();
+  const ops = {}; data.forEach(c => ops[c.operadora] = (ops[c.operadora]||0) + Number(c.premio));
+  currentChart = new Chart(ctx, { type:'bar', data: { labels: Object.keys(ops), datasets:[{ data: Object.values(ops), backgroundColor:'#1EAD6F', borderRadius:6 }] }, options: { maintainAspectRatio:false, plugins:{legend:{display:false}} } });
+
+  const r = {}; data.forEach(c => r[c.consultor] = (r[c.consultor]||0) + Number(c.premio));
+  const sorted = Object.entries(r).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('ranking-list').innerHTML = sorted.map(([n,v],i)=>`<div style="padding:12px; display:flex; justify-content:space-between; border-bottom:1px solid #f1f5f9; font-size:13px"><span><b>${i+1}º</b> ${n}</span><b>R$ ${v.toLocaleString()}</b></div>`).join('') || '<p style="padding:20px;text-align:center">Sem dados</p>';
 }
 
 function renderFunil(){
   const data = getVisibleData();
   document.getElementById('funil-kanban').innerHTML = ESTAGIOS.map(est => {
     const cards = data.filter(c => c.estagio === est);
-    return `<div class="kanban-col"><h4>${est} (${cards.length})</h4>${cards.map(c => `<div class="kanban-card" onclick="abrirEdicao(${c.id})">${c.cliente}</div>`).join('')}</div>`;
+    const tot = cards.reduce((s,c)=>s+c.premio,0);
+    return `<div class="kanban-col"><h4><span>${est}</span> <span class="badge" style="background:white;color:var(--brand)">${cards.length}</span></h4><div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">R$ ${tot.toLocaleString()}</div>
+      ${cards.map(c => `<div class="kanban-card" onclick="abrirEdicao(${c.id})"><div style="font-weight:700;font-size:13px;margin-bottom:5px">${c.cliente}</div><div style="font-size:10px;color:var(--text-muted)">${c.operadora} · R$ ${c.premio.toLocaleString()}</div><div style="font-size:10px;margin-top:5px;opacity:0.7">${c.consultor}</div></div>`).join('')}</div>`;
   }).join('');
 }
 
 function renderCarteira(){
   const data = getVisibleData();
-  document.getElementById('table-body-carteira').innerHTML = data.map(c => `<tr onclick="abrirEdicao(${c.id})"><td>${c.cliente}</td><td>${c.operadora}</td><td>R$ ${c.premio}</td></tr>`).join('');
+  const q = (document.getElementById('q-busca')?.value || '').toLowerCase();
+  let filtered = q ? data.filter(c => c.cliente.toLowerCase().includes(q)) : data;
+  
+  const isM = isMaster();
+  const head = document.querySelector('#table-carteira thead tr');
+  head.innerHTML = `<th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th>` + (isM ? `<th>Vendedor</th>` : '') + `<th>Status</th>`;
+
+  document.getElementById('table-body-carteira').innerHTML = filtered.map(c => `
+    <tr onclick="abrirEdicao(${c.id})" style="cursor:pointer">
+      <td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td><td>R$ ${c.premio.toLocaleString()}</td><td><span class="badge" style="background:var(--brand-light);color:var(--brand)">${c.estagio}</span></td>
+      ` + (isM ? `<td>${c.consultor}</td>` : '') + `<td><span class="badge" style="background:#dcfce7;color:#166534">Ativo</span></td>
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;padding:30px">Nenhum registro</td></tr>';
 }
 
 function renderFinanceiro(){
   const data = getVisibleData();
-  const totalCom = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.comissao||0)/100)), 0);
-  document.getElementById('fin-com').textContent = `R$ ${totalCom.toLocaleString()}`;
+  const tCom = data.reduce((s,c)=> s + (c.premio * (c.comissao/100)), 0);
+  const tAge = data.reduce((s,c)=> s + (c.premio * (c.agenciamento/100)), 0);
+  const tBruto = data.reduce((s,c)=>s+c.premio,0);
+  document.getElementById('fin-com').textContent = `R$ ${tCom.toLocaleString()}`;
+  document.getElementById('fin-age').textContent = `R$ ${tAge.toLocaleString()}`;
+  document.getElementById('fin-imp').textContent = `R$ ${(tBruto*0.06).toLocaleString()}`;
+  document.getElementById('table-body-fin').innerHTML = `<tr><td>Contas a Receber</td><td>R$ ${tBruto.toLocaleString()}</td><td>R$ ${tBruto.toLocaleString()}</td><td><span class="badge bg-ok">Previsto</span></td></tr>
+    <tr><td>Comissões</td><td>R$ ${tBruto.toLocaleString()}</td><td>R$ ${tCom.toLocaleString()}</td><td><span class="badge" style="background:#fee2e2;color:#991b1b">Pagar</span></td></tr>`;
+}
+
+async function renderAuditoria(){
+  if(!isMaster()) return;
+  const { data } = await sb.from('atividades').select('*').order('data',{ascending:false}).limit(25);
+  document.getElementById('table-body-auditoria').innerHTML = (data||[]).map(a => `<tr><td>${new Date(a.data).toLocaleString()}</td><td>${a.usuario}</td><td>${a.acao}</td><td>${a.detalhe}</td></tr>`).join('');
+}
+
+function showView(view, el){
+  document.querySelectorAll('.view-content').forEach(v => v.style.display='none');
+  document.getElementById('view-'+view).style.display='block';
+  document.getElementById('view-title').textContent = view.charAt(0).toUpperCase() + view.slice(1);
+  if(el){ document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); }
 }
 
 function abrirEdicao(id){
   const c = db.find(x => x.id === id);
+  if(!c) return;
   document.getElementById('edit-id').value = c.id;
   document.getElementById('edit-cliente').value = c.cliente;
   document.getElementById('edit-cnpj').value = c.cnpj;
   document.getElementById('edit-email').value = c.email;
   document.getElementById('edit-telefone').value = c.telefone;
-  document.getElementById('edit-cep').value = c.cep;
-  document.getElementById('edit-logradouro').value = c.logradouro;
-  document.getElementById('edit-bairro').value = c.bairro;
-  document.getElementById('edit-cidade').value = c.cidade;
-  document.getElementById('edit-uf').value = c.uf;
   document.getElementById('edit-estagio').value = c.estagio;
   document.getElementById('edit-data').value = c.data_renovacao;
   document.getElementById('edit-premio').value = c.premio;
@@ -486,66 +505,92 @@ function abrirEdicao(id){
   document.getElementById('edit-agenciamento').value = c.agenciamento;
   document.getElementById('edit-pagamento').value = c.dataPagamento;
   document.getElementById('edit-feedback').value = c.feedback;
+  
+  const w = document.getElementById('wrap-admin-vendedor');
+  if(isMaster()){
+    w.style.display = 'block';
+    const s = document.getElementById('edit-vendedor');
+    const u = ['Leonardo Henrique','Sergio','Pedro','Diego','Diretoria M.I'];
+    s.innerHTML = u.map(n=>`<option value="${n}">${n}</option>`).join('');
+    s.value = c.consultor;
+  } else { w.style.display = 'none'; }
   document.getElementById('modal-edit').classList.add('active');
 }
 
 function fecharModal(){ document.getElementById('modal-edit').classList.remove('active'); }
 
-async function consultarCNPJ(context) {
-  const cnpj = (context==='venda'?document.getElementById('venda-cnpj'):document.getElementById('edit-cnpj')).value.replace(/\D/g,'');
+async function consultarCNPJ(ctx){
+  const i = (ctx==='venda'?document.getElementById('venda-cnpj'):document.getElementById('edit-cnpj'));
+  const cnpj = i.value.replace(/\D/g,'');
+  if(cnpj.length!==14) return alert('CNPJ Inválido');
   const r = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
   const d = await r.json();
   const n = d.nome_fantasia || d.razao_social;
-  if(context==='venda'){ document.getElementById('venda-cliente').value=n; document.getElementById('venda-email').value=d.email||''; }
-  else { document.getElementById('edit-cliente').value=n; document.getElementById('edit-email').value=d.email||''; }
+  if(ctx==='venda'){ document.getElementById('venda-cliente').value=n; document.getElementById('venda-email').value=d.email||''; document.getElementById('venda-telefone').value=d.ddd_telefone_1||''; }
+  else { document.getElementById('edit-cliente').value=n; document.getElementById('edit-email').value=d.email||''; document.getElementById('edit-telefone').value=d.ddd_telefone_1||''; }
 }
 
-async function consultarCEP(context) {
-  const cep = (context==='venda'?document.getElementById('venda-cep'):document.getElementById('edit-cep')).value.replace(/\D/g,'');
-  const r = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
-  const d = await r.json();
-  if(context==='venda'){ document.getElementById('venda-logradouro').value=d.street; document.getElementById('venda-cidade').value=d.city; }
-  else { document.getElementById('edit-logradouro').value=d.street; document.getElementById('edit-cidade').value=d.city; }
+async function consultarCEP(ctx){
+    const i = (ctx==='venda'?document.getElementById('venda-cep'):document.getElementById('edit-cep'));
+    const cep = i.value.replace(/\D/g,'');
+    if(cep.length!==8) return alert('CEP Inválido');
+    const r = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
+    const d = await r.json();
+    if(ctx==='venda'){ document.getElementById('venda-logradouro').value=d.street||''; }
+}
+
+async function salvarVenda(e){
+  e.preventDefault();
+  const f = e.target;
+  const payload = {
+    cliente: f.cliente.value, cnpj: f.cnpj.value, email: f.email.value, telefone: f.telefone.value,
+    operadora: f.operadora.value, vidas: f.vidas.value, premio: f.premio.value, estagio: f.estagio.value, data_renovacao: f.data.value,
+    consultor: JSON.parse(localStorage.getItem('crm_user')).nome
+  };
+  const { error } = await sb.from('contratos').insert(payload);
+  if(!error){ logAtividade('criar', payload.cliente); location.reload(); }
 }
 
 async function salvarEdicao(e){
   e.preventDefault();
+  const id = document.getElementById('edit-id').value;
   const payload = {
     cliente: document.getElementById('edit-cliente').value, cnpj: document.getElementById('edit-cnpj').value,
     email: document.getElementById('edit-email').value, telefone: document.getElementById('edit-telefone').value,
-    cep: document.getElementById('edit-cep').value, logradouro: document.getElementById('edit-logradouro').value,
-    bairro: document.getElementById('edit-bairro').value, cidade: document.getElementById('edit-cidade').value, uf: document.getElementById('edit-uf').value,
-    estagio: document.getElementById('edit-estagio').value, data_renovacao: document.getElementById('edit-data').value,
+    estagio: document.getElementById('edit-estagio.value'), data_renovacao: document.getElementById('edit-data').value,
     premio: document.getElementById('edit-premio').value, comissao: document.getElementById('edit-comissao').value,
-    agenciamento: document.getElementById('edit-agenciamento').value, data_pagamento: document.getElementById('edit-pagamento').value, feedback: document.getElementById('edit-feedback').value
+    agenciamento: document.getElementById('edit-agenciamento').value, data_pagamento: document.getElementById('edit-pagamento').value,
+    feedback: document.getElementById('edit-feedback').value,
+    consultor: isMaster() ? document.getElementById('edit-vendedor').value : db.find(x=>x.id==id).consultor
   };
-  await sb.from('contratos').update(payload).eq('id', document.getElementById('edit-id').value);
-  location.reload();
+  const { error } = await sb.from('contratos').update(payload).eq('id', id);
+  if(!error){ logAtividade('editar', payload.cliente); location.reload(); }
+}
+
+async function excluirContrato(){
+  const id = document.getElementById('edit-id').value;
+  if(confirm('Excluir cliente?')){
+    await sb.from('contratos').delete().eq('id', id);
+    location.reload();
+  }
 }
 
 async function gerarPropostaPDF(){
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  const id = document.getElementById('edit-id').value;
-  const c = db.find(x => x.id == id);
-  doc.setFontSize(22); doc.text("PROPOSTA COMERCIAL", 20, 30);
+  const { jsPDF } = window.jspdf; const doc = new jsPDF();
+  const c = db.find(x=>x.id == document.getElementById('edit-id').value);
+  doc.setFontSize(20); doc.text("PROPOSTA DENTAL M.I", 20, 30);
   doc.setFontSize(12); doc.text(`Cliente: ${c.cliente}`, 20, 50);
-  doc.text(`CNPJ/CPF: ${c.cnpj}`, 20, 60);
-  doc.text(`Operadora: ${c.operadora}`, 20, 70);
-  doc.text(`Prêmio Estimado: R$ ${c.premio.toLocaleString()}`, 20, 80);
-  doc.text(`Data: ${new Date().toLocaleDateString()}`, 20, 100);
+  doc.text(`Prêmio: R$ ${c.premio.toLocaleString()}`, 20, 60);
   doc.save(`proposta_${c.cliente}.pdf`);
 }
 
 function enviarWhatsApp(){
-  const id = document.getElementById('edit-id').value;
-  const c = db.find(x => x.id == id);
-  const user = JSON.parse(localStorage.getItem('crm_user'));
-  const texto = encodeURIComponent(`Olá ${c.cliente}, segue a proposta comercial da Dental M.I Credit conforme conversamos.\n\nOperadora: ${c.operadora}\nPrêmio Estimado: R$ ${c.premio.toLocaleString()}\n\nConsultor: ${user.nome}`);
-  const fone = c.telefone ? c.telefone.replace(/\D/g,'') : '';
-  window.open(`https://api.whatsapp.com/send?phone=${fone}&text=${texto}`);
+  const c = db.find(x=>x.id == document.getElementById('edit-id').value);
+  const text = encodeURIComponent(`Olá ${c.cliente}, segue sua proposta Dental M.I.`);
+  window.open(`https://api.whatsapp.com/send?phone=${c.telefone.replace(/\D/g,'')}&text=${text}`);
 }
 
+async function logAtividade(acao, detalhe){ await sb.from('atividades').insert({usuario:JSON.parse(localStorage.getItem('crm_user')).nome, acao, detalhe}); }
 function abrirManual(){ document.getElementById('modal-manual').classList.add('active'); }
 function abrirAcessoGestores(){ document.getElementById('modal-gestores').classList.add('active'); }
 function abrirTermos(e){ e.preventDefault(); document.getElementById('modal-terms').classList.add('active'); }
