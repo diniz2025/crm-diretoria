@@ -202,7 +202,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
           </div>
           <div style="overflow-x:auto">
             <table id="table-carteira">
-              <thead><tr><th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th><th>Renovação</th><th>Status</th><th>Vendedor</th></tr></thead>
+              <thead><tr><th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Comissão (%)</th><th>Estágio</th><th>Renovação</th><th>Status</th><th>Vendedor</th></tr></thead>
               <tbody id="body-carteira"></tbody>
             </table>
           </div>
@@ -264,6 +264,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
               <option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option>
             </select>
             <input type="number" name="premio" placeholder="Prêmio Mensal (R$)" required step="0.01" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
+            <input type="number" name="comissao" placeholder="Comissão (%)" step="0.1" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
             <input type="number" name="vidas" placeholder="Nº de Vidas" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
             <select name="estagio" required onchange="toggleAgendamento(this)" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
               <option value="">Estágio do Negócio</option>
@@ -312,6 +313,10 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
           <div>
             <label>Prêmio Mensal (R$)</label>
             <input type="number" id="edit-premio" required step="0.01">
+          </div>
+          <div>
+            <label>Comissão (%)</label>
+            <input type="number" id="edit-comissao" step="0.1">
           </div>
           <div>
             <label>Data de Renovação</label>
@@ -395,6 +400,7 @@ function fromDB(r){
     operadora: r.operadora,
     vidas: r.vidas,
     premio: Number(r.premio),
+    comissao: Number(r.comissao || 0),
     estagio: r.estagio,
     statusManual: r.status_manual || 'auto',
     data: r.data_renovacao,
@@ -411,6 +417,7 @@ function toDB(c){
     operadora: c.operadora,
     vidas: c.vidas,
     premio: c.premio,
+    comissao: c.comissao || 0,
     estagio: c.estagio,
     status_manual: c.statusManual || 'auto',
     data_renovacao: c.data || null,
@@ -613,6 +620,7 @@ function renderCarteira(){
         <td>${c.operadora}</td>
         <td>${c.vidas}</td>
         <td>R$ ${c.premio.toLocaleString()}</td>
+        <td>${c.comissao ? c.comissao + '%' : '—'}</td>
         <td><span class="badge" style="background:var(--azul-light);color:var(--azul)">${c.estagio||'—'}</span></td>
         <td>${new Date(c.data).toLocaleDateString()}</td>
         <td><span class="badge bg-${st}">${stMap[st]}</span></td>
@@ -657,6 +665,7 @@ async function salvarVenda(e){
     operadora: f.operadora.value,
     vidas: parseInt(f.vidas.value),
     premio: parseFloat(f.premio.value),
+    comissao: parseFloat(f.comissao.value) || 0,
     estagio: f.estagio.value,
     data: f.data.value,
     agendamento: f.agendamento ? f.agendamento.value : '',
@@ -705,6 +714,7 @@ function abrirEdicao(id){
   document.getElementById('edit-operadora').value = c.operadora;
   document.getElementById('edit-vidas').value = c.vidas;
   document.getElementById('edit-premio').value = c.premio;
+  document.getElementById('edit-comissao').value = c.comissao || 0;
   document.getElementById('edit-data').value = c.data;
   document.getElementById('edit-estagio').value = c.estagio || 'Implantado';
   document.getElementById('edit-status').value = c.statusManual || 'auto';
@@ -741,6 +751,7 @@ async function salvarEdicao(e){
     operadora: document.getElementById('edit-operadora').value,
     vidas: parseInt(document.getElementById('edit-vidas').value),
     premio: parseFloat(document.getElementById('edit-premio').value),
+    comissao: parseFloat(document.getElementById('edit-comissao').value) || 0,
     data: document.getElementById('edit-data').value,
     estagio: document.getElementById('edit-estagio').value,
     statusManual: document.getElementById('edit-status').value,
