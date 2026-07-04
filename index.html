@@ -79,6 +79,8 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
 .funil-col-head .count{background:var(--brand);color:#fff;border-radius:20px;padding:2px 10px;font-size:11px}
 .funil-card{background:#fff;border:1px solid var(--slate-200);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow-sm)}
 .funil-card:hover{border-color:var(--brand);transform:translateY(-2px)}
+.funil-card.dragging{opacity:0.5;border:2px dashed var(--brand);transform:scale(0.95)}
+.funil-col.drag-over{background:var(--azul-light);outline:2px solid var(--brand)}
 .funil-card h4{font-size:13px;font-weight:700;margin-bottom:4px}
 .funil-card p{font-size:11px;color:var(--slate-700);margin:2px 0}
 .funil-card .valor{font-weight:700;color:var(--brand);font-size:13px;margin-top:6px}
@@ -928,7 +930,10 @@ function renderFunil(){
     const cards = data.filter(c => (c.estagio||'Implantado') === est);
     const total = cards.reduce((s,c)=>s+c.premio,0);
     return `
-      <div class="funil-col">
+      <div class="funil-col" 
+           ondragover="handleDragOver(event)" 
+           ondragleave="handleDragLeave(event)"
+           ondrop="handleDrop(event, '${est}')">
         <div class="funil-col-head">
           <span>${est}</span>
           <span class="count">${cards.length}</span>
@@ -937,7 +942,11 @@ function renderFunil(){
         ${cards.map(c=>{
           const temAgenda = c.estagio==='Agendamento' && c.agendamento;
           return `
-          <div class="funil-card" onclick="abrirEdicao(${c.id})">
+          <div class="funil-card" 
+               draggable="true" 
+               ondragstart="handleDragStart(event, ${c.id})"
+               ondragend="handleDragEnd(event)"
+               onclick="abrirEdicao(${c.id})">
             <h4>${c.cliente}${temAgenda?'<span class="notif-dot"></span>':''}</h4>
             <p>${c.operadora} · ${c.vidas} vidas</p>
             ${temAgenda?`<p style="color:var(--vermelho);font-weight:600">📅 ${new Date(c.agendamento).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</p>`:''}
@@ -949,6 +958,63 @@ function renderFunil(){
       </div>
     `;
   }).join('');
+}
+
+// Handlers do Drag & Drop
+let draggedId = null;
+
+function handleDragStart(e, id){
+  draggedId = id;
+  e.target.classList.add('dragging');
+  e.dataTransfer.setData('text/plain', id);
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragEnd(e){
+  e.target.classList.remove('dragging');
+}
+
+function handleDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const col = e.target.closest('.funil-col');
+  if(col) col.classList.add('drag-over');
+}
+
+function handleDragLeave(e){
+  const col = e.target.closest('.funil-col');
+  if(col) col.classList.remove('drag-over');
+}
+
+async function handleDrop(e, novoEstagio){
+  e.preventDefault();
+  const col = e.target.closest('.funil-col');
+  if(col) col.classList.remove('drag-over');
+  
+  const id = draggedId || parseInt(e.dataTransfer.getData('text/plain'));
+  if(!id) return;
+
+  const c = db.find(x => x.id === id);
+  if(!c) return;
+
+  // Se não mudou, ignora
+  if(c.estagio === novoEstagio) return;
+
+  const estagioAntigo = c.estagio;
+  c.estagio = novoEstagio;
+
+  // Atualiza Supabase
+  const { error } = await sb.from('contratos').update({ estagio: novoEstagio, atualizado_em: new Date().toISOString() }).eq('id', id);
+  
+  if(error){
+    c.estagio = estagioAntigo; // Reverte localmente em erro
+    alert('Erro ao mover contrato: ' + error.message);
+  } else {
+    logAtividade('editar', `Moveu ${c.cliente} para ${novoEstagio}`);
+    renderAll();
+  }
+  
+  draggedId = null;
 }
 
 // ===== NOTIFICAÇÕES DE AGENDAMENTO =====
