@@ -318,6 +318,7 @@ tr:hover td { background: var(--brand-light); }
       <textarea id="edit-feedback" placeholder="Feedback/Observações" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px;height:80px"></textarea>
       <button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar Alterações</button>
       <button type="button" class="btn" style="grid-column:span 2; background:var(--sidebar); color:white" onclick="gerarPropostaPDF()">📄 Gerar Proposta Comercial (PDF)</button>
+      <button type="button" class="btn" style="grid-column:span 2; background:#25D366; color:white" onclick="enviarWhatsApp()">📱 Enviar Proposta por WhatsApp</button>
     </form>
   </div>
 </div>
@@ -329,7 +330,7 @@ tr:hover td { background: var(--brand-light); }
       <button onclick="document.getElementById('modal-terms').classList.remove('active')" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button>
     </div>
     <div style="padding:24px; max-height:60vh; overflow-y:auto; font-size:14px; line-height:1.6; color:var(--text-main)">
-      <p style="margin-bottom:16px">Este sistema da <b>Dental M.I Credit</b> segue rigorosamente a Lei Geral de Proteção de Dados (LGPD) e diretrizes de Soberania Tecnológica.</p>
+      <p style="margin-bottom:16px">Este sistema da <b>Dental M.I Credit</b> segue rigorosamente a Lei Geral de Proteção de Dados (LGPD).</p>
     </div>
     <div style="padding:20px 24px; background:var(--bg); text-align:right">
       <button class="btn-login" style="width:auto; padding:10px 32px" onclick="document.getElementById('modal-terms').classList.remove('active'); document.getElementById('check-terms').checked=true">Entendi e Aceito</button>
@@ -413,8 +414,8 @@ function renderCarteira(){
 
 function renderFinanceiro(){
   const data = getVisibleData();
-  const total = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.comissao||0)/100)), 0);
-  document.getElementById('fin-com').textContent = `R$ ${total.toLocaleString()}`;
+  const totalCom = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.comissao||0)/100)), 0);
+  document.getElementById('fin-com').textContent = `R$ ${totalCom.toLocaleString()}`;
 }
 
 function abrirEdicao(id){
@@ -478,7 +479,6 @@ async function gerarPropostaPDF(){
   const doc = new jsPDF();
   const id = document.getElementById('edit-id').value;
   const c = db.find(x => x.id == id);
-  
   doc.setFontSize(22); doc.text("PROPOSTA COMERCIAL", 20, 30);
   doc.setFontSize(12); doc.text(`Cliente: ${c.cliente}`, 20, 50);
   doc.text(`CNPJ/CPF: ${c.cnpj}`, 20, 60);
@@ -486,6 +486,15 @@ async function gerarPropostaPDF(){
   doc.text(`Prêmio Estimado: R$ ${c.premio.toLocaleString()}`, 20, 80);
   doc.text(`Data: ${new Date().toLocaleDateString()}`, 20, 100);
   doc.save(`proposta_${c.cliente}.pdf`);
+}
+
+function enviarWhatsApp(){
+  const id = document.getElementById('edit-id').value;
+  const c = db.find(x => x.id == id);
+  const user = JSON.parse(localStorage.getItem('crm_user'));
+  const texto = encodeURIComponent(`Olá ${c.cliente}, segue a proposta comercial da Dental M.I Credit conforme conversamos.\n\nOperadora: ${c.operadora}\nPrêmio Estimado: R$ ${c.premio.toLocaleString()}\n\nConsultor: ${user.nome}`);
+  const fone = c.telefone ? c.telefone.replace(/\D/g,'') : '';
+  window.open(`https://api.whatsapp.com/send?phone=${fone}&text=${texto}`);
 }
 
 function abrirTermos(e){ e.preventDefault(); document.getElementById('modal-terms').classList.add('active'); }
