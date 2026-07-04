@@ -133,6 +133,7 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
     <div class="nav-tab" onclick="showTab('carteira',this)">📋 Carteira</div>
     <div class="nav-tab" onclick="showTab('funil',this)">🎯 Funil de Vendas</div>
     <div id="tab-admin" class="nav-tab" style="display:none" onclick="showTab('gestao',this)">⚙️ Gestão</div>
+    <div id="tab-auditoria" class="nav-tab" style="display:none" onclick="showTab('auditoria',this)">📊 Auditoria</div>
     <div class="nav-tab" onclick="showTab('alertas',this)">🔔 Alertas</div>
     <div class="nav-tab" onclick="showTab('venda',this)">➕ Nova Operação</div>
     <div id="tab-financeiro" class="nav-tab" style="display:none" onclick="showTab('financeiro',this)">💰 Gestão Financeira</div>
@@ -240,6 +241,22 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
             </select>
             <button type="button" class="btn btn-primary" onclick="alert('Usuário pré-cadastrado na fila de aprovação.')">➕ Incluir Pessoa</button>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUDITORIA -->
+    <div id="sec-auditoria" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2>📊 Auditoria de Uso (Últimas 50 Atividades)</h2>
+          <button class="btn btn-secondary" onclick="carregarAuditoria()">🔄 Atualizar</button>
+        </div>
+        <div class="card-body" style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Detalhe</th></tr></thead>
+            <tbody id="body-auditoria"></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -525,6 +542,7 @@ async function initApp(){
   
   if(user.cargo === 'Administrador' || user.cargo === 'CEO') {
     document.getElementById('tab-admin').style.display = 'block';
+    document.getElementById('tab-auditoria').style.display = 'block';
     document.getElementById('tab-financeiro').style.display = 'block';
   }
 
@@ -550,7 +568,28 @@ function renderAll(){
   renderFunil();
   renderFinanceiro();
   renderAlertas();
+  carregarAuditoria();
   checarAgendamentos();
+}
+
+// ===== AUDITORIA DE USO =====
+async function carregarAuditoria(){
+  if(!isMaster()) return;
+  const body = document.getElementById('body-auditoria');
+  if(!body) return;
+
+  const { data, error } = await sb.from('atividades').select('*').order('data',{ascending:false}).limit(50);
+  if(error){ console.error('Erro auditoria:', error); return; }
+
+  const acaoMap = {login:'🔑 Login', criar:'➕ Criou', editar:'✏️ Editou', excluir:'🗑️ Excluiu', export:'📥 Exportou'};
+  body.innerHTML = (data||[]).map(a => `
+    <tr>
+      <td style="white-space:nowrap">${new Date(a.data).toLocaleString('pt-BR')}</td>
+      <td><b>${a.usuario}</b></td>
+      <td>${acaoMap[a.acao] || a.acao}</td>
+      <td>${a.detalhe || '—'}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="4" style="text-align:center;padding:20px">Sem atividades registradas.</td></tr>';
 }
 
 function renderFinanceiro(){
