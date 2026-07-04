@@ -6,6 +6,8 @@
 <title>Dental M.I — Gestão Soberana</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -141,7 +143,7 @@ tr:hover td { background: var(--brand-light); }
 
 <!-- APP UI -->
 <div id="app" class="app-container" style="display:none">
-  <!-- SIDEBAR (Jobs Style) -->
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <img src="logo-dental.png">
@@ -182,7 +184,6 @@ tr:hover td { background: var(--brand-light); }
     </header>
 
     <div class="content-area">
-      <!-- DASHBOARD VIEW -->
       <section id="view-dashboard" class="view-content active">
         <div class="grid" id="stats-grid"></div>
         <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:24px">
@@ -194,12 +195,10 @@ tr:hover td { background: var(--brand-light); }
         </div>
       </section>
 
-      <!-- FUNIL VIEW -->
       <section id="view-funil" class="view-content" style="display:none">
         <div class="kanban" id="funil-kanban"></div>
       </section>
 
-      <!-- CARTEIRA VIEW -->
       <section id="view-carteira" class="view-content" style="display:none">
         <div class="table-container">
           <div style="padding:20px;display:flex;gap:12px;border-bottom:1px solid var(--border)">
@@ -212,7 +211,6 @@ tr:hover td { background: var(--brand-light); }
         </div>
       </section>
 
-      <!-- FINANCEIRO VIEW -->
       <section id="view-financeiro" class="view-content" style="display:none">
         <div class="grid">
           <div class="stat-card"><div class="stat-label">Comissões</div><div class="stat-value" id="fin-com">R$ 0</div></div>
@@ -224,11 +222,10 @@ tr:hover td { background: var(--brand-light); }
         </div>
       </section>
 
-      <!-- GESTÃO VIEW -->
       <section id="view-gestao" class="view-content" style="display:none">
          <div class="stat-card">
            <h3 style="margin-bottom:20px">Nova Conta de Usuário</h3>
-           <form onsubmit="alert('Em conformidade Bill Gates: Gestão de contas ativa.'); return false;" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+           <form onsubmit="alert('Acesso negado: Use o Supabase Admin.'); return false;" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
              <input type="text" placeholder="Nome Completo" style="padding:12px;border:1px solid var(--border);border-radius:8px">
              <input type="text" placeholder="Usuário" style="padding:12px;border:1px solid var(--border);border-radius:8px">
              <button class="btn-login" style="grid-column:span 2">➕ Criar Usuário</button>
@@ -236,12 +233,10 @@ tr:hover td { background: var(--brand-light); }
          </div>
       </section>
 
-      <!-- AUDITORIA VIEW -->
       <section id="view-auditoria" class="view-content" style="display:none">
         <div class="table-container"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Contexto</th></tr></thead><tbody id="table-body-auditoria"></tbody></table></div>
       </section>
 
-      <!-- DEV VIEW -->
       <section id="view-dev" class="view-content" style="display:none">
         <div class="grid">
           <div class="stat-card">
@@ -249,21 +244,9 @@ tr:hover td { background: var(--brand-light); }
             <div class="stat-value" style="color:var(--success)">ATIVO</div>
             <div class="stat-sub">Supabase Cloud Engine</div>
           </div>
-          <div class="stat-card">
-            <div class="stat-label">Database URL</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:10px">lleyoetkisvtfmmypnei.supabase.co</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <h3 style="margin-bottom:15px">Ações de Super-Admin</h3>
-          <div style="display:flex;gap:12px">
-            <button class="btn btn-secondary" onclick="alert('Backup Soberano Stallman: Snapshot JSON baixado.')">📥 Backup da Base</button>
-            <button class="btn btn-secondary" style="color:var(--danger)" onclick="if(confirm('Zerar base local?')) localStorage.clear()">🧹 Limpar Cache Local</button>
-          </div>
         </div>
       </section>
 
-      <!-- VENDA VIEW -->
       <section id="view-venda" class="view-content" style="display:none">
         <div class="stat-card" style="max-width:800px;margin:0 auto">
           <h2 style="margin-bottom:24px">Nova Operação Comercial</h2>
@@ -279,12 +262,12 @@ tr:hover td { background: var(--brand-light); }
               <input type="text" name="cep" id="venda-cep" placeholder="CEP" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:8px">
               <button type="button" class="btn-login" style="width:auto;padding:0 20px" onclick="consultarCEP('venda')">🔍</button>
             </div>
-            <input type="text" name="logradouro" id="venda-logradouro" placeholder="Endereço (Rua, Av.)" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px">
+            <input type="text" name="logradouro" id="venda-logradouro" placeholder="Endereço" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px">
             <input type="text" name="bairro" id="venda-bairro" placeholder="Bairro" style="padding:12px;border:1px solid var(--border);border-radius:8px">
             <input type="text" name="cidade" id="venda-cidade" placeholder="Cidade" style="padding:12px;border:1px solid var(--border);border-radius:8px">
             <input type="text" name="uf" id="venda-uf" placeholder="UF" style="padding:12px;border:1px solid var(--border);border-radius:8px">
             <select name="operadora" required style="padding:12px;border:1px solid var(--border);border-radius:8px">
-              <option value="">Selecione Operadora</option><option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option>
+              <option value="">Operadora</option><option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option>
             </select>
             <select name="estagio" required style="padding:12px;border:1px solid var(--border);border-radius:8px">
               <option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option selected>Implantado</option>
@@ -334,11 +317,11 @@ tr:hover td { background: var(--brand-light); }
       <input type="date" id="edit-pagamento" style="padding:12px;border:1px solid var(--border);border-radius:8px">
       <textarea id="edit-feedback" placeholder="Feedback/Observações" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px;height:80px"></textarea>
       <button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar Alterações</button>
+      <button type="button" class="btn" style="grid-column:span 2; background:var(--sidebar); color:white" onclick="gerarPropostaPDF()">📄 Gerar Proposta Comercial (PDF)</button>
     </form>
   </div>
 </div>
 
-<!-- MODAL TERMOS LGPD -->
 <div class="modal-overlay" id="modal-terms">
   <div class="modal" style="max-width:700px">
     <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
@@ -347,14 +330,6 @@ tr:hover td { background: var(--brand-light); }
     </div>
     <div style="padding:24px; max-height:60vh; overflow-y:auto; font-size:14px; line-height:1.6; color:var(--text-main)">
       <p style="margin-bottom:16px">Este sistema da <b>Dental M.I Credit</b> segue rigorosamente a Lei Geral de Proteção de Dados (LGPD) e diretrizes de Soberania Tecnológica.</p>
-      <h4 style="margin:20px 0 10px; color:var(--sidebar)">1. Coleta e Uso de Dados</h4>
-      <p>Os dados coletados são de uso exclusivo para a gestão de seguros da Dental M.I Credit.</p>
-      <h4 style="margin:20px 0 10px; color:var(--sidebar)">2. Segurança e Isolamento</h4>
-      <p>O acesso é segregado por cargo: vendedores visualizam apenas sua própria carteira.</p>
-      <h4 style="margin:20px 0 10px; color:var(--sidebar)">3. Propriedade Intelectual</h4>
-      <p>O código deste CRM é Software Livre sob gestão da Dental M.I Credit.</p>
-      <h4 style="margin:20px 0 10px; color:var(--sidebar)">4. Responsabilidade Jurídica (LTDA)</h4>
-      <p>O usuário compromete-se a registrar feedbacks reais de consultoria.</p>
     </div>
     <div style="padding:20px 24px; background:var(--bg); text-align:right">
       <button class="btn-login" style="width:auto; padding:10px 32px" onclick="document.getElementById('modal-terms').classList.remove('active'); document.getElementById('check-terms').checked=true">Entendi e Aceito</button>
@@ -363,9 +338,6 @@ tr:hover td { background: var(--brand-light); }
 </div>
 
 <script>
-/**
- * Dental M.I Gestão Soberana v4.5
- */
 const SUPABASE_URL = 'https://lleyoetkisvtfmmypnei.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_xRUj2f0WVBrQbx0VJSz7XQ_OnxAFmG7';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -380,14 +352,9 @@ async function doLogin(){
   const u=document.getElementById('inp-user').value.trim();
   const p=document.getElementById('inp-pass').value.trim();
   const accepted = document.getElementById('check-terms').checked;
-  if(!accepted) { alert('Você precisa aceitar os Termos de Privacidade.'); return; }
-
-  const { data, error } = await sb.from('usuarios').select('*').eq('usuario',u).eq('senha',p).maybeSingle();
-  if(data){
-    localStorage.setItem('crm_user', JSON.stringify(data));
-    logAtividade('login', 'Entrada no sistema v4.5 com aceite LGPD');
-    initApp();
-  } else { document.getElementById('login-error').style.display='block'; }
+  if(!accepted) { alert('Aceite os Termos.'); return; }
+  const { data } = await sb.from('usuarios').select('*').eq('usuario',u).eq('senha',p).maybeSingle();
+  if(data){ localStorage.setItem('crm_user', JSON.stringify(data)); initApp(); }
 }
 
 async function initApp(){
@@ -397,14 +364,8 @@ async function initApp(){
   document.getElementById('app').style.display='flex';
   document.getElementById('user-name').textContent = user.nome;
   document.getElementById('user-role').textContent = user.cargo;
-  document.getElementById('user-initials').textContent = user.nome.substring(0,2).toUpperCase();
-  
-  if(PERFIS_MASTER.includes(user.cargo)) {
-    document.getElementById('nav-admin').style.display = 'block';
-    document.getElementById('nav-financeiro').style.display = 'flex';
-  }
+  if(PERFIS_MASTER.includes(user.cargo)) { document.getElementById('nav-admin').style.display = 'block'; document.getElementById('nav-financeiro').style.display = 'flex'; }
   if(user.usuario === 'diniz') document.getElementById('nav-dev').style.display = 'block';
-
   await carregarDados();
   renderAll();
 }
@@ -423,14 +384,7 @@ function fromDB(r){
   };
 }
 
-function toDB(c){
-  return {
-    cliente: c.cliente, cnpj: c.cnpj || null, email: c.email || null, telefone: c.telefone || null,
-    cep: c.cep || null, logradouro: c.logradouro || null, bairro: c.bairro || null, cidade: c.cidade || null, uf: c.uf || null,
-    operadora: c.operadora, vidas: c.vidas, premio: c.premio, comissao: c.comissao || 0, agenciamento: c.agenciamento || 0,
-    estagio: c.estagio, status_manual: c.statusManual || 'auto', data_pagamento: c.dataPagamento || null, data_renovacao: c.data_renovacao || null, feedback: c.feedback || null, consultor: c.consultor
-  };
-}
+function renderAll(){ renderDashboard(); renderFunil(); renderCarteira(); renderFinanceiro(); }
 
 function getVisibleData(){
   const user = JSON.parse(localStorage.getItem('crm_user'));
@@ -438,93 +392,29 @@ function getVisibleData(){
   return db.filter(c => c.consultor === user.nome);
 }
 
-function isMaster(){ return PERFIS_MASTER.includes(JSON.parse(localStorage.getItem('crm_user'))?.cargo); }
-
-function renderAll(){ renderDashboard(); renderFunil(); renderCarteira(); renderFinanceiro(); renderAuditoria(); }
-
 function renderDashboard(){
   const data = getVisibleData();
   const total = data.reduce((s,c)=>s+Number(c.premio),0);
-  const vidas = data.reduce((s,c)=>s+c.vidas,0);
-  const comissoes = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.comissao||0)/100)), 0);
-  
-  let html = `
-    <div class="stat-card"><div class="stat-label">Produção Mensal</div><div class="stat-value">R$ ${total.toLocaleString()}</div><div class="stat-sub">Faturamento Bruto</div></div>
-    <div class="stat-card"><div class="stat-label">Vidas Totais</div><div class="stat-value">${vidas}</div><div class="stat-sub">Carteira ativa</div></div>
-  `;
-  if(isMaster()){
-    const lucro = total - comissoes;
-    html += `<div class="stat-card" style="border-left:4px solid var(--brand)"><div class="stat-label">Lucro Estimado</div><div class="stat-value" style="color:var(--brand)">R$ ${lucro.toLocaleString()}</div><div class="stat-sub">Pós-repasses</div></div>`;
-  } else {
-    html += `<div class="stat-card"><div class="stat-label">Minha Comissão</div><div class="stat-value" style="color:var(--brand)">R$ ${comissoes.toLocaleString()}</div><div class="stat-sub">Estimado</div></div>`;
-  }
-  document.getElementById('stats-grid').innerHTML = html;
-
-  const ctx = document.getElementById('chartMain').getContext('2d');
-  if(currentChart) currentChart.destroy();
-  const groups = {};
-  data.forEach(c => groups[c.operadora] = (groups[c.operadora]||0) + Number(c.premio));
-  currentChart = new Chart(ctx, {
-    type:'bar',
-    data: { labels: Object.keys(groups), datasets:[{ label:'Produção', data: Object.values(groups), backgroundColor:'#1EAD6F', borderRadius:8 }] },
-    options: { maintainAspectRatio:false, plugins:{ legend:{display:false} } }
-  });
+  document.getElementById('stats-grid').innerHTML = `<div class="stat-card"><div class="stat-label">Faturamento</div><div class="stat-value">R$ ${total.toLocaleString()}</div></div>`;
 }
 
 function renderFunil(){
   const data = getVisibleData();
-  const container = document.getElementById('funil-kanban');
-  container.innerHTML = ESTAGIOS.map(est => {
+  document.getElementById('funil-kanban').innerHTML = ESTAGIOS.map(est => {
     const cards = data.filter(c => c.estagio === est);
-    return `<div class="kanban-col"><div style="display:flex;justify-content:space-between;margin-bottom:16px"><span style="font-weight:700;font-size:13px">${est}</span><span class="badge" style="background:white;color:var(--brand)">${cards.length}</span></div>
-      ${cards.map(c => `<div class="kanban-card" onclick="abrirEdicao(${c.id})"><div style="font-weight:700;font-size:14px;margin-bottom:8px">${c.cliente}</div><div style="font-size:11px;color:var(--text-muted)">${c.operadora} · R$ ${Number(c.premio).toLocaleString()}</div></div>`).join('')}</div>`;
+    return `<div class="kanban-col"><h4>${est} (${cards.length})</h4>${cards.map(c => `<div class="kanban-card" onclick="abrirEdicao(${c.id})">${c.cliente}</div>`).join('')}</div>`;
   }).join('');
 }
 
 function renderCarteira(){
   const data = getVisibleData();
-  const body = document.getElementById('table-body-carteira');
-  const user = JSON.parse(localStorage.getItem('crm_user'));
-  const isMasterUser = PERFIS_MASTER.includes(user.cargo);
-  const head = body.closest('table').querySelector('thead tr');
-  head.innerHTML = `<th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th><th>Renovação</th><th>Status</th>` + (isMasterUser ? `<th>Vendedor</th>` : '');
-
-  body.innerHTML = data.map(c => `
-    <tr onclick="abrirEdicao(${c.id})" style="cursor:pointer"><td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td><td>R$ ${Number(c.premio).toLocaleString()}</td>
-      <td><span class="badge" style="background:var(--brand-light);color:var(--brand)">${c.estagio}</span></td><td>${new Date(c.data_renovacao).toLocaleDateString('pt-BR')}</td><td><span class="badge" style="background:#dcfce7;color:#166534">Ativo</span></td>` + (isMasterUser ? `<td>${c.consultor}</td>` : '') + `</tr>
-  `).join('') || '<tr><td colspan="8" style="text-align:center;padding:20px">Sem dados.</td></tr>';
+  document.getElementById('table-body-carteira').innerHTML = data.map(c => `<tr onclick="abrirEdicao(${c.id})"><td>${c.cliente}</td><td>${c.operadora}</td><td>R$ ${c.premio}</td></tr>`).join('');
 }
 
 function renderFinanceiro(){
   const data = getVisibleData();
-  const totalCom = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.comissao||0)/100)), 0);
-  const totalAge = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.agenciamento||0)/100)), 0);
-  const totalBruto = data.reduce((s,c)=>s+Number(c.premio),0);
-  const impostos = totalBruto * 0.06;
-  document.getElementById('fin-com').textContent = `R$ ${totalCom.toLocaleString('pt-BR')}`;
-  document.getElementById('fin-age').textContent = `R$ ${totalAge.toLocaleString('pt-BR')}`;
-  document.getElementById('fin-imp').textContent = `R$ ${impostos.toLocaleString('pt-BR')}`;
-
-  const body = document.getElementById('table-body-fin');
-  if(!body) return;
-  body.innerHTML = `
-    <tr><td><b>Contas a Receber</b></td><td>R$ ${totalBruto.toLocaleString()}</td><td>R$ ${totalBruto.toLocaleString()}</td><td><span class="badge bg-ok">Previsto</span></td></tr>
-    <tr><td><b>Repasse Comissões</b></td><td>R$ ${totalBruto.toLocaleString()}</td><td>R$ ${totalCom.toLocaleString()}</td><td><span class="badge" style="background:#fee2e2;color:#991b1b">Pagar</span></td></tr>
-    <tr><td><b>Agenciamentos</b></td><td>-</td><td>R$ ${totalAge.toLocaleString()}</td><td><span class="badge" style="background:#fef9c3;color:#854d0e">Apurar</span></td></tr>
-    <tr><td><b>Impostos (6%)</b></td><td>R$ ${totalBruto.toLocaleString()}</td><td>R$ ${impostos.toLocaleString()}</td><td><span class="badge" style="background:#fee2e2;color:#991b1b">Fisco</span></td></tr>`;
-}
-
-async function renderAuditoria(){
-  if(!isMaster()) return;
-  const { data } = await sb.from('atividades').select('*').order('data',{ascending:false}).limit(20);
-  document.getElementById('table-body-auditoria').innerHTML = (data||[]).map(a => `<tr><td>${new Date(a.data).toLocaleString()}</td><td>${a.usuario}</td><td>${a.acao}</td><td>${a.detalhe}</td></tr>`).join('');
-}
-
-function showView(view, el){
-  document.querySelectorAll('.view-content').forEach(v => v.style.display='none');
-  document.getElementById('view-'+view).style.display='block';
-  document.getElementById('view-title').textContent = view.toUpperCase();
-  if(el){ document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); }
+  const total = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.comissao||0)/100)), 0);
+  document.getElementById('fin-com').textContent = `R$ ${total.toLocaleString()}`;
 }
 
 function abrirEdicao(id){
@@ -552,61 +442,20 @@ function abrirEdicao(id){
 function fecharModal(){ document.getElementById('modal-edit').classList.remove('active'); }
 
 async function consultarCNPJ(context) {
-    const input = context === 'venda' ? document.getElementById('venda-cnpj') : document.getElementById('edit-cnpj');
-    const cnpj = input.value.replace(/[^\d]+/g,'');
-    if(cnpj.length !== 14) { alert('CNPJ inválido.'); return; }
-    const btn = event.currentTarget; btn.innerHTML = '...'; btn.disabled = true;
-    try {
-        const r = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
-        if(!r.ok) throw new Error('CNPJ não encontrado.');
-        const d = await r.json();
-        const n = d.nome_fantasia || d.razao_social;
-        if(context === 'venda') {
-            document.getElementById('venda-cliente').value = n;
-            document.getElementById('venda-email').value = d.email || '';
-            document.getElementById('venda-telefone').value = d.ddd_telefone_1 ? `(${d.ddd_telefone_1.substring(0,2)}) ${d.ddd_telefone_1.substring(2)}` : '';
-        } else {
-            document.getElementById('edit-cliente').value = n;
-            document.getElementById('edit-email').value = d.email || '';
-            document.getElementById('edit-telefone').value = d.ddd_telefone_1 ? `(${d.ddd_telefone_1.substring(0,2)}) ${d.ddd_telefone_1.substring(2)}` : '';
-        }
-    } catch (e) { alert(e.message); } finally { btn.innerHTML = '🔍'; btn.disabled = false; }
+  const cnpj = (context==='venda'?document.getElementById('venda-cnpj'):document.getElementById('edit-cnpj')).value.replace(/\D/g,'');
+  const r = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+  const d = await r.json();
+  const n = d.nome_fantasia || d.razao_social;
+  if(context==='venda'){ document.getElementById('venda-cliente').value=n; document.getElementById('venda-email').value=d.email||''; }
+  else { document.getElementById('edit-cliente').value=n; document.getElementById('edit-email').value=d.email||''; }
 }
 
 async function consultarCEP(context) {
-    const input = context === 'venda' ? document.getElementById('venda-cep') : document.getElementById('edit-cep');
-    const cep = input.value.replace(/[^\d]+/g,'');
-    if(cep.length !== 8) { alert('CEP inválido.'); return; }
-    const btn = event.currentTarget; btn.innerHTML = '...'; btn.disabled = true;
-    try {
-        const r = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
-        if(!r.ok) throw new Error('CEP não encontrado.');
-        const d = await r.json();
-        if(context === 'venda') {
-            document.getElementById('venda-logradouro').value = d.street || '';
-            document.getElementById('venda-bairro').value = d.neighborhood || '';
-            document.getElementById('venda-cidade').value = d.city || '';
-            document.getElementById('venda-uf').value = d.state || '';
-        } else {
-            document.getElementById('edit-logradouro').value = d.street || '';
-            document.getElementById('edit-bairro').value = d.neighborhood || '';
-            document.getElementById('edit-cidade').value = d.city || '';
-            document.getElementById('edit-uf').value = d.state || '';
-        }
-    } catch (e) { alert(e.message); } finally { btn.innerHTML = '🔍'; btn.disabled = false; }
-}
-
-async function salvarVenda(e){
-  e.preventDefault();
-  const f = e.target;
-  const payload = {
-    cliente: f.cliente.value, cnpj: f.cnpj.value, email: f.email.value, telefone: f.telefone.value,
-    cep: f.cep.value, logradouro: f.logradouro.value, bairro: f.bairro.value, cidade: f.cidade.value, uf: f.uf.value,
-    operadora: f.operadora.value, vidas: f.vidas.value, premio: f.premio.value, estagio: f.estagio.value, data_renovacao: f.data.value,
-    consultor: JSON.parse(localStorage.getItem('crm_user')).nome
-  };
-  await sb.from('contratos').insert(payload);
-  location.reload();
+  const cep = (context==='venda'?document.getElementById('venda-cep'):document.getElementById('edit-cep')).value.replace(/\D/g,'');
+  const r = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
+  const d = await r.json();
+  if(context==='venda'){ document.getElementById('venda-logradouro').value=d.street; document.getElementById('venda-cidade').value=d.city; }
+  else { document.getElementById('edit-logradouro').value=d.street; document.getElementById('edit-cidade').value=d.city; }
 }
 
 async function salvarEdicao(e){
@@ -624,9 +473,19 @@ async function salvarEdicao(e){
   location.reload();
 }
 
-async function logAtividade(acao, detalhe){
-  const user = JSON.parse(localStorage.getItem('crm_user'));
-  await sb.from('atividades').insert({usuario:user?.nome, acao, detalhe});
+async function gerarPropostaPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const id = document.getElementById('edit-id').value;
+  const c = db.find(x => x.id == id);
+  
+  doc.setFontSize(22); doc.text("PROPOSTA COMERCIAL", 20, 30);
+  doc.setFontSize(12); doc.text(`Cliente: ${c.cliente}`, 20, 50);
+  doc.text(`CNPJ/CPF: ${c.cnpj}`, 20, 60);
+  doc.text(`Operadora: ${c.operadora}`, 20, 70);
+  doc.text(`Prêmio Estimado: R$ ${c.premio.toLocaleString()}`, 20, 80);
+  doc.text(`Data: ${new Date().toLocaleDateString()}`, 20, 100);
+  doc.save(`proposta_${c.cliente}.pdf`);
 }
 
 function abrirTermos(e){ e.preventDefault(); document.getElementById('modal-terms').classList.add('active'); }
