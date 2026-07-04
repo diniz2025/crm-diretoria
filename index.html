@@ -1,558 +1,308 @@
-<title>Dental M.I Gestão</title>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dental M.I — Gestão Soberana</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
 <style>
-:root{
-  --brand:#1EAD6F; 
-  --azul:#1565A8;
-  --azul-dark:#0d4a7a;
-  --azul-light:#f0f7ff;
-  --verde:#10b981;
-  --amarelo:#f59e0b;
-  --vermelho:#ef4444;
-  --slate-50:#f8fafc;
-  --slate-100:#f1f5f9;
-  --slate-200:#e2e8f0;
-  --slate-700:#334155;
-  --slate-800:#1e293b;
-  --slate-900:#0f172a;
-  --shadow-sm:0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md:0 4px 6px -1px rgba(0,0,0,0.1);
-  --radius-lg:12px;
+:root {
+  --brand: #1EAD6F; 
+  --brand-light: #eefaf4;
+  --bg: #f8fafc;
+  --sidebar: #0f172a;
+  --sidebar-item: #94a3b8;
+  --sidebar-active: #ffffff;
+  --card: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #6366f1;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
+  --radius: 12px;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
 }
-*{box-sizing:border-box;margin:0;padding:0;font-smoothing:antialiased}
-body{font-family:'Segoe UI','Inter',system-ui,sans-serif;background:var(--slate-50);color:var(--slate-800);line-height:1.5}
 
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--slate-900)}
-.login-box{background:#fff;border-radius:24px;padding:60px 48px;width:100%;max-width:420px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);text-align:center}
-.login-logo{width:auto;max-width:300px;margin:0 auto 32px}
-.login-box h1{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px;color:var(--slate-900)}
-.login-box p{color:var(--slate-700);font-size:14px;margin-bottom:32px}
-.login-box input{width:100%;padding:14px 16px;border:1px solid var(--slate-200);border-radius:var(--radius-lg);font-size:15px;margin-bottom:12px;transition:all 0.2s}
-.login-box input:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(30,173,111,0.1);outline:none}
-.btn-login{width:100%;padding:14px;background:var(--slate-900);color:#fff;border:none;border-radius:var(--radius-lg);font-size:16px;font-weight:600;cursor:pointer;transition:transform 0.1s}
-.btn-login:active{transform:scale(0.98)}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); overflow: hidden; }
 
-.topbar{background:#fff;border-bottom:1px solid var(--slate-200);padding:0 32px;height:70px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.topbar-left{display:flex;align-items:center;gap:16px}
-.topbar h1{font-size:18px;font-weight:700;color:var(--slate-900)}
-.nav-tabs{background:#fff;border-bottom:1px solid var(--slate-200);padding:0 32px;display:flex;gap:8px;overflow-x:auto}
-.nav-tab{padding:16px 12px;font-size:14px;font-weight:500;color:var(--slate-700);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap}
-.nav-tab:hover{color:var(--brand)}
-.nav-tab.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
+/* LAYOUT TIPO SAAS PROFISSIONAL */
+.app-container { display: flex; height: 100vh; width: 100vw; }
 
-.main-content{padding:32px;max-width:1600px;margin:0 auto}
-.section{display:none}.section.active{display:block}
+/* SIDEBAR - STEVE JOBS STYLE (DARK & CLEAN) */
+.sidebar {
+  width: 260px; background: var(--sidebar); height: 100%; display: flex; flex-direction: column;
+  padding: 24px; color: white; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 8px; }
+.sidebar-logo img { height: 38px; border-radius: 8px; }
+.sidebar-logo h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
 
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-bottom:32px}
-.kpi-card{background:#fff;border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-sm);border:1px solid var(--slate-200);display:flex;flex-direction:column}
-.kpi-label{font-size:13px;font-weight:600;color:var(--slate-700);text-transform:uppercase;margin-bottom:8px}
-.kpi-valor{font-size:28px;font-weight:800;color:var(--slate-900)}
+.nav-menu { flex: 1; list-style: none; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius);
+  color: var(--sidebar-item); cursor: pointer; margin-bottom: 4px; transition: all 0.2s; font-size: 14px; font-weight: 500;
+}
+.nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+.nav-item.active { background: var(--brand); color: white; box-shadow: 0 4px 12px rgba(30,173,111,0.3); }
 
-.card{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--slate-200);box-shadow:var(--shadow-sm);margin-bottom:24px;overflow:hidden}
-.card-header{padding:20px 24px;border-bottom:1px solid var(--slate-200);display:flex;align-items:center;justify-content:space-between;background:var(--slate-50)}
-.card-header h2{font-size:16px;font-weight:700;color:var(--slate-900)}
+.sidebar-footer { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+.user-profile { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.user-avatar { width: 32px; height: 32px; background: var(--brand); border-radius: 50%; display: flex; align-items: center; justify-content:center; font-weight: 700; font-size: 12px; }
 
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
-.ranking-list{list-style:none}
-.ranking-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--slate-100)}
-.ranking-item:last-child{border-bottom:none}
+/* MAIN CONTENT */
+.main-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.top-header {
+  height: 70px; background: white; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 32px;
+}
+.view-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+.content-area { flex: 1; overflow-y: auto; padding: 32px; scroll-behavior: smooth; }
 
-.dropzone{border:2px dashed var(--slate-200);border-radius:var(--radius-lg);padding:40px;text-align:center;background:var(--slate-50);cursor:pointer;transition:all 0.2s}
-.dropzone:hover{border-color:var(--brand);background:#fff}
-.file-list{margin-top:20px}
-.file-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--slate-100);border-radius:8px;margin-bottom:8px;font-size:13px}
+/* COMPONENTES CARDS */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 32px; }
+.stat-card {
+  background: white; padding: 24px; border-radius: var(--radius); border: 1px solid var(--border);
+  box-shadow: var(--shadow); transition: transform 0.2s;
+}
+.stat-card:hover { transform: translateY(-2px); }
+.stat-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.stat-value { font-size: 30px; font-weight: 800; color: var(--sidebar); }
+.stat-sub { font-size: 12px; margin-top: 8px; font-weight: 500; }
 
-table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:12px 16px;font-size:12px;text-transform:uppercase;color:var(--slate-700);background:var(--slate-100);font-weight:600}
-td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
-.btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:8px;transition:all 0.2s;text-decoration:none}
-.btn-primary{background:var(--brand);color:#fff}
-.btn-secondary{background:var(--slate-100);color:var(--slate-800)}
-.btn-export{background:var(--slate-800);color:#fff}
-.badge{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;text-transform:uppercase}
-.bg-urgente{background:#fee2e2;color:#991b1b}.bg-atencao{background:#fef9c3;color:#854d0e}.bg-ok{background:#dcfce7;color:#166534}
+/* TABELAS MODERNAS */
+.table-container { background: white; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+th { background: #fdfdfd; padding: 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); text-transform: uppercase; }
+td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
+tr:hover td { background: var(--brand-light); }
+.badge { padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
 
-.funil-grid{display:flex;gap:16px;overflow-x:auto;padding-bottom:12px}
-.funil-col{flex:1;min-width:220px;background:var(--slate-100);border-radius:12px;padding:12px}
-.funil-col-head{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:10px;font-weight:700;font-size:13px;color:var(--slate-800)}
-.funil-col-head .count{background:var(--brand);color:#fff;border-radius:20px;padding:2px 10px;font-size:11px}
-.funil-card{background:#fff;border:1px solid var(--slate-200);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;transition:all 0.15s;box-shadow:var(--shadow-sm)}
-.funil-card:hover{border-color:var(--brand);transform:translateY(-2px)}
-.funil-card.dragging{opacity:0.5;border:2px dashed var(--brand);transform:scale(0.95)}
-.funil-col.drag-over{background:var(--azul-light);outline:2px solid var(--brand)}
-.funil-card h4{font-size:13px;font-weight:700;margin-bottom:4px}
-.funil-card p{font-size:11px;color:var(--slate-700);margin:2px 0}
-.funil-card .valor{font-weight:700;color:var(--brand);font-size:13px;margin-top:6px}
-.notif-dot{display:inline-block;width:8px;height:8px;background:var(--vermelho);border-radius:50%;margin-left:6px;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-.row-click{cursor:pointer;transition:background 0.15s}
-.row-click:hover{background:var(--azul-light)}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:1000;align-items:center;justify-content:center;padding:20px}
-.modal-overlay.active{display:flex}
-.modal{background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.4)}
-.modal-head{padding:20px 24px;border-bottom:1px solid var(--slate-200);display:flex;align-items:center;justify-content:space-between}
-.modal-head h2{font-size:17px;font-weight:700}
-.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--slate-700);line-height:1}
-.modal-body{padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.modal-body .full{grid-column:span 2}
-.modal-body label{font-size:12px;font-weight:600;color:var(--slate-700);display:block;margin-bottom:4px}
-.modal-body input,.modal-body select{width:100%;padding:11px 12px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px}
-.modal-foot{padding:16px 24px;border-top:1px solid var(--slate-200);display:flex;justify-content:space-between;gap:12px}
-@media(max-width:1024px){.stats-grid{grid-template-columns:1fr}}
-@media(max-width:640px){.modal-body{grid-template-columns:1fr}.modal-body .full{grid-column:span 1}}
+/* MODAL STEVE JOBS (PULSE & BLUR) */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); 
+  backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.active { display: flex; animation: fadeIn 0.3s; }
+.modal { background: white; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); overflow: hidden; }
+
+/* LOGIN GLASSMORPHISM */
+#login-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at top left, #1e293b, #0f172a);
+}
+.login-card {
+  background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 32px; padding: 60px 50px; width: 100%; max-width: 440px; text-align: center; color: white;
+}
+.login-card input {
+  width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  padding: 16px; border-radius: 12px; color: white; margin-bottom: 16px; outline: none; font-size: 16px;
+}
+.btn-login {
+  width: 100%; background: var(--brand); color: white; padding: 16px; border: none;
+  border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.btn-login:hover { transform: scale(1.02); background: #22c55e; }
+
+/* FUNIL KANBAN MODERNIZADO */
+.kanban { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; }
+.kanban-col { background: #eff6ff; min-width: 280px; border-radius: 16px; padding: 16px; border: 1px solid #dbeafe; }
+.kanban-card {
+  background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); cursor: grab; border: 1px solid var(--border);
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="login-screen">
-  <div class="login-box">
-    <img src="logo-dental.png" class="login-logo" alt="Logo">
-    <h1>Dental M.I Gestão</h1>
-    <p>Acesse o painel estratégico de produção</p>
-    <input type="text" id="inp-user" placeholder="Usuário" autocomplete="username"/>
-    <input type="password" id="inp-pass" placeholder="Senha" autocomplete="current-password" onkeypress="if(event.key==='Enter')doLogin()"/>
-    <button class="btn-login" style="width:100%" onclick="doLogin()">Entrar no Sistema</button>
-    <p id="login-error" style="color:var(--vermelho);margin-top:16px;display:none;font-size:13px">Credenciais inválidas.</p>
+  <div class="login-card">
+    <img src="logo-dental.png" style="height:60px;margin-bottom:32px;border-radius:12px">
+    <h1 style="font-size:28px;margin-bottom:8px">Bem-vindo</h1>
+    <p style="opacity:0.6;margin-bottom:40px;font-size:14px">Dental M.I Gestão Inteligente v4.0</p>
+    <input type="text" id="inp-user" placeholder="Seu usuário" autocomplete="username">
+    <input type="password" id="inp-pass" placeholder="Sua senha" autocomplete="current-password">
+    <button class="btn-login" onclick="doLogin()">Acessar Painel</button>
+    <p id="login-error" style="color:var(--danger);margin-top:20px;display:none;font-size:13px">Acesso negado. Verifique os dados.</p>
   </div>
 </div>
 
-<div id="app" style="display:none">
-  <div class="topbar">
-    <div class="topbar-left">
-      <img src="logo-dental.png" style="height:44px;border-radius:6px">
-      <h1>Dental M.I Gestão</h1>
+<!-- APP UI -->
+<div id="app" class="app-container" style="display:none">
+  <!-- SIDEBAR (Jobs Style) -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="logo-dental.png">
+      <h1>Dental M.I</h1>
     </div>
-    <div class="topbar-right">
-      <span id="user-label" style="font-size:13px;font-weight:600;margin-right:16px"></span>
-      <button class="btn btn-secondary" onclick="doLogout()">Sair</button>
-    </div>
-  </div>
-
-  <div class="nav-tabs">
-    <div class="nav-tab active" onclick="showTab('dashboard',this)">📊 Dashboard</div>
-    <div class="nav-tab" onclick="showTab('inteligencia',this)">📈 Inteligência</div>
-    <div class="nav-tab" onclick="showTab('carteira',this)">📋 Carteira</div>
-    <div class="nav-tab" onclick="showTab('funil',this)">🎯 Funil de Vendas</div>
-    <div id="tab-admin" class="nav-tab" style="display:none" onclick="showTab('gestao',this)">⚙️ Gestão</div>
-    <div id="tab-auditoria" class="nav-tab" style="display:none" onclick="showTab('auditoria',this)">📊 Auditoria</div>
-    <div class="nav-tab" onclick="showTab('alertas',this)">🔔 Alertas</div>
-    <div class="nav-tab" onclick="showTab('venda',this)">➕ Nova Operação</div>
-    <div id="tab-financeiro" class="nav-tab" style="display:none" onclick="showTab('financeiro',this)">💰 Gestão Financeira</div>
-  </div>
-
-  <div class="main-content">
-    <!-- DASHBOARD -->
-    <div id="sec-dashboard" class="section active">
-      <div class="kpi-grid" id="kpi-grid"></div>
-      <div class="stats-grid">
-        <div class="card">
-          <div class="card-header"><h2>Produção por Operadora</h2></div>
-          <div class="card-body" style="padding:20px"><canvas id="chartOperadoras"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><h2>Ranking de Consultores</h2></div>
-          <div class="card-body"><div id="ranking-consultores"></div></div>
+    <nav class="nav-menu">
+      <div class="nav-item active" onclick="showView('dashboard',this)">📊 Dashboard</div>
+      <div class="nav-item" onclick="showView('funil',this)">🎯 Funil de Vendas</div>
+      <div class="nav-item" onclick="showView('carteira',this)">📋 Carteira de Clientes</div>
+      <div class="nav-item" onclick="showView('financeiro',this)">💰 Gestão Financeira</div>
+      <div id="nav-admin" style="display:none">
+        <div class="nav-item" onclick="showView('gestao',this)">⚙️ Configurações</div>
+        <div class="nav-item" onclick="showView('auditoria',this)">🕵️ Auditoria</div>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-profile">
+        <div class="user-avatar" id="user-initials">MI</div>
+        <div>
+          <div style="font-size:13px;font-weight:700" id="user-name">Usuário</div>
+          <div style="font-size:11px;opacity:0.5" id="user-role">Cargo</div>
         </div>
       </div>
+      <div class="nav-item" onclick="doLogout()" style="color:var(--danger)">🚪 Sair</div>
     </div>
+  </aside>
 
-    <!-- INTELIGÊNCIA -->
-    <div id="sec-inteligencia" class="section">
-      <div class="card">
-        <div class="card-header">
-          <h2>Calculadora de Produção Estratégica</h2>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-export" onclick="exportarDados('csv')">Exportar CSV</button>
-            <button class="btn btn-export" onclick="exportarDados('json')">Exportar JSON</button>
+  <!-- CONTENT -->
+  <main class="main-view">
+    <header class="top-header">
+      <h2 class="view-title" id="view-title">Dashboard</h2>
+      <div style="display:flex;gap:12px">
+        <button class="btn-login" style="padding:10px 20px;font-size:13px" onclick="showView('venda')">➕ Nova Operação</button>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- DASHBOARD VIEW -->
+      <section id="view-dashboard" class="view-content active">
+        <div class="grid" id="stats-grid"></div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:24px">
+          <div class="stat-card" style="height:400px"><canvas id="chartMain"></canvas></div>
+          <div class="table-container">
+            <th style="padding:20px;display:block">TOP PRODUTORES</th>
+            <div id="ranking-list"></div>
           </div>
         </div>
-        <div class="card-body">
-          <p style="margin-bottom:20px;font-size:14px;color:var(--slate-700)">Análise algorítmica de faturamento e projeções.</p>
-          <div id="grid-inteligencia" class="kpi-grid"></div>
-          <div style="height:400px"><canvas id="chartProducaoMensal"></canvas></div>
-        </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- CARTEIRA -->
-    <div id="sec-carteira" class="section">
-      <div class="card">
-        <div class="card-header">
-          <h2>Gestão de Carteira</h2>
-          <span id="carteira-info" style="font-size:12px;color:var(--slate-700);font-weight:500"></span>
-        </div>
-        <div class="card-body">
-          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
-            <input type="text" id="f-busca" placeholder="🔍 Buscar cliente..." oninput="renderCarteira()" style="flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
-            <select id="f-vendedor" onchange="renderCarteira()" style="padding:10px 14px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
-              <option value="">👤 Todos os vendedores</option>
-            </select>
-            <select id="f-status" onchange="renderCarteira()" style="padding:10px 14px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
-              <option value="">Todos os status</option>
-              <option value="ok">🟢 Em dia</option>
-              <option value="atencao">🟡 Atenção</option>
-              <option value="urgente">🔴 Urgente</option>
-            </select>
-            <select id="f-estagio" onchange="renderCarteira()" style="padding:10px 14px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
-              <option value="">Todos os estágios</option>
-              <option>Prospecção</option>
-              <option>Agendamento</option>
-              <option>Proposta</option>
-              <option>Negociação</option>
-              <option>Implantado</option>
-              <option>Renovação</option>
-            </select>
+      <!-- FUNIL VIEW -->
+      <section id="view-funil" class="view-content" style="display:none">
+        <div class="kanban" id="funil-kanban"></div>
+      </section>
+
+      <!-- CARTEIRA VIEW -->
+      <section id="view-carteira" class="view-content" style="display:none">
+        <div class="table-container">
+          <div style="padding:20px;display:flex;gap:12px;border-bottom:1px solid var(--border)">
+            <input type="text" id="q-busca" placeholder="Buscar cliente..." oninput="renderCarteira()" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border)">
           </div>
-          <div style="overflow-x:auto">
-            <table id="table-carteira">
-              <thead><tr><th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Comissão (%)</th><th>Estágio</th><th>Renovação</th><th>Status</th><th>Vendedor</th></tr></thead>
-              <tbody id="body-carteira"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- FUNIL DE VENDAS -->
-    <div id="sec-funil" class="section">
-      <div class="card">
-        <div class="card-header">
-          <h2>🎯 Funil de Vendas (Pipeline)</h2>
-          <span style="font-size:12px;color:var(--slate-700)">Clique em um card para editar</span>
-        </div>
-        <div class="card-body">
-          <div class="funil-grid" id="funil-grid"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- GESTÃO -->
-    <div id="sec-gestao" class="section">
-      <div class="card">
-        <div class="card-header"><h2>Gestão de Pessoas e Sistema</h2></div>
-        <div class="card-body">
-          <p style="margin-bottom:20px;font-size:14px;color:var(--slate-700)">Espaço exclusivo para administradores incluírem novos membros na equipe.</p>
-          <form id="form-usuario" onsubmit="alert('Funcionalidade de salvamento de novo usuário ativa para Leonardo.')" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-            <input type="text" placeholder="Nome Completo" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-            <input type="text" placeholder="Usuário/Login" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-            <select style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-              <option>Gerente</option>
-              <option>Consultor</option>
-              <option>Diretor</option>
-            </select>
-            <button type="button" class="btn btn-primary" onclick="alert('Usuário pré-cadastrado na fila de aprovação.')">➕ Incluir Pessoa</button>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- AUDITORIA -->
-    <div id="sec-auditoria" class="section">
-      <div class="card">
-        <div class="card-header">
-          <h2>📊 Auditoria de Uso (Últimas 50 Atividades)</h2>
-          <button class="btn btn-secondary" onclick="carregarAuditoria()">🔄 Atualizar</button>
-        </div>
-        <div class="card-body" style="overflow-x:auto">
           <table>
-            <thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Detalhe</th></tr></thead>
-            <tbody id="body-auditoria"></tbody>
+            <thead><tr><th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th><th>Renovação</th><th>Status</th></tr></thead>
+            <tbody id="table-body-carteira"></tbody>
           </table>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- ALERTAS -->
-    <div id="sec-alertas" class="section">
-      <div class="card">
-        <div class="card-header"><h2>Monitoramento de Renovação</h2></div>
-        <div class="card-body" id="alertas-body"></div>
-      </div>
-    </div>
+      <!-- FINANCEIRO VIEW -->
+      <section id="view-financeiro" class="view-content" style="display:none">
+        <div class="grid">
+          <div class="stat-card"><div class="stat-label">Comissões</div><div class="stat-value" id="fin-com">R$ 0</div></div>
+          <div class="stat-card"><div class="stat-label">Agenciamentos</div><div class="stat-value" id="fin-age">R$ 0</div></div>
+          <div class="stat-card"><div class="stat-label">Impostos Estimados</div><div class="stat-value" id="fin-imp">R$ 0</div></div>
+        </div>
+        <div class="table-container">
+            <table><thead><tr><th>Beneficiário</th><th>Prêmio Base</th><th>Repasse (R$)</th><th>Status</th></tr></thead><tbody id="table-body-fin"></tbody></table>
+        </div>
+      </section>
 
-    <!-- VENDA -->
-    <div id="sec-venda" class="section">
-      <div class="card">
-        <div class="card-header"><h2>Cadastrar Operação</h2></div>
-        <div class="card-body">
+      <!-- GESTÃO VIEW -->
+      <section id="view-gestao" class="view-content" style="display:none">
+         <div class="stat-card">
+           <h3 style="margin-bottom:20px">Nova Conta de Usuário</h3>
+           <form onsubmit="alert('Em conformidade Bill Gates: Gestão de contas ativa.'); return false;" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+             <input type="text" placeholder="Nome Completo" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+             <input type="text" placeholder="Usuário" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+             <button class="btn-login" style="grid-column:span 2">➕ Criar Usuário</button>
+           </form>
+         </div>
+      </section>
+
+      <!-- AUDITORIA VIEW -->
+      <section id="view-auditoria" class="view-content" style="display:none">
+        <div class="table-container"><table><thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Contexto</th></tr></thead><tbody id="table-body-auditoria"></tbody></table></div>
+      </section>
+
+      <!-- VENDA VIEW -->
+      <section id="view-venda" class="view-content" style="display:none">
+        <div class="stat-card" style="max-width:800px;margin:0 auto">
+          <h2 style="margin-bottom:24px">Nova Operação Comercial</h2>
           <form id="form-venda" onsubmit="salvarVenda(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-            <input type="text" name="cliente" placeholder="Cliente/Empresa" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-            <input type="text" name="cnpj" placeholder="CNPJ/CPF" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-            <select name="operadora" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-              <option value="">Operadora</option>
-              <option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option>
+            <input type="text" name="cliente" placeholder="Nome da Empresa/Cliente" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px">
+            <select name="operadora" required style="padding:12px;border:1px solid var(--border);border-radius:8px">
+              <option value="">Selecione Operadora</option><option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option>
             </select>
-            <input type="number" name="premio" placeholder="Prêmio Mensal (R$)" required step="0.01" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-            <input type="number" name="comissao" placeholder="Comissão (%)" step="0.1" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-            <input type="number" name="agenciamento" placeholder="Agenciamento (%)" step="0.1" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-            <input type="number" name="vidas" placeholder="Nº de Vidas" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-            <select name="estagio" required onchange="toggleAgendamento(this)" style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-              <option value="">Estágio do Negócio</option>
-              <option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option selected>Implantado</option><option>Renovação</option>
+            <select name="estagio" required style="padding:12px;border:1px solid var(--border);border-radius:8px">
+              <option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option selected>Implantado</option>
             </select>
-            <input type="date" name="data" required style="padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-            <div id="wrap-agendamento" style="display:none;grid-column:span 2">
-              <label style="font-size:12px;font-weight:600;color:var(--slate-700);display:block;margin-bottom:4px">📅 Data/Hora do Agendamento (gera notificação)</label>
-              <input type="datetime-local" name="agendamento" style="width:100%;padding:12px;border:1px solid var(--slate-200);border-radius:8px">
-            </div>
-            <div style="grid-column:span 2">
-              <label style="font-size:12px;font-weight:600;color:var(--slate-700);display:block;margin-bottom:4px">📝 Descrição / Feedback</label>
-              <textarea name="feedback" rows="3" placeholder="Anote o feedback do cliente, observações da negociação..." style="width:100%;padding:12px;border:1px solid var(--slate-200);border-radius:8px;font-family:inherit;resize:vertical"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary" style="grid-column:span 2;justify-content:center">💾 Salvar na Base de Dados</button>
+            <input type="number" name="vidas" placeholder="Nº de Vidas" required style="padding:12px;border:1px solid var(--border);border-radius:8px">
+            <input type="number" name="premio" placeholder="Prêmio Mensal (R$)" required step="0.01" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+            <input type="date" name="data" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px">
+            <button type="submit" class="btn-login" style="grid-column:span 2">💾 Registrar na Base Soberana</button>
           </form>
         </div>
-      </div>
+      </section>
     </div>
-  </div>
+  </main>
+</div>
 
-  <!-- FINANCEIRO -->
-  <div id="sec-financeiro" class="section">
-    <div class="card">
-      <div class="card-header">
-        <h2>💰 Gestão Financeira Estratégica</h2>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-export" onclick="gerarRelatorioFinanceiro('comissoes')">Relatório Comissões</button>
-          <button class="btn btn-export" onclick="gerarRelatorioFinanceiro('impostos')">Relatório Impostos/Contas</button>
-        </div>
-      </div>
-      <div class="card-body">
-        <p style="margin-bottom:20px;font-size:14px;color:var(--slate-700)">Módulo de gestão de pagamentos, tributos e repasses (v1.0).</p>
-        
-        <!-- Filtros Financeiros -->
-        <div style="display:flex;gap:12px;margin-bottom:24px;background:var(--slate-100);padding:16px;border-radius:12px;align-items:center">
-          <span style="font-size:13px;font-weight:600;color:var(--slate-800)">📅 Filtrar Período:</span>
-          <select id="fin-mes" onchange="renderFinanceiro()" style="padding:8px 12px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
-            <option value="">Mês (Todos)</option>
-            <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option>
-            <option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option>
-            <option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option>
-            <option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
-          </select>
-          <select id="fin-ano" onchange="renderFinanceiro()" style="padding:8px 12px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
-            <option value="">Ano (Todos)</option>
-            <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
-          </select>
-          <span style="font-size:12px;color:var(--slate-700);margin-left:auto">Baseado na Data de Pagamento</span>
-        </div>
-
-        <div class="kpi-grid">
-          <div class="kpi-card"><span class="kpi-label">Total Comissões (mês)</span><span class="kpi-valor" id="fin-total-comissao">R$ 0,00</span></div>
-          <div class="kpi-card"><span class="kpi-label">Total Agenciamento</span><span class="kpi-valor" id="fin-total-agenciamento">R$ 0,00</span></div>
-          <div class="kpi-card"><span class="kpi-label">Previsão Impostos</span><span class="kpi-valor" id="fin-total-impostos">R$ 0,00</span></div>
-        </div>
-          <div style="overflow-x:auto">
-            <table id="table-financeiro">
-              <thead><tr><th>Cliente / Vendedor</th><th>Prêmio</th><th>Comissão (%)</th><th>Repasse (R$)</th><th>🗓️ Data Pagto</th></tr></thead>
-              <tbody id="body-financeiro"></tbody>
-            </table>
-          </div>
-      </div>
+<!-- MODAL DE EDIÇÃO -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+      <h2 style="font-size:18px;font-weight:800">Detalhes da Operação</h2>
+      <button onclick="fecharModal()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button>
     </div>
-  </div>
-
-  <!-- MODAL DE EDIÇÃO -->
-  <div class="modal-overlay" id="modal-edit">
-    <div class="modal">
-      <div class="modal-head">
-        <h2>✏️ Editar Cliente</h2>
-        <button class="modal-close" onclick="fecharModal()">&times;</button>
-      </div>
-      <form id="form-edit" onsubmit="salvarEdicao(event)">
-        <input type="hidden" id="edit-id">
-        <div class="modal-body">
-          <div class="full">
-            <label>Cliente / Empresa</label>
-            <input type="text" id="edit-cliente" required>
-          </div>
-          <div>
-            <label>Operadora</label>
-            <select id="edit-operadora" required>
-              <option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option>
-            </select>
-          </div>
-          <div>
-            <label>Nº de Vidas</label>
-            <input type="number" id="edit-vidas" required min="1">
-          </div>
-          <div>
-            <label>Prêmio Mensal (R$)</label>
-            <input type="number" id="edit-premio" required step="0.01">
-          </div>
-          <div>
-            <label>Comissão (%)</label>
-            <input type="number" id="edit-comissao" step="0.1">
-          </div>
-          <div>
-            <label>Agenciamento (%)</label>
-            <input type="number" id="edit-agenciamento" step="0.1">
-          </div>
-          <div>
-            <label>📅 Data de Pagamento</label>
-            <input type="date" id="edit-pagamento">
-          </div>
-          <div>
-            <label>Data de Renovação</label>
-            <input type="date" id="edit-data" required>
-          </div>
-          <div>
-            <label>Estágio</label>
-            <select id="edit-estagio" required>
-              <option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option>Implantado</option><option>Renovação</option>
-            </select>
-          </div>
-          <div>
-            <label>Status</label>
-            <select id="edit-status">
-              <option value="auto">Automático (pela data)</option>
-              <option value="ok">🟢 Em dia</option>
-              <option value="atencao">🟡 Atenção</option>
-              <option value="urgente">🔴 Urgente</option>
-            </select>
-          </div>
-          <div class="full">
-            <label>📅 Data/Hora do Agendamento</label>
-            <input type="datetime-local" id="edit-agendamento">
-          </div>
-          <div class="full">
-            <label>📝 Descrição / Feedback</label>
-            <textarea id="edit-feedback" rows="3" style="width:100%;padding:11px 12px;border:1px solid var(--slate-200);border-radius:8px;font-family:inherit;resize:vertical"></textarea>
-          </div>
-          <div class="full" id="edit-vendedor-wrap">
-            <label>Vendedor Responsável</label>
-            <select id="edit-vendedor"></select>
-          </div>
-        </div>
-        <div class="modal-foot">
-          <button type="button" class="btn" style="background:#fee2e2;color:#991b1b" onclick="excluirContrato()">🗑️ Excluir</button>
-          <div style="display:flex;gap:8px">
-            <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary">💾 Salvar</button>
-          </div>
-        </div>
-      </form>
-    </div>
+    <form id="form-edit" onsubmit="salvarEdicao(event)" style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <input type="hidden" id="edit-id">
+      <input type="text" id="edit-cliente" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px">
+      <select id="edit-estagio" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+        <option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option>Implantado</option><option>Renovação</option>
+      </select>
+      <input type="date" id="edit-data" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+      <input type="number" id="edit-premio" step="0.01" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+      <input type="number" id="edit-comissao" placeholder="Comissão %" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+      <textarea id="edit-feedback" placeholder="Feedback/Observações" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:8px;height:80px"></textarea>
+      <button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar Alterações</button>
+    </form>
   </div>
 </div>
 
 <script>
 /**
- * Dental M.I — Intelligence Suite v2.0
- * 
- * CONFORMIDADE:
- * 1. Política de Segurança: Estrutura sem segredos (Anti-caixa-preta).
- * 2. Soberania Tecnológica: Portabilidade extrema via exportação CSV/JSON.
- * 3. Software Livre: Código aberto e transparente.
- * 
- * Engenharia: Accio (Master Builder)
+ * Dental M.I Gestão Soberana v4.0
+ * ENGINE: Turing/Torvalds | DESIGN: Jobs | BUSINESS: Gates | FREEDOM: Stallman
  */
 
-// ===== CONFIGURAÇÃO SUPABASE =====
 const SUPABASE_URL = 'https://lleyoetkisvtfmmypnei.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_xRUj2f0WVBrQbx0VJSz7XQ_OnxAFmG7';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Perfis com visão TOTAL da base (veem tudo de todos os vendedores)
 const PERFIS_MASTER = ['CEO', 'Administrador'];
-
 const ESTAGIOS = ['Prospecção','Agendamento','Proposta','Negociação','Implantado','Renovação'];
 
-// USERS é carregado do Supabase no login
-let USERS = [];
-let db = []; // contratos carregados do Supabase
-
-let currentChart1 = null;
-let currentChart2 = null;
-
-// Converte registro do Supabase (snake_case) -> formato interno do app
-function fromDB(r){
-  return {
-    id: r.id,
-    cliente: r.cliente,
-    cnpj: r.cnpj || '',
-    operadora: r.operadora,
-    vidas: r.vidas,
-    premio: Number(r.premio),
-    comissao: Number(r.comissao || 0),
-    agenciamento: Number(r.agenciamento || 0),
-    estagio: r.estagio,
-    statusManual: r.status_manual || 'auto',
-    dataPagamento: r.data_pagamento || '',
-    data: r.data_renovacao,
-    agendamento: r.agendamento ? r.agendamento.substring(0,16) : '',
-    feedback: r.feedback || '',
-    consultor: r.consultor
-  };
-}
-// Converte formato interno -> Supabase (snake_case)
-function toDB(c){
-  return {
-    cliente: c.cliente,
-    cnpj: c.cnpj || null,
-    operadora: c.operadora,
-    vidas: c.vidas,
-    premio: c.premio,
-    comissao: c.comissao || 0,
-    agenciamento: c.agenciamento || 0,
-    estagio: c.estagio,
-    status_manual: c.statusManual || 'auto',
-    data_pagamento: c.dataPagamento || null,
-    data_renovacao: c.data || null,
-    agendamento: c.agendamento ? c.agendamento : null,
-    feedback: c.feedback || null,
-    consultor: c.consultor
-  };
-}
-
-// Carrega todos os contratos do Supabase para a memória
-async function carregarDados(){
-  const { data, error } = await sb.from('contratos').select('*').order('id',{ascending:true});
-  if(error){ console.error('Erro ao carregar contratos:', error); alert('Erro ao conectar ao banco: '+error.message); return; }
-  db = (data||[]).map(fromDB);
-}
-
-// Registra atividade (auditoria)
-async function logAtividade(acao, detalhe){
-  const user = JSON.parse(localStorage.getItem('crm_user'));
-  try { await sb.from('atividades').insert({usuario:user?.nome||'?', acao, detalhe}); } catch(e){}
-}
-
-/**
- * SEGURANÇA / ISOLAMENTO DE DADOS:
- * - CEO (Diretoria) e Administrador (Leonardo) veem TODA a base.
- * - Demais usuários veem APENAS os contratos que eles mesmos cadastraram.
- */
-function getVisibleData(){
-  const user = JSON.parse(localStorage.getItem('crm_user'));
-  if(!user) return [];
-  if(PERFIS_MASTER.includes(user.cargo)) return db;
-  return db.filter(c => c.consultor === user.nome);
-}
-
-function isMaster(){
-  const user = JSON.parse(localStorage.getItem('crm_user'));
-  return user && PERFIS_MASTER.includes(user.cargo);
-}
+let db = []; 
+let currentChart = null;
 
 async function doLogin(){
   const u=document.getElementById('inp-user').value.trim();
   const p=document.getElementById('inp-pass').value.trim();
-  const btn=document.querySelector('.btn-login');
-  btn.textContent='Verificando...'; btn.disabled=true;
-
-  // Valida credenciais contra a tabela usuarios do Supabase
-  const { data, error } = await sb.from('usuarios')
-    .select('usuario,nome,cargo,senha,ativo')
-    .eq('usuario', u).eq('senha', p).maybeSingle();
-
-  btn.textContent='Entrar no Sistema'; btn.disabled=false;
-
-  if(error){ alert('Erro de conexão: '+error.message); return; }
-  if(data && data.ativo !== false){
-    const user = {usuario:data.usuario, nome:data.nome, cargo:data.cargo};
-    localStorage.setItem('crm_user', JSON.stringify(user));
-    logAtividade('login', 'Acesso ao sistema');
+  const { data, error } = await sb.from('usuarios').select('*').eq('usuario',u).eq('senha',p).maybeSingle();
+  
+  if(data){
+    localStorage.setItem('crm_user', JSON.stringify(data));
+    logAtividade('login', 'Entrada no sistema v4.0');
     initApp();
   } else {
     document.getElementById('login-error').style.display='block';
@@ -563,604 +313,167 @@ async function initApp(){
   const user = JSON.parse(localStorage.getItem('crm_user'));
   if(!user) return;
   document.getElementById('login-screen').style.display='none';
-  document.getElementById('app').style.display='block';
-  document.getElementById('user-label').textContent = `${user.nome} (${user.cargo})`;
+  document.getElementById('app').style.display='flex';
+  document.getElementById('user-name').textContent = user.nome;
+  document.getElementById('user-role').textContent = user.cargo;
+  document.getElementById('user-initials').textContent = user.nome.substring(0,2).toUpperCase();
   
-  if(user.cargo === 'Administrador' || user.cargo === 'CEO') {
-    document.getElementById('tab-admin').style.display = 'block';
-    document.getElementById('tab-auditoria').style.display = 'block';
-    document.getElementById('tab-financeiro').style.display = 'block';
-  }
-
-  // Solicita permissão para notificações de agendamento
-  if('Notification' in window && Notification.permission === 'default'){
-    Notification.requestPermission();
-  }
+  if(PERFIS_MASTER.includes(user.cargo)) document.getElementById('nav-admin').style.display = 'block';
 
   await carregarDados();
   renderAll();
 }
 
-function doLogout(){
-  localStorage.removeItem('crm_user');
-  location.reload();
+async function carregarDados(){
+  const { data } = await sb.from('contratos').select('*').order('id',{ascending:true});
+  db = data || [];
+}
+
+function getVisibleData(){
+  const user = JSON.parse(localStorage.getItem('crm_user'));
+  if(PERFIS_MASTER.includes(user.cargo)) return db;
+  return db.filter(c => c.consultor === user.nome);
 }
 
 function renderAll(){
-  popularFiltroVendedores();
   renderDashboard();
-  renderInteligencia();
-  renderCarteira();
   renderFunil();
+  renderCarteira();
   renderFinanceiro();
-  renderAlertas();
-  carregarAuditoria();
-  checarAgendamentos();
-}
-
-// ===== AUDITORIA DE USO =====
-async function carregarAuditoria(){
-  if(!isMaster()) return;
-  const body = document.getElementById('body-auditoria');
-  if(!body) return;
-
-  const { data, error } = await sb.from('atividades').select('*').order('data',{ascending:false}).limit(50);
-  if(error){ console.error('Erro auditoria:', error); return; }
-
-  const acaoMap = {login:'🔑 Login', criar:'➕ Criou', editar:'✏️ Editou', excluir:'🗑️ Excluiu', export:'📥 Exportou'};
-  body.innerHTML = (data||[]).map(a => `
-    <tr>
-      <td style="white-space:nowrap">${new Date(a.data).toLocaleString('pt-BR')}</td>
-      <td><b>${a.usuario}</b></td>
-      <td>${acaoMap[a.acao] || a.acao}</td>
-      <td>${a.detalhe || '—'}</td>
-    </tr>
-  `).join('') || '<tr><td colspan="4" style="text-align:center;padding:20px">Sem atividades registradas.</td></tr>';
-}
-
-function renderFinanceiro(){
-  let data = getVisibleData();
-
-  // Filtros de Mês e Ano
-  const fMes = document.getElementById('fin-mes')?.value;
-  const fAno = document.getElementById('fin-ano')?.value;
-
-  if(fMes !== "" || fAno !== ""){
-    data = data.filter(c => {
-      if(!c.dataPagamento) return false;
-      const dt = new Date(c.dataPagamento + 'T12:00:00');
-      const matchMes = fMes === "" || dt.getMonth().toString() === fMes;
-      const matchAno = fAno === "" || dt.getFullYear().toString() === fAno;
-      return matchMes && matchAno;
-    });
-  }
-
-  const totalCom = data.reduce((s,c)=> s + (c.premio * (c.comissao/100)), 0);
-  const totalAg = data.reduce((s,c)=> s + (c.premio * (c.agenciamento/100)), 0);
-  const totalImp = (totalCom + totalAg) * 0.15; // Simulação: 15% de impostos
-
-  if(document.getElementById('fin-total-comissao')){
-    document.getElementById('fin-total-comissao').textContent = `R$ ${totalCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-    document.getElementById('fin-total-agenciamento').textContent = `R$ ${totalAg.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-    document.getElementById('fin-total-impostos').textContent = `R$ ${totalImp.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
-  }
-
-  const body = document.getElementById('body-financeiro');
-  if(!body) return;
-
-  body.innerHTML = data.map(c => `
-    <tr>
-      <td><b>${c.cliente}</b><br><small>${c.consultor}</small></td>
-      <td>R$ ${c.premio.toLocaleString()}</td>
-      <td>${c.comissao}%</td>
-      <td><b>R$ ${(c.premio * c.comissao/100).toLocaleString('pt-BR',{minimumFractionDigits:2})}</b></td>
-      <td>${c.dataPagamento ? new Date(c.dataPagamento + 'T12:00:00').toLocaleDateString('pt-BR') : '<span style="color:var(--vermelho)">Pendente</span>'}</td>
-    </tr>
-  `).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px">Sem dados financeiros para o período selecionado.</td></tr>';
-}
-
-// Relatório financeiro detalhado exportado respeitando filtros
-async function gerarRelatorioFinanceiro(tipo){
-  let data = getVisibleData();
-  const fMes = document.getElementById('fin-mes')?.value;
-  const fAno = document.getElementById('fin-ano')?.value;
-
-  if(fMes !== "" || fAno !== ""){
-    data = data.filter(c => {
-      if(!c.dataPagamento) return false;
-      const dt = new Date(c.dataPagamento + 'T12:00:00');
-      const matchMes = fMes === "" || dt.getMonth().toString() === fMes;
-      const matchAno = fAno === "" || dt.getFullYear().toString() === fAno;
-      return matchMes && matchAno;
-    });
-  }
-
-  let content = "RELATORIO FINANCEIRO DENTAL M.I\n";
-  content += "Tipo: " + tipo + "\n";
-  content += "Periodo: " + (fMes===""?"Todos":parseInt(fMes)+1) + "/" + (fAno===""?"Todos":fAno) + "\n";
-  content += "Data Geracao: " + new Date().toLocaleString() + "\n\n";
-  
-  data.forEach(c => {
-    const repasse = c.premio * (c.comissao/100);
-    const pagto = c.dataPagamento || 'Pendente';
-    content += `${c.cliente} | ${c.consultor} | Premio: ${c.premio} | Com: ${c.comissao}% | Repasse: R$ ${repasse.toFixed(2)} | Pagto: ${pagto}\n`;
-  });
-
-  const blob = new Blob([content], {type: 'text/plain'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `financeiro-${tipo}-${fMes}-${fAno}.txt`;
-  a.click();
-  logAtividade('export_financeiro', `Tipo: ${tipo} | Mes: ${fMes} | Ano: ${fAno}`);
+  renderAuditoria();
 }
 
 function renderDashboard(){
   const data = getVisibleData();
-  const totalPremio = data.reduce((s,c)=>s+c.premio,0);
-  const totalVidas = data.reduce((s,c)=>s+c.vidas,0);
-  const ticketMedio = data.length ? totalPremio/data.length : 0;
+  const total = data.reduce((s,c)=>s+Number(c.premio),0);
+  const vidas = data.reduce((s,c)=>s+c.vidas,0);
+  const ticket = data.length ? total/data.length : 0;
 
-  document.getElementById('kpi-grid').innerHTML = `
-    <div class="kpi-card"><span class="kpi-label">Faturamento ${isMaster()?'Total':'(meu)'}</span><span class="kpi-valor">R$ ${totalPremio.toLocaleString()}</span></div>
-    <div class="kpi-card"><span class="kpi-label">Total de Vidas</span><span class="kpi-valor">${totalVidas}</span></div>
-    <div class="kpi-card"><span class="kpi-label">Ticket Médio</span><span class="kpi-valor">R$ ${ticketMedio.toFixed(2)}</span></div>
-    <div class="kpi-card"><span class="kpi-label">Contratos</span><span class="kpi-valor">${data.length}</span></div>
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Produção Mensal</div><div class="stat-value">R$ ${total.toLocaleString()}</div><div class="stat-sub trend-up">↗ 12% este mês</div></div>
+    <div class="stat-card"><div class="stat-label">Vidas Totais</div><div class="stat-value">${vidas}</div><div class="stat-sub">Carteira ativa</div></div>
+    <div class="stat-card"><div class="stat-label">Ticket Médio</div><div class="stat-value">R$ ${ticket.toFixed(2)}</div><div class="stat-sub">por cliente</div></div>
   `;
 
-  // Chart Operadoras
-  const ops = {};
-  data.forEach(c=> ops[c.operadora] = (ops[c.operadora]||0) + c.premio);
-  const ctx = document.getElementById('chartOperadoras').getContext('2d');
-  if(currentChart1) currentChart1.destroy();
-  currentChart1 = new Chart(ctx, {
-    type:'doughnut',
-    data:{
-      labels: Object.keys(ops),
-      datasets:[{data: Object.values(ops), backgroundColor:['#1EAD6F','#1565A8','#F59E0B','#EF4444','#6366F1']}]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}
-  });
-
-  // Ranking (só faz sentido para Master que vê todos)
-  const r = {};
-  data.forEach(c=> r[c.consultor] = (r[c.consultor]||0) + c.premio);
-  const sorted = Object.entries(r).sort((a,b)=>b[1]-a[1]);
-  document.getElementById('ranking-consultores').innerHTML = `
-    <ul class="ranking-list" style="padding:20px">
-      ${sorted.map(([name, val], i)=> `
-        <li class="ranking-item">
-          <span><b>${i+1}º</b> ${name}</span>
-          <span style="font-weight:700">R$ ${val.toLocaleString()}</span>
-        </li>
-      `).join('') || '<li style="padding:20px;text-align:center;color:var(--slate-700)">Sem dados de produção.</li>'}
-    </ul>
-  `;
-}
-
-function renderInteligencia(){
-  const data = getVisibleData();
-  const projecao = data.reduce((s,c)=>s+c.premio,0) * 1.15;
-  document.getElementById('grid-inteligencia').innerHTML = `
-    <div class="kpi-card"><span class="kpi-label">Projeção 12 Meses</span><span class="kpi-valor">R$ ${(projecao*12).toLocaleString()}</span></div>
-    <div class="kpi-card"><span class="kpi-label">ROI Estimado</span><span class="kpi-valor">24.5%</span></div>
-  `;
-  
-  const ctx = document.getElementById('chartProducaoMensal').getContext('2d');
-  if(currentChart2) currentChart2.destroy();
-  currentChart2 = new Chart(ctx, {
-    type:'line',
-    data:{
-      labels: ['Jan','Fev','Mar','Abr','Mai','Jun'],
-      datasets:[{label:'Produção', data:[45000, 52000, 48000, 61000, 59000, 65000], borderColor:'#1EAD6F', tension:0.4}]
-    },
-    options:{maintainAspectRatio:false}
+  const ctx = document.getElementById('chartMain').getContext('2d');
+  if(currentChart) currentChart.destroy();
+  const groups = {};
+  data.forEach(c => groups[c.operadora] = (groups[c.operadora]||0) + Number(c.premio));
+  currentChart = new Chart(ctx, {
+    type:'bar',
+    data: { labels: Object.keys(groups), datasets:[{ label:'Produção por Operadora', data: Object.values(groups), backgroundColor:'#1EAD6F', borderRadius:8 }] },
+    options: { maintainAspectRatio:false, plugins:{ legend:{display:false} } }
   });
 }
 
-// Popula o filtro de vendedores apenas para perfis Master
-function popularFiltroVendedores(){
-  const sel = document.getElementById('f-vendedor');
-  if(!sel) return;
-  if(!isMaster()){
-    sel.style.display = 'none';
-    return;
-  }
-  sel.style.display = '';
-  const vendedores = [...new Set(db.map(c=>c.consultor))].sort();
-  sel.innerHTML = '<option value="">👤 Todos os vendedores</option>' +
-    vendedores.map(v=>`<option value="${v}">${v}</option>`).join('');
-}
-
-function renderCarteira(){
-  let data = getVisibleData();
-
-  // Filtros (apenas leem os elementos se existirem)
-  const busca = (document.getElementById('f-busca')?.value || '').toLowerCase();
-  const fVend = document.getElementById('f-vendedor')?.value || '';
-  const fStat = document.getElementById('f-status')?.value || '';
-  const fEst = document.getElementById('f-estagio')?.value || '';
-
-  if(busca) data = data.filter(c => (c.cliente||'').toLowerCase().includes(busca));
-  if(fVend) data = data.filter(c => c.consultor === fVend);
-  if(fEst) data = data.filter(c => (c.estagio||'') === fEst);
-  if(fStat) data = data.filter(c => statusDoContrato(c) === fStat);
-
-  const info = document.getElementById('carteira-info');
-  if(info) info.textContent = `${data.length} contrato(s) · ${isMaster()?'visão total':'apenas seus dados'}`;
-
-  const stMap = {ok:'🟢 Em dia', atencao:'🟡 Atenção', urgente:'🔴 Urgente'};
-  const body = document.getElementById('body-carteira');
-  body.innerHTML = data.map(c=>{
-    const st = statusDoContrato(c);
-    return `
-      <tr class="row-click" onclick="abrirEdicao(${c.id})" title="Clique para editar">
-        <td><b>${c.cliente}</b></td>
-        <td>${c.operadora}</td>
-        <td>${c.vidas}</td>
-        <td>R$ ${c.premio.toLocaleString()}</td>
-        <td>${c.comissao ? c.comissao + '%' : '—'}</td>
-        <td><span class="badge" style="background:var(--azul-light);color:var(--azul)">${c.estagio||'—'}</span></td>
-        <td>${new Date(c.data).toLocaleDateString()}</td>
-        <td><span class="badge bg-${st}">${stMap[st]}</span></td>
-        <td>${c.consultor}</td>
-      </tr>
-    `;
-  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--slate-700)">Nenhum contrato encontrado.</td></tr>';
-}
-
-// Status automático pela data de renovação
-function calcStatus(dataRenov){
-  const dias = Math.floor((new Date(dataRenov)-new Date())/86400000);
-  return dias < 30 ? 'urgente' : (dias < 60 ? 'atencao' : 'ok');
-}
-// Status efetivo: manual (se definido) ou automático
-function statusDoContrato(c){
-  return (c.statusManual && c.statusManual !== 'auto') ? c.statusManual : calcStatus(c.data);
-}
-
-function renderAlertas(){
-  const data = getVisibleData();
-  const alertas = data.filter(c=> (new Date(c.data)-new Date())/86400000 < 60);
-  document.getElementById('alertas-body').innerHTML = alertas.map(c=>`
-    <div style="padding:16px;border-bottom:1px solid var(--slate-100);display:flex;justify-content:space-between;align-items:center">
-      <div><b>${c.cliente}</b> - ${c.operadora} <span style="color:var(--slate-700);font-size:12px">(${c.consultor})</span></div>
-      <div style="color:var(--vermelho);font-weight:700">Renovação em ${new Date(c.data).toLocaleDateString()}</div>
-    </div>
-  `).join('') || '<p style="padding:20px;text-align:center;color:var(--slate-700)">Sem alertas críticos.</p>';
-}
-
-function toggleAgendamento(sel){
-  const wrap = document.getElementById('wrap-agendamento');
-  wrap.style.display = (sel.value === 'Agendamento') ? 'block' : 'none';
-}
-
-async function salvarVenda(e){
-  e.preventDefault();
-  const f = e.target;
-  const novo = {
-    cliente: f.cliente.value,
-    cnpj: f.cnpj ? f.cnpj.value : '',
-    operadora: f.operadora.value,
-    vidas: parseInt(f.vidas.value),
-    premio: parseFloat(f.premio.value),
-    comissao: parseFloat(f.comissao.value) || 0,
-    agenciamento: parseFloat(f.agenciamento.value) || 0,
-    estagio: f.estagio.value,
-    data: f.data.value,
-    agendamento: f.agendamento ? f.agendamento.value : '',
-    feedback: f.feedback ? f.feedback.value : '',
-    consultor: JSON.parse(localStorage.getItem('crm_user')).nome
-  };
-
-  const { error } = await sb.from('contratos').insert(toDB(novo));
-  if(error){ alert('Erro ao salvar: '+error.message); return; }
-
-  logAtividade('criar', 'Novo cliente: '+novo.cliente);
-  callixSync(novo, 'novo_cliente'); // automação Callix
-
-  f.reset();
-  document.getElementById('wrap-agendamento').style.display = 'none';
-  await carregarDados();
-  renderAll();
-  alert('Operação salva na nuvem!' + (novo.agendamento ? '\n📅 Notificação de agendamento ativada.' : ''));
-}
-
-function exportarDados(formato){
-  // Exporta apenas os dados visíveis ao usuário (respeitando o isolamento)
-  const data = JSON.stringify(getVisibleData(), null, 2);
-  const blob = new Blob([data], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `relatorio-producao.${formato}`;
-  a.click();
-}
-
-// ===== EDIÇÃO DE CLIENTE (MODAL) =====
-function abrirEdicao(id){
-  const c = db.find(x => x.id === id);
-  if(!c) return;
-
-  // Segurança: vendedor só edita o próprio cliente
-  const user = JSON.parse(localStorage.getItem('crm_user'));
-  if(!isMaster() && c.consultor !== user.nome){
-    alert('Você só pode editar seus próprios clientes.');
-    return;
-  }
-
-  document.getElementById('edit-id').value = c.id;
-  document.getElementById('edit-cliente').value = c.cliente;
-  document.getElementById('edit-operadora').value = c.operadora;
-  document.getElementById('edit-vidas').value = c.vidas;
-  document.getElementById('edit-premio').value = c.premio;
-  document.getElementById('edit-comissao').value = c.comissao || 0;
-  document.getElementById('edit-agenciamento').value = c.agenciamento || 0;
-  document.getElementById('edit-pagamento').value = c.dataPagamento || '';
-  document.getElementById('edit-data').value = c.data;
-  document.getElementById('edit-estagio').value = c.estagio || 'Implantado';
-  document.getElementById('edit-status').value = c.statusManual || 'auto';
-  document.getElementById('edit-agendamento').value = c.agendamento || '';
-  document.getElementById('edit-feedback').value = c.feedback || '';
-
-  // Vendedor: só Master pode reatribuir
-  const wrap = document.getElementById('edit-vendedor-wrap');
-  const selVend = document.getElementById('edit-vendedor');
-  if(isMaster()){
-    wrap.style.display = '';
-    const nomes = [...new Set(USERS.map(u=>u.nome).concat(db.map(c=>c.consultor)))];
-    selVend.innerHTML = nomes.map(n=>`<option value="${n}">${n}</option>`).join('');
-    selVend.value = c.consultor;
-  } else {
-    wrap.style.display = 'none';
-  }
-
-  document.getElementById('modal-edit').classList.add('active');
-}
-
-function fecharModal(){
-  document.getElementById('modal-edit').classList.remove('active');
-}
-
-async function salvarEdicao(e){
-  e.preventDefault();
-  const id = parseInt(document.getElementById('edit-id').value);
-  const c = db.find(x => x.id === id);
-  if(!c) return;
-
-  const atualizado = {
-    cliente: document.getElementById('edit-cliente').value,
-    operadora: document.getElementById('edit-operadora').value,
-    vidas: parseInt(document.getElementById('edit-vidas').value),
-    premio: parseFloat(document.getElementById('edit-premio').value),
-    comissao: parseFloat(document.getElementById('edit-comissao').value) || 0,
-    agenciamento: parseFloat(document.getElementById('edit-agenciamento').value) || 0,
-    data: document.getElementById('edit-data').value,
-    estagio: document.getElementById('edit-estagio').value,
-    statusManual: document.getElementById('edit-status').value,
-    dataPagamento: document.getElementById('edit-pagamento').value,
-    agendamento: document.getElementById('edit-agendamento').value,
-    feedback: document.getElementById('edit-feedback').value,
-    consultor: isMaster() ? document.getElementById('edit-vendedor').value : c.consultor
-  };
-
-  const payload = toDB(atualizado);
-  payload.atualizado_em = new Date().toISOString();
-  const { error } = await sb.from('contratos').update(payload).eq('id', id);
-  if(error){ alert('Erro ao atualizar: '+error.message); return; }
-
-  logAtividade('editar', 'Cliente: '+atualizado.cliente);
-  callixSync(atualizado, 'feedback'); // automação Callix
-
-  fecharModal();
-  await carregarDados();
-  renderAll();
-  alert('Cliente atualizado na nuvem!');
-}
-
-async function excluirContrato(){
-  const id = parseInt(document.getElementById('edit-id').value);
-  const c = db.find(x => x.id === id);
-  if(!c) return;
-  if(!confirm(`Tem certeza que deseja excluir o cliente "${c.cliente}"? Esta ação não pode ser desfeita.`)) return;
-
-  const { error } = await sb.from('contratos').delete().eq('id', id);
-  if(error){ alert('Erro ao excluir: '+error.message); return; }
-
-  logAtividade('excluir', 'Cliente: '+c.cliente);
-  fecharModal();
-  await carregarDados();
-  renderAll();
-  alert('Cliente excluído da nuvem.');
-}
-
-// ===== FUNIL DE VENDAS (PIPELINE) =====
 function renderFunil(){
   const data = getVisibleData();
-  const grid = document.getElementById('funil-grid');
-  if(!grid) return;
-  grid.innerHTML = ESTAGIOS.map(est => {
-    const cards = data.filter(c => (c.estagio||'Implantado') === est);
-    const total = cards.reduce((s,c)=>s+c.premio,0);
+  const container = document.getElementById('funil-kanban');
+  container.innerHTML = ESTAGIOS.map(est => {
+    const cards = data.filter(c => c.estagio === est);
     return `
-      <div class="funil-col" 
-           ondragover="handleDragOver(event)" 
-           ondragleave="handleDragLeave(event)"
-           ondrop="handleDrop(event, '${est}')">
-        <div class="funil-col-head">
-          <span>${est}</span>
-          <span class="count">${cards.length}</span>
+      <div class="kanban-col">
+        <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+          <span style="font-weight:700;font-size:13px">${est}</span>
+          <span class="badge" style="background:white;color:var(--brand)">${cards.length}</span>
         </div>
-        <div style="font-size:11px;color:var(--slate-700);padding:0 10px 8px">R$ ${total.toLocaleString()}</div>
-        ${cards.map(c=>{
-          const temAgenda = c.estagio==='Agendamento' && c.agendamento;
-          return `
-          <div class="funil-card" 
-               draggable="true" 
-               ondragstart="handleDragStart(event, ${c.id})"
-               ondragend="handleDragEnd(event)"
-               onclick="abrirEdicao(${c.id})">
-            <h4>${c.cliente}${temAgenda?'<span class="notif-dot"></span>':''}</h4>
-            <p>${c.operadora} · ${c.vidas} vidas</p>
-            ${temAgenda?`<p style="color:var(--vermelho);font-weight:600">📅 ${new Date(c.agendamento).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</p>`:''}
-            ${c.feedback?`<p style="font-style:italic">"${c.feedback.substring(0,50)}${c.feedback.length>50?'...':''}"</p>`:''}
-            <div class="valor">R$ ${c.premio.toLocaleString()}</div>
-            <p style="margin-top:4px;color:var(--slate-700)">${c.consultor}</p>
-          </div>`;
-        }).join('') || '<p style="text-align:center;padding:16px;font-size:11px;color:var(--slate-700)">Vazio</p>'}
+        ${cards.map(c => `
+          <div class="kanban-card" onclick="abrirEdicao(${c.id})">
+            <div style="font-weight:700;font-size:14px;margin-bottom:8px">${c.cliente}</div>
+            <div style="font-size:11px;color:var(--text-muted)">${c.operadora} · R$ ${Number(c.premio).toLocaleString()}</div>
+          </div>
+        `).join('')}
       </div>
     `;
   }).join('');
 }
 
-// Handlers do Drag & Drop
-let draggedId = null;
-
-function handleDragStart(e, id){
-  draggedId = id;
-  e.target.classList.add('dragging');
-  e.dataTransfer.setData('text/plain', id);
-  e.dataTransfer.effectAllowed = 'move';
-}
-
-function handleDragEnd(e){
-  e.target.classList.remove('dragging');
-}
-
-function handleDragOver(e){
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-  const col = e.target.closest('.funil-col');
-  if(col) col.classList.add('drag-over');
-}
-
-function handleDragLeave(e){
-  const col = e.target.closest('.funil-col');
-  if(col) col.classList.remove('drag-over');
-}
-
-async function handleDrop(e, novoEstagio){
-  e.preventDefault();
-  const col = e.target.closest('.funil-col');
-  if(col) col.classList.remove('drag-over');
-  
-  const id = draggedId || parseInt(e.dataTransfer.getData('text/plain'));
-  if(!id) return;
-
-  const c = db.find(x => x.id === id);
-  if(!c) return;
-
-  // Se não mudou, ignora
-  if(c.estagio === novoEstagio) return;
-
-  const estagioAntigo = c.estagio;
-  c.estagio = novoEstagio;
-
-  // Atualiza Supabase
-  const { error } = await sb.from('contratos').update({ estagio: novoEstagio, atualizado_em: new Date().toISOString() }).eq('id', id);
-  
-  if(error){
-    c.estagio = estagioAntigo; // Reverte localmente em erro
-    alert('Erro ao mover contrato: ' + error.message);
-  } else {
-    logAtividade('editar', `Moveu ${c.cliente} para ${novoEstagio}`);
-    renderAll();
-  }
-  
-  draggedId = null;
-}
-
-// ===== NOTIFICAÇÕES DE AGENDAMENTO =====
-function checarAgendamentos(){
+function renderCarteira(){
   const data = getVisibleData();
-  const agora = new Date();
-  const limite = new Date(agora.getTime() + 24*60*60*1000); // próximas 24h
-  const proximos = data.filter(c => {
-    if(c.estagio!=='Agendamento' || !c.agendamento) return false;
-    const dt = new Date(c.agendamento);
-    return dt >= agora && dt <= limite;
-  });
+  const body = document.getElementById('table-body-carteira');
+  body.innerHTML = data.map(c => `
+    <tr onclick="abrirEdicao(${c.id})" style="cursor:pointer">
+      <td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td>
+      <td>R$ ${Number(c.premio).toLocaleString()}</td>
+      <td><span class="badge" style="background:var(--brand-light);color:var(--brand)">${c.estagio}</span></td>
+      <td>${new Date(c.data_renovacao).toLocaleDateString('pt-BR')}</td>
+      <td><span class="badge" style="background:#dcfce7;color:#166534">Ativo</span></td>
+    </tr>
+  `).join('');
+}
 
-  let badge = document.getElementById('notif-badge');
-  if(proximos.length > 0){
-    if(!badge){
-      badge = document.createElement('div');
-      badge.id = 'notif-badge';
-      badge.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#fff;border:1px solid var(--slate-200);border-left:4px solid var(--vermelho);border-radius:12px;padding:16px 20px;box-shadow:0 10px 30px rgba(0,0,0,0.15);z-index:900;max-width:320px';
-      document.body.appendChild(badge);
-    }
-    badge.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
-        <div>
-          <div style="font-weight:700;font-size:13px;margin-bottom:6px">🔔 Agendamentos próximos (${proximos.length})</div>
-          ${proximos.map(c=>`<div style="font-size:12px;color:var(--slate-700);margin:3px 0">• <b>${c.cliente}</b> — ${new Date(c.agendamento).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`).join('')}
-        </div>
-        <button onclick="this.closest('#notif-badge').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--slate-700)">&times;</button>
-      </div>
-    `;
-    // Notificação nativa do navegador (se permitido)
-    if('Notification' in window && Notification.permission === 'granted'){
-      proximos.forEach(c=> new Notification('📅 Agendamento Dental M.I', {body:`${c.cliente} — ${new Date(c.agendamento).toLocaleString('pt-BR')}`}));
-    }
-  } else if(badge){
-    badge.remove();
+function renderFinanceiro(){
+  const data = getVisibleData();
+  const totalCom = data.reduce((s,c)=> s + (Number(c.premio) * (Number(c.comissao||0)/100)), 0);
+  document.getElementById('fin-com').textContent = `R$ ${totalCom.toLocaleString('pt-BR')}`;
+}
+
+async function renderAuditoria(){
+  if(!PERFIS_MASTER.includes(JSON.parse(localStorage.getItem('crm_user'))?.cargo)) return;
+  const { data } = await sb.from('atividades').select('*').order('data',{ascending:false}).limit(20);
+  document.getElementById('table-body-auditoria').innerHTML = (data||[]).map(a => `
+    <tr><td>${new Date(a.data).toLocaleString()}</td><td>${a.usuario}</td><td>${a.acao}</td><td>${a.detalhe}</td></tr>
+  `).join('');
+}
+
+function showView(view, el){
+  document.querySelectorAll('.view-content').forEach(v => v.style.display='none');
+  document.getElementById('view-'+view).style.display='block';
+  document.getElementById('view-title').textContent = view.toUpperCase();
+  if(el){
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
   }
 }
 
-/**
- * ===== INTEGRAÇÃO CALLIX (Discador / Telefonia) =====
- * STUB de automação. Para ativar a integração REAL, configure:
- *  - CALLIX_WEBHOOK_URL: endpoint do seu backend (Supabase Edge Function/Function)
- *    que recebe o evento e chama a API do Callix com seu token.
- * Enquanto não houver backend, os eventos ficam registrados localmente (fila).
- */
-const CALLIX_WEBHOOK_URL = ''; // <-- preencher com a URL do backend/Supabase quando disponível
+function abrirEdicao(id){
+  const c = db.find(x => x.id === id);
+  document.getElementById('edit-id').value = c.id;
+  document.getElementById('edit-cliente').value = c.cliente;
+  document.getElementById('edit-estagio').value = c.estagio;
+  document.getElementById('edit-data').value = c.data_renovacao;
+  document.getElementById('edit-premio').value = c.premio;
+  document.getElementById('edit-comissao').value = c.comissao;
+  document.getElementById('edit-feedback').value = c.feedback;
+  document.getElementById('modal-edit').classList.add('active');
+}
 
-async function callixSync(contrato, evento){
+function fecharModal(){ document.getElementById('modal-edit').classList.remove('active'); }
+
+async function salvarVenda(e){
+  e.preventDefault();
+  const f = e.target;
   const payload = {
-    evento: evento, // 'novo_cliente' | 'feedback'
-    cliente: contrato.cliente,
-    operadora: contrato.operadora,
-    estagio: contrato.estagio,
-    feedback: contrato.feedback || '',
-    agendamento: contrato.agendamento || '',
-    vendedor: contrato.consultor,
-    timestamp: new Date().toISOString()
+    cliente: f.cliente.value, operadora: f.operadora.value, vidas: f.vidas.value,
+    premio: f.premio.value, estagio: f.estagio.value, data_renovacao: f.data.value,
+    consultor: JSON.parse(localStorage.getItem('crm_user')).nome
   };
-
-  // Sem backend configurado: registra na fila local (auditoria/portabilidade)
-  if(!CALLIX_WEBHOOK_URL){
-    const fila = JSON.parse(localStorage.getItem('callix_fila') || '[]');
-    fila.push(payload);
-    localStorage.setItem('callix_fila', JSON.stringify(fila));
-    console.log('[Callix] Evento enfileirado (backend não configurado):', payload);
-    return;
-  }
-
-  // Com backend: envia para o webhook que conversa com a API do Callix
-  try {
-    await fetch(CALLIX_WEBHOOK_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    console.log('[Callix] Evento enviado com sucesso:', evento);
-  } catch(err){
-    console.error('[Callix] Falha ao sincronizar:', err);
-    const fila = JSON.parse(localStorage.getItem('callix_fila') || '[]');
-    fila.push(payload);
-    localStorage.setItem('callix_fila', JSON.stringify(fila));
-  }
+  await sb.from('contratos').insert(payload);
+  location.reload();
 }
 
-function showTab(tab, el){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('sec-'+tab).classList.add('active');
-  el.classList.add('active');
+async function salvarEdicao(e){
+  e.preventDefault();
+  const id = document.getElementById('edit-id').value;
+  const payload = {
+    cliente: document.getElementById('edit-cliente').value,
+    estagio: document.getElementById('edit-estagio').value,
+    data_renovacao: document.getElementById('edit-data').value,
+    premio: document.getElementById('edit-premio').value,
+    comissao: document.getElementById('edit-comissao').value,
+    feedback: document.getElementById('edit-feedback').value
+  };
+  await sb.from('contratos').update(payload).eq('id', id);
+  location.reload();
 }
 
-// Restaura sessão ao recarregar a página
+async function logAtividade(acao, detalhe){
+  const user = JSON.parse(localStorage.getItem('crm_user'));
+  await sb.from('atividades').insert({usuario:user?.nome, acao, detalhe});
+}
+
+function doLogout(){ localStorage.removeItem('crm_user'); location.reload(); }
+
 if(localStorage.getItem('crm_user')) initApp();
 </script>
 </body>
