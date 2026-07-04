@@ -319,6 +319,24 @@ td{padding:14px 16px;border-bottom:1px solid var(--slate-100);font-size:14px}
       </div>
       <div class="card-body">
         <p style="margin-bottom:20px;font-size:14px;color:var(--slate-700)">Módulo de gestão de pagamentos, tributos e repasses (v1.0).</p>
+        
+        <!-- Filtros Financeiros -->
+        <div style="display:flex;gap:12px;margin-bottom:24px;background:var(--slate-100);padding:16px;border-radius:12px;align-items:center">
+          <span style="font-size:13px;font-weight:600;color:var(--slate-800)">📅 Filtrar Período:</span>
+          <select id="fin-mes" onchange="renderFinanceiro()" style="padding:8px 12px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
+            <option value="">Mês (Todos)</option>
+            <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option>
+            <option value="3">Abril</option><option value="4">Maio</option><option value="5">Junho</option>
+            <option value="6">Julho</option><option value="7">Agosto</option><option value="8">Setembro</option>
+            <option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
+          </select>
+          <select id="fin-ano" onchange="renderFinanceiro()" style="padding:8px 12px;border:1px solid var(--slate-200);border-radius:8px;font-size:14px">
+            <option value="">Ano (Todos)</option>
+            <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
+          </select>
+          <span style="font-size:12px;color:var(--slate-700);margin-left:auto">Baseado na Data de Pagamento</span>
+        </div>
+
         <div class="kpi-grid">
           <div class="kpi-card"><span class="kpi-label">Total Comissões (mês)</span><span class="kpi-valor" id="fin-total-comissao">R$ 0,00</span></div>
           <div class="kpi-card"><span class="kpi-label">Total Agenciamento</span><span class="kpi-valor" id="fin-total-agenciamento">R$ 0,00</span></div>
@@ -601,7 +619,22 @@ async function carregarAuditoria(){
 }
 
 function renderFinanceiro(){
-  const data = getVisibleData();
+  let data = getVisibleData();
+
+  // Filtros de Mês e Ano
+  const fMes = document.getElementById('fin-mes')?.value;
+  const fAno = document.getElementById('fin-ano')?.value;
+
+  if(fMes !== "" || fAno !== ""){
+    data = data.filter(c => {
+      if(!c.dataPagamento) return false;
+      const dt = new Date(c.dataPagamento + 'T12:00:00');
+      const matchMes = fMes === "" || dt.getMonth().toString() === fMes;
+      const matchAno = fAno === "" || dt.getFullYear().toString() === fAno;
+      return matchMes && matchAno;
+    });
+  }
+
   const totalCom = data.reduce((s,c)=> s + (c.premio * (c.comissao/100)), 0);
   const totalAg = data.reduce((s,c)=> s + (c.premio * (c.agenciamento/100)), 0);
   const totalImp = (totalCom + totalAg) * 0.15; // Simulação: 15% de impostos
@@ -621,16 +654,31 @@ function renderFinanceiro(){
       <td>R$ ${c.premio.toLocaleString()}</td>
       <td>${c.comissao}%</td>
       <td><b>R$ ${(c.premio * c.comissao/100).toLocaleString('pt-BR',{minimumFractionDigits:2})}</b></td>
-      <td>${c.dataPagamento ? new Date(c.dataPagamento).toLocaleDateString('pt-BR') : '<span style="color:var(--vermelho)">Pendente</span>'}</td>
+      <td>${c.dataPagamento ? new Date(c.dataPagamento + 'T12:00:00').toLocaleDateString('pt-BR') : '<span style="color:var(--vermelho)">Pendente</span>'}</td>
     </tr>
-  `).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px">Sem dados financeiros.</td></tr>';
+  `).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px">Sem dados financeiros para o período selecionado.</td></tr>';
 }
 
-// Relatório financeiro detalhado exportado
+// Relatório financeiro detalhado exportado respeitando filtros
 async function gerarRelatorioFinanceiro(tipo){
-  const data = getVisibleData();
+  let data = getVisibleData();
+  const fMes = document.getElementById('fin-mes')?.value;
+  const fAno = document.getElementById('fin-ano')?.value;
+
+  if(fMes !== "" || fAno !== ""){
+    data = data.filter(c => {
+      if(!c.dataPagamento) return false;
+      const dt = new Date(c.dataPagamento + 'T12:00:00');
+      const matchMes = fMes === "" || dt.getMonth().toString() === fMes;
+      const matchAno = fAno === "" || dt.getFullYear().toString() === fAno;
+      return matchMes && matchAno;
+    });
+  }
+
   let content = "RELATORIO FINANCEIRO DENTAL M.I\n";
-  content += "Tipo: " + tipo + "\nData: " + new Date().toLocaleString() + "\n\n";
+  content += "Tipo: " + tipo + "\n";
+  content += "Periodo: " + (fMes===""?"Todos":parseInt(fMes)+1) + "/" + (fAno===""?"Todos":fAno) + "\n";
+  content += "Data Geracao: " + new Date().toLocaleString() + "\n\n";
   
   data.forEach(c => {
     const repasse = c.premio * (c.comissao/100);
@@ -642,9 +690,9 @@ async function gerarRelatorioFinanceiro(tipo){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `financeiro-${tipo}.txt`;
+  a.download = `financeiro-${tipo}-${fMes}-${fAno}.txt`;
   a.click();
-  logAtividade('export_financeiro', tipo);
+  logAtividade('export_financeiro', `Tipo: ${tipo} | Mes: ${fMes} | Ano: ${fAno}`);
 }
 
 function renderDashboard(){
