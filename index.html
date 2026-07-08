@@ -11,90 +11,160 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --brand: #1EAD6F; --brand-dark: #168a52; --brand-light: #eefaf4; --bg: #f8fafc;
-  --sidebar: #0f172a; --sidebar-item: #94a3b8; --sidebar-active: #ffffff;
-  --card: #ffffff; --text-main: #1e293b; --text-muted: #64748b; --border: #e2e8f0;
-  --accent: #6366f1; --danger: #ef4444; --warning: #f59e0b; --success: #10b981;
-  --radius: 12px; --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --brand: #1EAD6F; 
+  --brand-dark: #168a52;
+  --brand-light: #eefaf4;
+  --bg: #f8fafc;
+  --sidebar: #0f172a;
+  --sidebar-item: #94a3b8;
+  --sidebar-active: #ffffff;
+  --card: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #6366f1;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
+  --radius: 12px;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); height: 100vh; overflow: hidden; }
+
 .app-container { display: flex; height: 100vh; width: 100vw; }
-.sidebar { width: 260px; background: var(--sidebar); height: 100%; display: flex; flex-direction: column; padding: 24px; color: white; transition: all 0.3s ease; z-index: 100; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 260px; background: var(--sidebar); height: 100%; display: flex; flex-direction: column;
+  padding: 24px; color: white; transition: all 0.3s ease; z-index: 100;
+}
 .sidebar-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding: 0 8px; }
 .sidebar-logo img { height: 42px; border-radius: 10px; }
 .sidebar-logo h1 { font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 800; letter-spacing: -0.5px; }
+
 .nav-menu { flex: 1; list-style: none; }
-.nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius); color: var(--sidebar-item); cursor: pointer; margin-bottom: 6px; transition: all 0.2s; font-size: 14px; font-weight: 500; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: var(--radius);
+  color: var(--sidebar-item); cursor: pointer; margin-bottom: 6px; transition: all 0.2s; font-size: 14px; font-weight: 500;
+}
 .nav-item:hover { background: rgba(255,255,255,0.06); color: white; }
 .nav-item.active { background: var(--brand); color: white; box-shadow: 0 4px 15px rgba(30,173,111,0.3); font-weight: 600; }
+
 .sidebar-footer { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; }
 .user-profile { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .user-avatar { width: 36px; height: 36px; background: var(--brand); border-radius: 50%; display: flex; align-items: center; justify-content:center; font-weight: 800; font-size: 13px; color: white; }
+
+/* MAIN CONTENT */
 .main-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fdfdfd; position: relative; }
-.top-header { height: 72px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; }
+.top-header {
+  height: 72px; background: white; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; padding: 0 32px;
+}
 .view-title { font-family: 'Manrope', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; white-space: nowrap; }
 .content-area { flex: 1; overflow-y: auto; padding: 32px; scroll-behavior: smooth; }
+
+/* SEARCH HEADER */
 .header-search { position: relative; flex: 1; max-width: 500px; margin: 0 30px; }
-.header-search input { width: 100%; padding: 10px 16px 10px 40px; border-radius: 12px; border: 1px solid var(--border); font-size: 14px; outline: none; background: #fcfcfc; }
-.header-search i { position: absolute; left: 14px; top: 10px; opacity: 0.5; font-style: normal; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-bottom: 32px; }
-.stat-card { background: white; padding: 24px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.2s; }
+.header-search input { width: 100%; padding: 10px 16px 10px 40px; border-radius: 12px; border: 1px solid var(--border); font-size: 14px; outline: none; background: #fcfcfc; transition: all 0.2s; }
+.header-search input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-light); }
+.header-search i { position: absolute; left: 14px; top: 11px; opacity: 0.4; font-style: normal; }
+
+/* CARDS */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 32px; }
+.stat-card {
+  background: white; padding: 24px; border-radius: 16px; border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.2s;
+}
 .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.04); }
 .stat-label { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
 .stat-value { font-size: 28px; font-weight: 900; color: var(--sidebar); letter-spacing: -1px; }
+
+/* TABLES */
 .table-container { background: white; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.02); overflow: hidden; }
 table { width: 100%; border-collapse: collapse; }
 th { background: #fafafa; padding: 16px; text-align: left; font-size: 11px; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px; }
 td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text-main); }
 tr:hover td { background: var(--brand-light); }
 .badge { padding: 5px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-.kanban { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 10px; min-height: 500px; align-items: flex-start; }
-.kanban-col { background: #f1f5f9; min-width: 280px; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; flex-shrink: 0; }
-.kanban-col h4 { font-size: 13px; font-weight: 800; color: var(--sidebar); margin-bottom: 16px; display: flex; justify-content: space-between; }
-.kanban-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid var(--border); transition: all 0.2s; }
-.kanban-card:hover { border-color: var(--brand); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+
+/* KANBAN */
+.kanban { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 16px; min-height: 550px; align-items: flex-start; }
+.kanban-col { background: #f1f5f9; min-width: 300px; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; flex-shrink: 0; }
+.kanban-col h4 { font-size: 13px; font-weight: 800; color: var(--sidebar); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+.kanban-card {
+  background: white; border-radius: 12px; padding: 18px; margin-bottom: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.kanban-card:hover { border-color: var(--brand); box-shadow: 0 8px 15px rgba(0,0,0,0.05); transform: translateY(-2px); }
+
+/* MODALS */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); 
+  backdrop-filter: blur(8px); z-index: 2000; align-items: center; justify-content: center; padding: 20px;
+}
 .modal-overlay.active { display: flex; }
 .modal { background: white; border-radius: 24px; width: 100%; max-width: 650px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4); overflow: hidden; animation: modalIn 0.3s; }
+
 @keyframes modalIn { from { opacity:0; transform: translateY(20px) scale(0.95); } to { opacity:1; transform: translateY(0) scale(1); } }
-#login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); }
-.login-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); border-radius: 32px; padding: 64px 48px; width: 100%; max-width: 440px; text-align: center; color: white; }
-.login-card input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 16px; border-radius: 12px; color: white; margin-bottom: 16px; outline: none; font-size: 15px; }
-.btn-login { width: 100%; background: var(--brand); color: white; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+
+/* LOGIN */
+#login-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+}
+.login-card {
+  background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 32px; padding: 64px 48px; width: 100%; max-width: 440px; text-align: center; color: white;
+}
+.login-card input {
+  width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
+  padding: 16px; border-radius: 12px; color: white; margin-bottom: 16px; outline: none; font-size: 15px;
+}
+.btn-login {
+  width: 100%; background: var(--brand); color: white; padding: 16px; border: none;
+  border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s;
+}
 .btn-login:hover { transform: translateY(-2px); background: var(--brand-dark); box-shadow: 0 8px 20px rgba(30,173,111,0.4); }
+
 .btn { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
 .btn-secondary { background: var(--bg); color: var(--text-main); border: 1px solid var(--border); }
-#loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 15px; }
+.btn-secondary:hover { background: white; border-color: var(--brand); }
+
+#loading-overlay { position: fixed; inset: 0; background: white; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 15px; }
 .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-#debug-status { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 10000; background: var(--border); }
-#debug-bar { height: 100%; width: 0; background: var(--brand); transition: width 0.3s; }
+
+@media(max-width: 900px) {
+  .sidebar { width: 80px; padding: 20px 10px; }
+  .sidebar h1, .sidebar span, .sidebar-logo h1 { display: none; }
+  .top-header { padding: 0 16px; }
+  .header-search { display: none; }
+}
 </style>
 </head>
 <body>
 
-<div id="debug-status"><div id="debug-bar"></div></div>
-<div id="loading-overlay"><div class="spinner"></div><div id="loading-text" style="font-size:12px;font-weight:700;color:var(--text-muted)">Conectando ao Supabase...</div></div>
+<div id="loading-overlay" style="display:none"><div class="spinner"></div><div style="font-weight:700;font-size:12px;color:var(--text-muted)">Carregando dados soberanos...</div></div>
 
-<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <img src="logo-dental.png" style="height:60px;margin-bottom:24px;border-radius:12px">
     <h1 style="font-family:'Manrope';font-weight:800;letter-spacing:-1px;font-size:26px">Dental M.I Gestão</h1>
-    <p style="opacity:0.6;margin-bottom:40px;font-size:14px">Sistema Conectado v5.5</p>
+    <p style="opacity:0.6;margin-bottom:40px;font-size:14px">Sistema de Alta Performance v6.0</p>
     <input type="text" id="inp-user" placeholder="Usuário">
     <input type="password" id="inp-pass" placeholder="Senha">
     <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px;font-size:13px;opacity:0.9">
-      <input type="checkbox" id="check-terms" checked style="width:16px;height:16px;margin:0;cursor:pointer">
+      <input type="checkbox" id="check-terms" style="width:16px;height:16px;margin:0;cursor:pointer">
       <label for="check-terms" style="cursor:pointer">Aceito os <a href="#" onclick="abrirTermos(event)" style="color:var(--brand);font-weight:700">Termos LGPD</a></label>
     </div>
     <button class="btn-login" id="btn-entrar" onclick="doLogin()">Entrar</button>
-    <p id="login-error" style="color:var(--danger);margin-top:20px;display:none;font-size:13px;font-weight:600">Erro de acesso.</p>
+    <p id="login-error" style="color:var(--danger);margin-top:20px;display:none;font-size:13px;font-weight:600">Acesso negado.</p>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app" class="app-container" style="display:none">
   <aside class="sidebar">
     <div class="sidebar-logo"><img src="logo-dental.png"><h1>Dental M.I</h1></div>
@@ -104,7 +174,7 @@ tr:hover td { background: var(--brand-light); }
       <div class="nav-item" onclick="showView('carteira',this)">📋 <span>Carteira</span></div>
       <div id="nav-financeiro" class="nav-item" style="display:none" onclick="showView('financeiro',this)">💰 <span>Financeiro</span></div>
       <div id="nav-admin" style="display:none">
-        <div class="nav-item" onclick="showView('gestao',this)">⚙️ <span>Equipe</span></div>
+        <div class="nav-item" onclick="showView('gestao',this)">⚙️ <span>Configurações</span></div>
         <div class="nav-item" onclick="showView('auditoria',this)">🕵️ <span>Auditoria</span></div>
       </div>
       <div id="nav-dev" style="display:none">
@@ -114,7 +184,7 @@ tr:hover td { background: var(--brand-light); }
     <div class="sidebar-footer">
       <div class="user-profile">
         <div class="user-avatar" id="user-initials">MI</div>
-        <div><div style="font-size:13px;font-weight:700" id="user-name">...</div><div style="font-size:11px;opacity:0.5" id="user-role">...</div></div>
+        <div><div style="font-size:13px;font-weight:700" id="user-name">Usuário</div><div style="font-size:11px;opacity:0.5" id="user-role">Cargo</div></div>
       </div>
       <div class="nav-item" onclick="doLogout()" style="color:var(--danger);margin-bottom:0">🚪 <span>Sair</span></div>
     </div>
@@ -123,7 +193,7 @@ tr:hover td { background: var(--brand-light); }
   <main class="main-view">
     <header class="top-header">
       <h2 class="view-title" id="view-title">Dashboard</h2>
-      <div class="header-search"><i>🔍</i><input type="text" id="global-search" placeholder="Buscar em toda a base..." oninput="filtrarGlobal(this.value)"></div>
+      <div class="header-search"><i>🔍</i><input type="text" id="global-search" placeholder="Pesquisa rápida (Cliente, Operadora, Vendedor)..." oninput="filtrarGlobal(this.value)"></div>
       <div style="display:flex;gap:10px">
         <button class="btn btn-secondary" onclick="abrirManual()">📖 Manual</button>
         <button id="btn-gestores" class="btn btn-secondary" style="display:none" onclick="abrirAcessoGestores()">🔑 Gestores</button>
@@ -132,34 +202,147 @@ tr:hover td { background: var(--brand-light); }
     </header>
 
     <div class="content-area">
+      <!-- DASHBOARD -->
       <section id="view-dashboard" class="view-content active">
         <div class="grid" id="stats-grid"></div>
         <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:24px">
           <div class="stat-card" style="height:400px"><canvas id="chartMain"></canvas></div>
-          <div class="table-container"><div style="padding:20px; font-weight:800; border-bottom:1px solid var(--border)">TOP PRODUTORES</div><div id="ranking-list"></div></div>
+          <div class="table-container">
+            <div style="padding:20px; font-weight:800; border-bottom:1px solid var(--border)">RANKING DE PRODUÇÃO</div>
+            <div id="ranking-list"></div>
+          </div>
         </div>
       </section>
-      <section id="view-funil" class="view-content" style="display:none"><div class="kanban" id="funil-kanban"></div></section>
-      <section id="view-carteira" class="view-content" style="display:none"><div class="table-container"><table><thead><tr id="head-carteira"></tr></thead><tbody id="table-body-carteira"></tbody></table></div></section>
-      <section id="view-financeiro" class="view-content" style="display:none"><div class="grid"><div class="stat-card"><div class="stat-label">Comissões</div><div class="stat-value" id="fin-com">R$ 0</div></div><div class="stat-card"><div class="stat-label">Agenciamentos</div><div class="stat-value" id="fin-age">R$ 0</div></div><div class="stat-card"><div class="stat-label">Impostos (6%)</div><div class="stat-value" id="fin-imp">R$ 0</div></div></div><div class="table-container"><table><thead><tr><th>Demonstrativo</th><th>Valor Base</th><th>Cálculo</th><th>Status</th></tr></thead><tbody id="table-body-fin"></tbody></table></div></section>
-      <section id="view-auditoria" class="view-content" style="display:none"><div class="table-container"><table><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Detalhe</th></tr></thead><tbody id="table-body-auditoria"></tbody></table></div></section>
-      <section id="view-dev" class="view-content" style="display:none"><div class="stat-card"><h3>Soberania</h3><button class="btn btn-secondary" style="margin-top:15px" onclick="exportarBackup()">📥 Exportar Base (JSON)</button></div></section>
-      <section id="view-venda" class="view-content" style="display:none"><div class="stat-card" style="max-width:800px;margin:0 auto"><h2>Nova Operação</h2><form id="form-venda" onsubmit="salvarVenda(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><input type="text" name="cliente" id="venda-cliente" placeholder="Empresa/Cliente" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" name="cnpj" id="venda-cnpj" placeholder="CNPJ ou CPF" required style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCNPJ('venda', this)">🔍 Consultar</button></div><input type="email" name="email" id="venda-email" placeholder="E-mail" style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="text" name="telefone" id="venda-telefone" placeholder="Telefone" style="padding:12px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" name="cep" id="venda-cep" placeholder="CEP" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCEP('venda', this)">🔍 Endereço</button></div><input type="text" name="logradouro" id="venda-logradouro" placeholder="Logradouro" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px"><select name="operadora" required style="padding:12px;border:1px solid var(--border);border-radius:10px"><option value="">Operadora</option><option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option></select><select name="estagio" required style="padding:12px;border:1px solid var(--border);border-radius:10px"><option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option selected>Implantado</option><option>Renovação</option></select><input type="number" name="vidas" placeholder="Nº Vidas" required style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="number" name="premio" placeholder="Prêmio Mensal (R$)" required step="0.01" style="padding:12px;border:1px solid var(--border);border-radius:10px"><input type="date" name="data" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px"><button type="submit" class="btn-login" style="grid-column:span 2;margin-top:10px">💾 Registrar na Nuvem</button></form></div></section>
+
+      <!-- FUNIL -->
+      <section id="view-funil" class="view-content" style="display:none">
+        <div class="kanban" id="funil-kanban"></div>
+      </section>
+
+      <!-- CARTEIRA -->
+      <section id="view-carteira" class="view-content" style="display:none">
+        <div class="table-container">
+          <table id="table-carteira">
+            <thead><tr id="head-carteira"></tr></thead>
+            <tbody id="table-body-carteira"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FINANCEIRO -->
+      <section id="view-financeiro" class="view-content" style="display:none">
+        <div class="grid">
+          <div class="stat-card"><div class="stat-label">Comissões</div><div class="stat-value" id="fin-com">R$ 0</div></div>
+          <div class="stat-card"><div class="stat-label">Agenciamentos</div><div class="stat-value" id="fin-age">R$ 0</div></div>
+          <div class="stat-card"><div class="stat-label">Impostos (6%)</div><div class="stat-value" id="fin-imp">R$ 0</div></div>
+        </div>
+        <div class="table-container"><table><thead><tr><th>Demonstrativo</th><th>Base Bruta</th><th>Valor Cálculo</th><th>Status</th></tr></thead><tbody id="table-body-fin"></tbody></table></div>
+      </section>
+
+      <!-- GESTÃO -->
+      <section id="view-gestao" class="view-content" style="display:none">
+         <div class="stat-card">
+           <h3 style="margin-bottom:20px">Gestão de Equipe</h3>
+           <p style="font-size:14px;color:var(--text-muted)">Configure os acessos dos consultores no Supabase Dashboard.</p>
+         </div>
+      </section>
+
+      <!-- AUDITORIA -->
+      <section id="view-auditoria" class="view-content" style="display:none">
+        <div class="table-container"><table><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Evento</th></tr></thead><tbody id="table-body-auditoria"></tbody></table></div>
+      </section>
+
+      <!-- DEV -->
+      <section id="view-dev" class="view-content" style="display:none">
+        <div class="stat-card"><h3>Soberania Stallman</h3><button class="btn btn-secondary" style="margin-top:15px" onclick="exportarBackup()">📥 Exportar Snapshot (JSON)</button></div>
+      </section>
+
+      <!-- VENDA -->
+      <section id="view-venda" class="view-content" style="display:none">
+        <div class="stat-card" style="max-width:800px;margin:0 auto">
+          <h2 style="font-family:'Manrope';font-weight:800;margin-bottom:30px">Nova Operação Comercial</h2>
+          <form id="form-venda" onsubmit="salvarVenda(event)" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <input type="text" name="cliente" id="venda-cliente" placeholder="Empresa/Cliente" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px">
+            <div style="grid-column:span 2;display:flex;gap:8px">
+              <input type="text" name="cnpj" id="venda-cnpj" placeholder="CNPJ ou CPF" required style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px">
+              <button type="button" class="btn btn-secondary" onclick="consultarCNPJ('venda', this)">🔍 Lupa Receita</button>
+            </div>
+            <input type="email" name="email" id="venda-email" placeholder="E-mail" style="padding:12px;border:1px solid var(--border);border-radius:10px">
+            <input type="text" name="telefone" id="venda-telefone" placeholder="Telefone" style="padding:12px;border:1px solid var(--border);border-radius:10px">
+            <div style="grid-column:span 2;display:flex;gap:8px">
+                <input type="text" name="cep" id="venda-cep" placeholder="CEP" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px">
+                <button type="button" class="btn btn-secondary" onclick="consultarCEP('venda', this)">🔍 Lupa Endereço</button>
+            </div>
+            <input type="text" name="logradouro" id="venda-logradouro" placeholder="Logradouro" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px">
+            <select name="operadora" required style="padding:12px;border:1px solid var(--border);border-radius:10px">
+              <option value="">Selecione Operadora</option><option>Amil</option><option>Bradesco</option><option>SulAmérica</option><option>Porto</option><option>Unimed</option>
+            </select>
+            <select name="estagio" required style="padding:12px;border:1px solid var(--border);border-radius:10px">
+              <option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option selected>Implantado</option><option>Renovação</option>
+            </select>
+            <input type="number" name="vidas" placeholder="Nº Vidas" required style="padding:12px;border:1px solid var(--border);border-radius:10px">
+            <input type="number" name="premio" placeholder="Prêmio Mensal (R$)" required step="0.01" style="padding:12px;border:1px solid var(--border);border-radius:10px">
+            <input type="date" name="data" required style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px">
+            <button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar na Nuvem</button>
+          </form>
+        </div>
+      </section>
     </div>
   </main>
 </div>
 
 <!-- MODAL EDIT -->
-<div class="modal-overlay" id="modal-edit"><div class="modal"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"><h3>Ficha do Cliente</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:26px;cursor:pointer;opacity:0.5">&times;</button></div><form id="form-edit" onsubmit="salvarEdicao(event)" style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px"><input type="hidden" id="edit-id"><input type="text" id="edit-cliente" placeholder="Cliente" style="grid-column:span 2;padding:10px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" id="edit-cnpj" placeholder="CNPJ/CPF" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCNPJ('edit', this)">🔍</button></div><input type="email" id="edit-email" placeholder="E-mail" style="padding:10px;border:1px solid var(--border);border-radius:10px"><input type="text" id="edit-telefone" placeholder="Telefone" style="padding:10px;border:1px solid var(--border);border-radius:10px"><div style="grid-column:span 2;display:flex;gap:8px"><input type="text" id="edit-cep" placeholder="CEP" style="flex:1;padding:10px;border:1px solid var(--border);border-radius:10px"><button type="button" class="btn btn-secondary" onclick="consultarCEP('edit', this)">🔍</button></div><input type="text" id="edit-logradouro" placeholder="Logradouro" style="grid-column:span 2;padding:10px;border:1px solid var(--border);border-radius:10px"><select id="edit-estagio" style="padding:10px;border:1px solid var(--border);border-radius:10px"><option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option>Implantado</option><option>Renovação</option></select><input type="date" id="edit-data" style="padding:10px;border:1px solid var(--border);border-radius:10px"><input type="number" id="edit-premio" step="0.01" style="padding:10px;border:1px solid var(--border);border-radius:10px"><input type="number" id="edit-comissao" placeholder="Comissão %" style="padding:10px;border:1px solid var(--border);border-radius:10px"><input type="number" id="edit-agenciamento" placeholder="Agenciamento %" style="padding:10px;border:1px solid var(--border);border-radius:10px"><input type="date" id="edit-pagamento" style="padding:10px;border:1px solid var(--border);border-radius:10px"><textarea id="edit-feedback" placeholder="Feedback" style="grid-column:span 2;padding:10px;border:1px solid var(--border);border-radius:10px;height:60px;font-family:inherit"></textarea><div id="wrap-admin-vendedor" style="display:none; grid-column:span 2; background:var(--bg); padding:16px; border-radius:12px"><label style="font-size:11px; font-weight:800; color:var(--text-muted); display:block; margin-bottom:8px">REATRIBUIR VENDEDOR (ADMIN)</label><select id="edit-vendedor" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px"></select></div><button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar Alterações</button><div style="grid-column:span 2; display:flex; gap:10px; margin-top:8px"><button type="button" class="btn btn-secondary" style="flex:1" onclick="gerarPropostaPDF()">📄 Proposta PDF</button><button type="button" class="btn" style="flex:1; background:#25D366; color:white" onclick="enviarWhatsApp()">📱 WhatsApp</button><button type="button" class="btn" style="background:#fee2e2; color:var(--danger)" onclick="excluirContrato()">🗑️</button></div></form></div></div>
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <h3 style="font-family:'Manrope';font-weight:800;font-size:18px">Ficha do Cliente</h3>
+      <button onclick="fecharModal()" style="border:none;background:none;font-size:26px;cursor:pointer;opacity:0.5">&times;</button>
+    </div>
+    <form id="form-edit" onsubmit="salvarEdicao(event)" style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <input type="hidden" id="edit-id">
+      <input type="text" id="edit-cliente" placeholder="Cliente" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px">
+      
+      <div style="grid-column:span 2;display:flex;gap:8px">
+        <input type="text" id="edit-cnpj" placeholder="CNPJ/CPF" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:10px">
+        <button type="button" class="btn btn-secondary" onclick="consultarCNPJ('edit', this)">🔍</button>
+      </div>
 
-<div class="modal-overlay" id="modal-manual"><div class="modal" style="max-width:650px"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>📖 Guia Dental M.I</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button></div><div style="padding:24px;font-size:14px;line-height:1.7"><p><b>Busca Global:</b> Use o campo no topo para pesquisar clientes instantaneamente.</p><p><b>Consultas 🔍:</b> Digite CNPJ ou CEP e clique na lupa para automação.</p></div></div></div>
-<div class="modal-overlay" id="modal-gestores"><div class="modal" style="max-width:650px"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>🔑 Acesso Master</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button></div><div style="padding:24px;font-size:14px;line-height:1.7"><p><b>Gestores (Diniz, Leonardo, Pedro, Sergio, Diego)</b> possuem acesso completo.</p></div></div></div>
-<div class="modal-overlay" id="modal-terms"><div class="modal" style="max-width:550px"><div style="padding:24px;border-bottom:1px solid var(--border)"><h3>Termos de Privacidade</h3></div><div style="padding:24px;font-size:14px"><p>Aceito o tratamento dos dados sob normas da LGPD.</p></div><div style="padding:20px 24px;text-align:right"><button class="btn btn-login" style="width:auto" onclick="document.getElementById('modal-terms').classList.remove('active');document.getElementById('check-terms').checked=true">Entendi e Aceito</button></div></div></div>
+      <input type="email" id="edit-email" placeholder="E-mail" style="padding:10px;border:1px solid var(--border);border-radius:10px">
+      <input type="text" id="edit-telefone" placeholder="Telefone" style="padding:10px;border:1px solid var(--border);border-radius:10px">
+      
+      <select id="edit-estagio" style="padding:10px;border:1px solid var(--border);border-radius:10px">
+        <option>Prospecção</option><option>Agendamento</option><option>Proposta</option><option>Negociação</option><option>Implantado</option><option>Renovação</option>
+      </select>
+      <input type="date" id="edit-data" style="padding:12px;border:1px solid var(--border);border-radius:10px">
+      
+      <input type="number" id="edit-premio" step="0.01" style="padding:10px;border:1px solid var(--border);border-radius:10px">
+      <input type="number" id="edit-comissao" placeholder="Comissão %" style="padding:10px;border:1px solid var(--border);border-radius:10px">
+      <input type="number" id="edit-agenciamento" placeholder="Agenciamento %" style="padding:10px;border:1px solid var(--border);border-radius:10px">
+      <input type="date" id="edit-pagamento" style="padding:10px;border:1px solid var(--border);border-radius:10px">
+      <textarea id="edit-feedback" placeholder="Feedback e Observações" style="grid-column:span 2;padding:12px;border:1px solid var(--border);border-radius:10px;height:80px;font-family:inherit"></textarea>
+      
+      <div id="wrap-admin-vendedor" style="display:none; grid-column:span 2; background:var(--bg); padding:16px; border-radius:12px">
+        <label style="font-size:11px; font-weight:800; color:var(--text-muted); display:block; margin-bottom:8px">REATRIBUIR VENDEDOR (MASTER)</label>
+        <select id="edit-vendedor" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:8px"></select>
+      </div>
+
+      <button type="submit" class="btn-login" style="grid-column:span 2">💾 Salvar na Nuvem</button>
+      
+      <div style="grid-column:span 2; display:flex; gap:10px; margin-top:8px">
+        <button type="button" class="btn btn-secondary" style="flex:1" onclick="gerarPropostaPDF()">📄 PDF</button>
+        <button type="button" class="btn" style="flex:1; background:#25D366; color:white" onclick="enviarWhatsApp()">📱 WhatsApp</button>
+        <button type="button" class="btn" style="background:#fee2e2; color:var(--danger)" onclick="excluirContrato()">🗑️</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAIS INSTRUTIVOS -->
+<div class="modal-overlay" id="modal-manual"><div class="modal" style="max-width:650px"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>📖 Guia Dental M.I</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button></div><div style="padding:24px;font-size:14px;line-height:1.7"><p><b>Busca Global:</b> Use o campo no topo para localizar clientes instantaneamente.</p><p><b>Lupas 🔍:</b> Preenchimento automático de CNPJ (Receita) e CEP (Endereço).</p><p><b>Pipeline:</b> Arraste para mudar o estágio no Funil.</p></div></div></div>
+<div class="modal-overlay" id="modal-gestores"><div class="modal" style="max-width:650px"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>🔑 Acesso Master</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button></div><div style="padding:24px;font-size:14px;line-height:1.7"><p>Gestores (Diniz, Leonardo, Pedro, Sergio, Diego) possuem visão total da base e gestão financeira de repasses.</p></div></div></div>
+<div class="modal-overlay" id="modal-terms"><div class="modal" style="max-width:550px"><div style="padding:24px;border-bottom:1px solid var(--border)"><h3>Termos de Privacidade</h3></div><div style="padding:24px;font-size:14px"><p>Aceito o tratamento dos dados de apólices e clientes conforme LGPD.</p></div><div style="padding:20px 24px;text-align:right"><button class="btn btn-login" style="width:auto;padding:12px 30px" onclick="document.getElementById('modal-terms').classList.remove('active');document.getElementById('check-terms').checked=true">Aceito</button></div></div></div>
 
 <script>
-/** 
- * v5.5 - MASTER FIX (RECONSTRUCTION) 
- */
 const SUPABASE_URL = 'https://lleyoetkisvtfmmypnei.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_xRUj2f0WVBrQbx0VJSz7XQ_OnxAFmG7';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -172,12 +355,12 @@ async function doLogin(){
   const u = document.getElementById('inp-user').value.trim();
   const p = document.getElementById('inp-pass').value.trim();
   if(!document.getElementById('check-terms').checked) return alert('Aceite os Termos.');
-  const btn = document.getElementById('btn-entrar'); btn.textContent = '...'; btn.disabled = true;
+  const btn = document.getElementById('btn-entrar'); btn.textContent = 'Verificando...'; btn.disabled = true;
   try {
     const { data, error } = await sb.from('usuarios').select('*').eq('usuario',u).eq('senha',p).maybeSingle();
     if(data){ localStorage.setItem('crm_user', JSON.stringify(data)); initApp(); }
     else { document.getElementById('login-error').style.display='block'; }
-  } catch(e){ alert('Erro conexao'); } finally { btn.textContent = 'Entrar'; btn.disabled = false; }
+  } catch(e){ alert('Erro conexão'); } finally { btn.textContent = 'Entrar'; btn.disabled = false; }
 }
 
 async function initApp(){
@@ -189,8 +372,8 @@ async function initApp(){
   document.getElementById('user-name').textContent = user.nome;
   document.getElementById('user-role').textContent = user.cargo;
   document.getElementById('user-initials').textContent = user.nome.substring(0,2).toUpperCase();
-  if(PERFIS_MASTER.includes(user.cargo)) {
-    document.getElementById('nav-admin').style.display = 'block';
+  if(PERFIS_MASTER.includes(user.cargo)) { 
+    document.getElementById('nav-admin').style.display = 'block'; 
     document.getElementById('nav-financeiro').style.display = 'block';
     document.getElementById('btn-gestores').style.display = 'block';
   }
@@ -201,7 +384,7 @@ async function initApp(){
 }
 
 async function carregarDados(){
-  const { data } = await sb.from('contratos').select('*').order('id',{ascending:true});
+  const { data, error } = await sb.from('contratos').select('*').order('id',{ascending:true});
   db = (data || []).map(r => ({
     id: r.id, cliente: r.cliente || 'S/N', cnpj: r.cnpj || '', email: r.email || '', telefone: r.telefone || '',
     cep: r.cep || '', logradouro: r.logradouro || '', bairro: r.bairro || '', cidade: r.cidade || '', uf: r.uf || '',
@@ -225,16 +408,16 @@ function renderDashboard(){
   const coms = data.reduce((s,c)=> s + (c.premio * (c.comissao/100)), 0);
   const isM = PERFIS_MASTER.includes(JSON.parse(localStorage.getItem('crm_user')).cargo);
   document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card"><div class="stat-label">Produção</div><div class="stat-value">R$ ${total.toLocaleString('pt-BR')}</div></div>
-    <div class="stat-card"><div class="stat-label">Vidas</div><div class="stat-value">${vidas}</div></div>
-    <div class="stat-card"><div class="stat-label">${isM?'Resultado Líquido':'Minha Comissão'}</div><div class="stat-value" style="color:var(--brand)">R$ ${(isM?total-coms:coms).toLocaleString('pt-BR')}</div></div>`;
+    <div class="stat-card"><div class="stat-label">Produção Mensal</div><div class="stat-value">R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+    <div class="stat-card"><div class="stat-label">Vidas Ativas</div><div class="stat-value">${vidas}</div></div>
+    <div class="stat-card"><div class="stat-label">${isM?'Resultado Líquido':'Minha Comissão'}</div><div class="stat-value" style="color:var(--brand)">R$ ${(isM?total-coms:coms).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>`;
   const ctx = document.getElementById('chartMain').getContext('2d');
   if(currentChart) currentChart.destroy();
   const ops = {}; data.forEach(c => ops[c.operadora] = (ops[c.operadora]||0) + c.premio);
   currentChart = new Chart(ctx, { type:'bar', data:{ labels:Object.keys(ops), datasets:[{data:Object.values(ops), backgroundColor:'#1EAD6F', borderRadius:8 }] }, options:{maintainAspectRatio:false, plugins:{legend:{display:false}}} });
   const r = {}; data.forEach(c => r[c.consultor] = (r[c.consultor]||0) + c.premio);
   const sorted = Object.entries(r).sort((a,b)=>b[1]-a[1]);
-  document.getElementById('ranking-list').innerHTML = sorted.map(([n,v],i)=>`<div style="padding:15px; display:flex; justify-content:space-between; border-bottom:1px solid #f1f5f9; font-size:13.5px"><span><b>${i+1}º</b> ${n}</span><b>R$ ${v.toLocaleString()}</b></div>`).join('');
+  document.getElementById('ranking-list').innerHTML = sorted.map(([n,v],i)=>`<div style="padding:15px; display:flex; justify-content:space-between; border-bottom:1px solid #f1f5f9; font-size:13.5px"><span><b>${i+1}º</b> ${n}</span><b>R$ ${v.toLocaleString('pt-BR')}</b></div>`).join('');
 }
 
 function renderFunil(){
@@ -242,7 +425,7 @@ function renderFunil(){
   document.getElementById('funil-kanban').innerHTML = ESTAGIOS.map(est => {
     const cards = data.filter(c => c.estagio === est);
     return `<div class="kanban-col"><h4><span>${est}</span> <span class="badge" style="background:white;color:var(--brand)">${cards.length}</span></h4>
-      ${cards.map(c => `<div class="kanban-card" onclick="abrirEdicao(${c.id})"><div style="font-weight:700;font-size:14px">${c.cliente}</div><div style="font-size:11px;opacity:0.6">R$ ${c.premio.toLocaleString()}</div></div>`).join('')}</div>`;
+      ${cards.map(c => `<div class="kanban-card" onclick="abrirEdicao(${c.id})"><div style="font-weight:700;font-size:14px;margin-bottom:6px">${c.cliente}</div><div style="font-size:11px;opacity:0.6">${c.operadora} · R$ ${c.premio.toLocaleString()}</div></div>`).join('')}</div>`;
   }).join('');
 }
 
@@ -250,13 +433,12 @@ function filtrarGlobal(q){ filtroAtivo = q.toLowerCase(); renderCarteira(); }
 
 function renderCarteira(){
   let data = getVisibleData();
-  if(filtroAtivo) data = data.filter(c => c.cliente.toLowerCase().includes(filtroAtivo) || c.consultor.toLowerCase().includes(filtroAtivo));
+  if(filtroAtivo) data = data.filter(c => c.cliente.toLowerCase().includes(filtroAtivo) || c.consultor.toLowerCase().includes(filtroAtivo) || c.operadora.toLowerCase().includes(filtroAtivo));
   const isM = PERFIS_MASTER.includes(JSON.parse(localStorage.getItem('crm_user')).cargo);
   document.getElementById('head-carteira').innerHTML = `<th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th>` + (isM ? `<th>Vendedor</th>` : '') + `<th>Status</th>`;
   document.getElementById('table-body-carteira').innerHTML = data.map(c => `
-    <tr onclick="abrirEdicao(${c.id})" style="cursor:pointer"><td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td><td>R$ ${c.premio.toLocaleString()}</td>
-      <td><span class="badge" style="background:var(--brand-light);color:var(--brand)">${c.estagio}</span></td>
-      ` + (isM ? `<td>${c.consultor}</td>` : '') + `<td><span class="badge" style="background:#dcfce7;color:#166534">Ativo</span></td></tr>`).join('') || '<tr><td colspan="8" style="text-align:center;padding:40px">Vazio</td></tr>';
+    <tr onclick="abrirEdicao(${c.id})" style="cursor:pointer"><td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td><td>R$ ${c.premio.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td><span class="badge" style="background:var(--brand-light);color:var(--brand)">${c.estagio}</span></td>
+      ` + (isM ? `<td>${c.consultor}</td>` : '') + `<td><span class="badge" style="background:#dcfce7;color:#166534">Ativo</span></td></tr>`).join('') || '<tr><td colspan="8" style="text-align:center;padding:40px;color:#64748b">Vazio</td></tr>';
 }
 
 function renderFinanceiro(){
@@ -264,15 +446,17 @@ function renderFinanceiro(){
   const tCom = data.reduce((s,c)=> s + (c.premio * (c.comissao/100)), 0);
   const tAge = data.reduce((s,c)=> s + (c.premio * (c.agenciamento/100)), 0);
   const tBruto = data.reduce((s,c)=>s+c.premio,0);
-  document.getElementById('fin-com').textContent = `R$ ${tCom.toLocaleString('pt-BR')}`;
-  document.getElementById('fin-age').textContent = `R$ ${tAge.toLocaleString('pt-BR')}`;
-  document.getElementById('fin-imp').textContent = `R$ ${(tBruto*0.06).toLocaleString('pt-BR')}`;
+  document.getElementById('fin-com').textContent = `R$ ${tCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+  document.getElementById('fin-age').textContent = `R$ ${tAge.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+  document.getElementById('fin-imp').textContent = `R$ ${(tBruto*0.06).toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+  document.getElementById('table-body-fin').innerHTML = `<tr><td>Entrada Prêmios</td><td>R$ ${tBruto.toLocaleString()}</td><td>R$ ${tBruto.toLocaleString()}</td><td><span class="badge bg-ok">Previsto</span></td></tr>
+    <tr><td>Repasse Comissão</td><td>-</td><td>R$ ${tCom.toLocaleString()}</td><td><span class="badge" style="background:#fee2e2;color:#991b1b">Pagar</span></td></tr>`;
 }
 
 async function renderAuditoria(){
-  if(!isMaster()) return;
+  if(!PERFIS_MASTER.includes(JSON.parse(localStorage.getItem('crm_user')).cargo)) return;
   const { data } = await sb.from('atividades').select('*').order('data',{ascending:false}).limit(20);
-  document.getElementById('table-body-auditoria').innerHTML = (data||[]).map(a => `<tr><td>${new Date(a.data).toLocaleString()}</td><td><b>${a.usuario}</b></td><td>${a.acao}</td><td>${a.detalhe}</td></tr>`).join('');
+  document.getElementById('table-body-auditoria').innerHTML = (data||[]).map(a => `<tr><td style="font-size:12px">${new Date(a.data).toLocaleString()}</td><td><b>${a.usuario}</b></td><td>${a.acao}</td><td>${a.detalhe}</td></tr>`).join('');
 }
 
 function showView(view, el){
@@ -297,7 +481,8 @@ function abrirEdicao(id){
   document.getElementById('edit-agenciamento').value = c.agenciamento;
   document.getElementById('edit-pagamento').value = c.dataPagamento;
   document.getElementById('edit-feedback').value = c.feedback;
-  if(isMaster()){
+  const user = JSON.parse(localStorage.getItem('crm_user'));
+  if(PERFIS_MASTER.includes(user.cargo)){
     document.getElementById('wrap-admin-vendedor').style.display = 'block';
     const s = document.getElementById('edit-vendedor');
     const u = ['Leonardo Henrique','Sergio','Pedro','Diego','Diretoria M.I'];
@@ -307,30 +492,37 @@ function abrirEdicao(id){
   document.getElementById('modal-edit').classList.add('active');
 }
 
+function fecharModais(){ document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
+function fecharModal(){ document.getElementById('modal-edit').classList.remove('active'); }
+function abrirManual(){ document.getElementById('modal-manual').classList.add('active'); }
+function abrirAcessoGestores(){ document.getElementById('modal-gestores').classList.add('active'); }
+function abrirTermos(e){ e.preventDefault(); document.getElementById('modal-terms').classList.add('active'); }
+function doLogout(){ localStorage.removeItem('crm_user'); location.reload(); }
+
 async function consultarCNPJ(ctx, btn){
   const cnpj = (ctx==='venda'?document.getElementById('venda-cnpj'):document.getElementById('edit-cnpj')).value.replace(/\D/g,'');
   if(cnpj.length!==14) return alert('CNPJ Inválido');
-  btn.textContent = '...';
+  const oldT = btn.textContent; btn.textContent = '...';
   try {
     const r = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
     const d = await r.json();
     const n = d.nome_fantasia || d.razao_social;
     if(ctx==='venda'){ document.getElementById('venda-cliente').value=n; document.getElementById('venda-email').value=d.email||''; document.getElementById('venda-telefone').value=d.ddd_telefone_1||''; }
     else { document.getElementById('edit-cliente').value=n; document.getElementById('edit-email').value=d.email||''; document.getElementById('edit-telefone').value=d.ddd_telefone_1||''; }
-  } catch(e){ alert('Erro busca'); } finally { btn.textContent = '🔍'; }
+  } catch(e){ alert('Erro busca'); } finally { btn.textContent = oldT; }
 }
 
 async function consultarCEP(ctx, btn){
     const i = (ctx==='venda'?document.getElementById('venda-cep'):document.getElementById('edit-cep'));
     const cep = i.value.replace(/\D/g,'');
     if(cep.length!==8) return alert('CEP Inválido');
-    btn.textContent = '...';
+    const oldT = btn.textContent; btn.textContent = '...';
     try {
         const r = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
         const d = await r.json();
         if(ctx==='venda') document.getElementById('venda-logradouro').value=d.street;
         else document.getElementById('edit-logradouro').value=d.street;
-    } catch(e){} finally { btn.textContent = '🔍'; }
+    } catch(e){} finally { btn.textContent = oldT; }
 }
 
 async function salvarVenda(e){
@@ -342,6 +534,7 @@ async function salvarVenda(e){
     consultor: JSON.parse(localStorage.getItem('crm_user')).nome
   };
   await sb.from('contratos').insert(payload);
+  logAtividade('criar', payload.cliente);
   location.reload();
 }
 
@@ -359,6 +552,7 @@ async function salvarEdicao(e){
     consultor: PERFIS_MASTER.includes(user.cargo) ? document.getElementById('edit-vendedor').value : db.find(x=>x.id==id).consultor
   };
   await sb.from('contratos').update(payload).eq('id', id);
+  logAtividade('editar', payload.cliente);
   location.reload();
 }
 
@@ -388,12 +582,6 @@ async function logAtividade(acao, detalhe){
   const user = JSON.parse(localStorage.getItem('crm_user'));
   if(user) await sb.from('atividades').insert({usuario:user.nome, acao, detalhe}); 
 }
-function fecharModais(){ document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); }
-function fecharModal(){ document.getElementById('modal-edit').classList.remove('active'); }
-function abrirManual(){ document.getElementById('modal-manual').classList.add('active'); }
-function abrirAcessoGestores(){ document.getElementById('modal-gestores').classList.add('active'); }
-function abrirTermos(e){ e.preventDefault(); document.getElementById('modal-terms').classList.add('active'); }
-function doLogout(){ localStorage.removeItem('crm_user'); location.reload(); }
 if(localStorage.getItem('crm_user')) initApp();
 </script>
 </body>
