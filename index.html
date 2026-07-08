@@ -174,9 +174,10 @@ tr:hover td { background: var(--brand-light); }
       <div class="nav-item" onclick="showView('carteira',this)">📋 <span>Carteira</span></div>
       <div id="nav-financeiro" class="nav-item" style="display:none" onclick="showView('financeiro',this)">💰 <span>Financeiro</span></div>
       <div id="nav-admin" style="display:none">
-        <div class="nav-item" onclick="showView('gestao',this)">⚙️ <span>Configurações</span></div>
+        <div class="nav-item" onclick="showView('gestao',this)">⚙️ <span>Equipe</span></div>
         <div class="nav-item" onclick="showView('auditoria',this)">🕵️ <span>Auditoria</span></div>
       </div>
+      <div class="nav-item" style="color:var(--brand);margin-top:auto" onclick="abrirPedidosAlteracao()">📝 <span>Sugestões/Pedidos</span></div>
       <div id="nav-dev" style="display:none">
         <div class="nav-item" style="color:var(--accent)" onclick="showView('dev',this)">🛠️ <span>Painel Dev</span></div>
       </div>
@@ -340,6 +341,20 @@ tr:hover td { background: var(--brand-light); }
 <!-- MODAIS INSTRUTIVOS -->
 <div class="modal-overlay" id="modal-manual"><div class="modal" style="max-width:650px"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>📖 Guia Dental M.I</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button></div><div style="padding:24px;font-size:14px;line-height:1.7"><p><b>Busca Global:</b> Use o campo no topo para localizar clientes instantaneamente.</p><p><b>Lupas 🔍:</b> Preenchimento automático de CNPJ (Receita) e CEP (Endereço).</p><p><b>Pipeline:</b> Arraste para mudar o estágio no Funil.</p></div></div></div>
 <div class="modal-overlay" id="modal-gestores"><div class="modal" style="max-width:650px"><div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><h3>🔑 Acesso Master</h3><button onclick="fecharModais()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button></div><div style="padding:24px;font-size:14px;line-height:1.7"><p>Gestores (Diniz, Leonardo, Pedro, Sergio, Diego) possuem visão total da base e gestão financeira de repasses.</p></div></div></div>
+<div class="modal-overlay" id="modal-pedidos">
+  <div class="modal" style="max-width:550px">
+    <div style="padding:24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+      <h3>📝 Sugestões e Alterações</h3>
+      <button onclick="fecharModais()" style="border:none;background:none;font-size:24px;cursor:pointer">&times;</button>
+    </div>
+    <div style="padding:24px">
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px">Leonardo, descreva aqui as melhorias ou ajustes que você deseja para o sistema.</p>
+      <textarea id="texto-pedido" placeholder="Ex: Adicionar campo de data de nascimento, mudar cor do funil..." style="width:100%;padding:15px;border:1px solid var(--border);border-radius:12px;height:150px;font-family:inherit;font-size:14px;margin-bottom:20px;outline:none"></textarea>
+      <button class="btn-login" onclick="enviarPedidoAlteracao()">Enviar para Engenharia DCG</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-terms"><div class="modal" style="max-width:550px"><div style="padding:24px;border-bottom:1px solid var(--border)"><h3>Termos de Privacidade</h3></div><div style="padding:24px;font-size:14px"><p>Aceito o tratamento dos dados de apólices e clientes conforme LGPD.</p></div><div style="padding:20px 24px;text-align:right"><button class="btn btn-login" style="width:auto;padding:12px 30px" onclick="document.getElementById('modal-terms').classList.remove('active');document.getElementById('check-terms').checked=true">Aceito</button></div></div></div>
 
 <script>
@@ -582,6 +597,31 @@ async function logAtividade(acao, detalhe){
   const user = JSON.parse(localStorage.getItem('crm_user'));
   if(user) await sb.from('atividades').insert({usuario:user.nome, acao, detalhe}); 
 }
+
+function abrirPedidosAlteracao(){
+  document.getElementById('modal-pedidos').classList.add('active');
+}
+
+async function enviarPedidoAlteracao(){
+  const texto = document.getElementById('texto-pedido').value.trim();
+  if(!texto) return alert('Por favor, descreva o seu pedido.');
+  
+  const user = JSON.parse(localStorage.getItem('crm_user'));
+  const { error } = await sb.from('atividades').insert({
+    usuario: user.nome,
+    acao: 'pedido_alteracao',
+    detalhe: texto
+  });
+  
+  if(!error){
+    alert('Pedido enviado com sucesso para a Engenharia DCG!');
+    document.getElementById('texto-pedido').value = '';
+    fecharModais();
+  } else {
+    alert('Erro ao enviar pedido.');
+  }
+}
+
 if(localStorage.getItem('crm_user')) initApp();
 </script>
 </body>
