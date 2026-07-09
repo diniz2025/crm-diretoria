@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Painel de Sinistralidade — DCG Corretora de Seguros</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--papel:#f6f4ee;--tinta:#1c1a17;--grafite:#5d574d;--linha:#e3ded2;
+--verde:#2e7d5b;--ambar:#b8860b;--vermelho:#b3402e;--cartao:#fffdf8}
+*{box-sizing:border-box;margin:0}
+body{background:var(--papel);color:var(--tinta);font:400 15px/1.6 'Inter',sans-serif;padding-bottom:70px}
+header{border-bottom:1px solid var(--linha);padding:26px 5vw}
+header .marca{font:650 15px 'Fraunces',serif;letter-spacing:.02em;color:var(--grafite)}
+h1{font:650 clamp(24px,4vw,34px)/1.15 'Fraunces',serif;margin-top:4px}
+main{max-width:860px;margin:0 auto;padding:26px 5vw}
+.painel{background:var(--cartao);border:1px solid var(--linha);border-radius:14px;padding:22px;margin-bottom:18px}
+.painel h3{font:650 17px 'Fraunces',serif;margin-bottom:12px}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:99px;color:#fff}
+.saudavel{background:var(--verde)}.atencao{background:var(--ambar)}.critico{background:var(--vermelho)}.sem_dados{background:var(--grafite)}
+.termo{position:relative;height:16px;border-radius:99px;background:#efece2;margin:26px 0 6px}
+.termo .fill{position:absolute;inset:0 auto 0 0;border-radius:99px;transition:width .8s}
+.termo .be{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--tinta)}
+.termo .be::after{content:'limite contratual';position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:10.5px;color:var(--grafite);white-space:nowrap}
+.leitura{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:13.5px;color:var(--grafite)}
+.leitura b{font-size:20px;color:var(--tinta);font-family:'Fraunces',serif}
+canvas{max-height:280px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;color:var(--grafite);font-weight:500;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--linha)}
+td{padding:8px;border-bottom:1px solid var(--linha)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+footer{max-width:860px;margin:0 auto;padding:0 5vw;font-size:12px;color:var(--grafite)}
+.erro{padding:60px 5vw;text-align:center;font:500 17px 'Fraunces',serif}
+</style>
+</head>
+<body>
+<header>
+  <div class="marca">DCG Corretora de Seguros · SUSEP 10.2010993.8</div>
+  <h1 id="titulo">Painel de Sinistralidade</h1>
+</header>
+<main id="conteudo"></main>
+<footer id="rodape"></footer>
+<script>
+const API='/api/sinistralidade';
+const token=new URLSearchParams(location.search).get('t');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rotulo={saudavel:'Saudável',atencao:'Atenção',critico:'Crítico',sem_dados:'Sem dados'};
+const cor={saudavel:'#2e7d5b',atencao:'#b8860b',critico:'#b3402e',sem_dados:'#5d574d'};
+const texto={
+ saudavel:'A utilização do plano está dentro do esperado. Mantendo esse padrão, a renovação tende a ocorrer sem reajuste técnico relevante.',
+ atencao:'A utilização se aproxima do limite contratual. Recomendamos ações preventivas — a DCG entrará em contato para orientar.',
+ critico:'A utilização ultrapassou o limite contratual. A DCG já está atuando para preparar a negociação de reajuste e propor medidas de contenção.',
+ sem_dados:'Aguardando os primeiros relatórios da operadora.'};
+
+(async()=>{
+  if(!token){document.getElementById('conteudo').innerHTML='<p class="erro">Link inválido. Solicite um novo acesso à DCG.</p>';return;}
+  const r=await fetch(`${API}/portal/${encodeURIComponent(token)}`);
+  if(!r.ok){document.getElementById('conteudo').innerHTML='<p class="erro">Link inválido ou expirado. Fale com a DCG: comercial@dcgseguros.com.br · (11) 93075-9163.</p>';return;}
+  const d=await r.json(); const c=d.contrato,u=d.ultimo;
+  document.getElementById('titulo').textContent=c.empresa;
+  const acc=u?u.acumulado12m:null, pct=acc?Math.min(acc,120):0;
+  document.getElementById('conteudo').innerHTML=`
+  <div class="painel">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <h3 style="margin:0">${esc(c.operadora)}${c.produto?' · '+esc(c.produto):''}</h3>
+      <span class="tag ${d.status}">${rotulo[d.status]}</span>
+    </div>
+    <div class="termo">
+      <div class="fill" style="width:${pct/120*100}%;background:${cor[d.status]}"></div>
+      <div class="be" style="left:${c.break_even/120*100}%"></div>
+    </div>
+    <div class="leitura">
+      <span>Sinistralidade acumulada (12 meses): <b>${acc!=null?acc+'%':'—'}</b></span>
+      <span>Limite contratual: <b>${c.break_even}%</b></span>
+    </div>
+    <p style="margin-top:14px">${texto[d.status]}</p>
+  </div>
+  <div class="painel"><h3>Evolução mensal</h3><canvas id="g"></canvas></div>
+  <div class="painel"><h3>Histórico</h3><table>
+    <tr><th>Mês</th><th class="num">Índice do mês</th><th class="num">Acumulado 12m</th></tr>
+    ${d.serie.slice().reverse().map(m=>`<tr><td>${m.competencia.slice(0,7)}</td>
+      <td class="num">${m.indice}%</td><td class="num">${m.acumulado12m}%</td></tr>`).join('')}
+  </table></div>
+  ${d.arquivos.length?`<div class="painel"><h3>Relatórios disponibilizados</h3><table>
+    <tr><th>Arquivo</th><th>Competência</th><th></th></tr>
+    ${d.arquivos.map(a=>`<tr><td>${esc(a.nome_arquivo)}</td><td>${a.competencia?a.competencia.slice(0,7):'—'}</td>
+    <td class="num"><a href="${API}/portal/${encodeURIComponent(token)}/arquivos/${a.id}/download">baixar</a></td></tr>`).join('')}</table></div>`:''}`;
+  new Chart(document.getElementById('g'),{type:'bar',data:{
+    labels:d.serie.map(m=>m.competencia.slice(0,7)),
+    datasets:[
+      {label:'Índice do mês (%)',data:d.serie.map(m=>m.indice),backgroundColor:'#c9c2b0',borderRadius:6},
+      {label:'Acumulado 12m (%)',data:d.serie.map(m=>m.acumulado12m),type:'line',borderColor:'#1c1a17',tension:.3},
+      {label:'Limite',data:d.serie.map(()=>Number(c.break_even)),type:'line',borderColor:'#b3402e',borderDash:[6,4],pointRadius:0}
+    ]},options:{plugins:{legend:{labels:{font:{family:'Inter',size:12}}}}}});
+  document.getElementById('rodape').innerHTML=
+    'Painel disponibilizado pela DCG Corretora de Seguros LTDA · CNPJ 16.383.565/0001-35 · Dados fornecidos pela operadora e tratados conforme a LGPD (Lei 13.709/2018), de forma agregada e sem identificação de beneficiários. Dúvidas: comercial@dcgseguros.com.br · (11) 93075-9163.';
+})();
+</script>
+</body>
+</html>

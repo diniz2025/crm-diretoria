@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Sinistralidade — Diseg | DCG Corretora de Seguros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --papel:#f6f4ee; --tinta:#1c1a17; --grafite:#5d574d; --linha:#e3ded2;
+  --verde:#2e7d5b; --ambar:#b8860b; --vermelho:#b3402e; --cartao:#fffdf8;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--papel);color:var(--tinta);font:400 15px/1.55 'Inter',sans-serif;padding:0 0 60px}
+header{border-bottom:1px solid var(--linha);padding:26px 5vw;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+h1{font:650 clamp(24px,3.4vw,34px)/1.1 'Fraunces',serif}
+header small{color:var(--grafite);font-size:13px}
+main{max-width:1080px;margin:0 auto;padding:28px 5vw}
+.grid{display:grid;gap:18px}
+.cartao{background:var(--cartao);border:1px solid var(--linha);border-radius:14px;padding:20px 22px;cursor:pointer;transition:transform .15s}
+.cartao:hover{transform:translateY(-2px)}
+.cartao h2{font:650 20px 'Fraunces',serif;margin-bottom:2px}
+.cartao .meta{color:var(--grafite);font-size:13px;margin-bottom:14px}
+/* Termômetro de sinistralidade — assinatura visual do módulo */
+.termo{position:relative;height:14px;border-radius:99px;background:#efece2;overflow:visible;margin:10px 0 4px}
+.termo .fill{position:absolute;inset:0 auto 0 0;border-radius:99px;transition:width .6s}
+.termo .be{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--tinta)}
+.termo .be::after{content:'break-even';position:absolute;top:-18px;left:-30px;font-size:10px;color:var(--grafite);letter-spacing:.04em}
+.leitura{display:flex;justify-content:space-between;font-size:13px;color:var(--grafite)}
+.leitura b{font-size:17px;color:var(--tinta)}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:99px;color:#fff}
+.saudavel{background:var(--verde)}.atencao{background:var(--ambar)}.critico{background:var(--vermelho)}.sem_dados{background:var(--grafite)}
+/* Detalhe */
+#detalhe{display:none}
+.volta{background:none;border:none;color:var(--grafite);font:500 14px 'Inter';cursor:pointer;margin-bottom:14px;padding:0}
+.painel{background:var(--cartao);border:1px solid var(--linha);border-radius:14px;padding:22px;margin-bottom:18px}
+.painel h3{font:650 17px 'Fraunces',serif;margin-bottom:14px}
+canvas{max-height:300px}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end}
+label{font-size:12px;color:var(--grafite);display:block;margin-bottom:3px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--linha);border-radius:8px;background:#fff;font:400 14px 'Inter'}
+button.acao{background:var(--tinta);color:var(--papel);border:none;border-radius:8px;padding:10px 18px;font:600 14px 'Inter';cursor:pointer}
+button.acao:hover{opacity:.85}
+button.leve{background:none;border:1px solid var(--linha);border-radius:8px;padding:6px 12px;font:500 12.5px 'Inter';color:var(--grafite);cursor:pointer}
+button.leve:hover{border-color:var(--grafite)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;color:var(--grafite);font-weight:500;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--linha)}
+td{padding:8px;border-bottom:1px solid var(--linha)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.proj{font:650 15px 'Fraunces',serif}
+.link-cliente{font-size:12.5px;color:var(--grafite);word-break:break-all;background:#efece2;padding:8px 10px;border-radius:8px;margin-top:10px}
+.aviso{font-size:12px;color:var(--grafite);margin-top:8px}
+@media(max-width:640px){header{padding:20px 5vw}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Sinistralidade</h1>
+  <small>DCG Corretora de Seguros · contratos 100+ vidas · acompanhamento pré-reajuste</small>
+</header>
+<main>
+  <section id="lista" class="grid"></section>
+
+  <section id="novo" class="painel" style="margin-top:18px">
+    <h3>Novo contrato</h3>
+    <form id="formNovo" onsubmit="return criarContrato(event)">
+      <div><label>Empresa *</label><input name="empresa" required></div>
+      <div><label>CNPJ</label><input name="cnpj" placeholder="00.000.000/0000-00"></div>
+      <div><label>Operadora *</label><input name="operadora" required></div>
+      <div><label>Produto</label><input name="produto"></div>
+      <div><label>Vidas</label><input type="number" name="vidas" min="0"></div>
+      <div><label>Break-even (%)</label><input type="number" step="0.01" name="break_even" value="70"></div>
+      <div><label>Mês reajuste (1–12)</label><input type="number" name="mes_reajuste" min="1" max="12"></div>
+      <div><label>VCMH estimada (%)</label><input type="number" step="0.01" name="vcmh_estimada" value="12"></div>
+      <button class="acao">Cadastrar contrato</button>
+    </form>
+  </section>
+
+  <section id="detalhe">
+    <button class="volta" onclick="voltar()">← Voltar aos contratos</button>
+    <div class="painel" id="cabecalho"></div>
+    <div class="painel">
+      <h3>Dados técnicos do contrato</h3>
+      <form id="formEditar" onsubmit="return salvarContrato(event)">
+        <div><label>Vidas</label><input type="number" name="vidas" min="0"></div>
+        <div><label>Break-even (%)</label><input type="number" step="0.01" name="break_even"></div>
+        <div><label>Mês reajuste (1–12)</label><input type="number" name="mes_reajuste" min="1" max="12"></div>
+        <div><label>VCMH estimada (%)</label><input type="number" step="0.01" name="vcmh_estimada"></div>
+        <button class="acao">Salvar alterações</button>
+      </form>
+    </div>
+    <div class="painel"><h3>Evolução mensal × acumulado 12 meses</h3><canvas id="grafico"></canvas></div>
+    <div class="painel">
+      <h3>Lançar competência</h3>
+      <form id="formMes" onsubmit="return lancarMes(event)">
+        <div><label>Competência</label><input type="month" name="competencia" required></div>
+        <div><label>Prêmio (R$)</label><input type="number" step="0.01" min="0.01" name="premio" required></div>
+        <div><label>Sinistro (R$)</label><input type="number" step="0.01" min="0" name="sinistro" required></div>
+        <div><label>Vidas</label><input type="number" name="vidas_mes"></div>
+        <button class="acao">Salvar mês</button>
+      </form>
+    </div>
+    <div class="painel">
+      <h3>Relatórios da operadora</h3>
+      <form id="formArq" onsubmit="return enviarArquivo(event)">
+        <div><label>Competência</label><input type="month" name="competencia"></div>
+        <div><label>Arquivo (PDF/Excel)</label><input type="file" name="relatorio" accept=".pdf,.xls,.xlsx,.csv" required></div>
+        <div><label>Visível ao cliente</label>
+          <select name="visivel_cliente"><option value="false">Não</option><option value="true">Sim</option></select>
+        </div>
+        <button class="acao">Enviar relatório</button>
+      </form>
+      <p class="aviso">LGPD: relatórios podem conter dados de saúde. Marque "visível ao cliente" apenas para versões agregadas, sem identificação de beneficiário.</p>
+      <table id="tabArq"></table>
+    </div>
+    <div class="painel">
+      <h3>Histórico de competências</h3>
+      <table id="tabMeses"></table>
+    </div>
+  </section>
+</main>
+
+<script>
+const API='/api/sinistralidade';
+let contratoAtual=null, chart=null;
+const fmtBR=v=>Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rotulo={saudavel:'Saudável',atencao:'Atenção',critico:'Crítico',sem_dados:'Sem dados'};
+const cor={saudavel:'var(--verde)',atencao:'var(--ambar)',critico:'var(--vermelho)',sem_dados:'var(--grafite)'};
+
+async function carregarLista(){
+  const r=await fetch(API+'/contratos'); const dados=await r.json();
+  const el=document.getElementById('lista'); el.innerHTML='';
+  if(!dados.length){el.innerHTML='<div class="cartao" style="cursor:default"><h2>Nenhum contrato</h2><p class="meta">Cadastre no formulário abaixo.</p></div>';return;}
+  dados.forEach(c=>{
+    const acc=c.ultimo?c.ultimo.acumulado12m:null;
+    const pct=acc?Math.min(acc,120):0;
+    el.insertAdjacentHTML('beforeend',`
+    <div class="cartao" onclick="abrir(${c.id})">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:10px">
+        <div><h2>${esc(c.empresa)}</h2>
+        <div class="meta">${esc(c.operadora)}${c.produto?' · '+esc(c.produto):''} · ${c.vidas||'—'} vidas</div></div>
+        <span class="tag ${c.status}">${rotulo[c.status]}</span>
+      </div>
+      <div class="termo">
+        <div class="fill" style="width:${pct/120*100}%;background:${cor[c.status]}"></div>
+        <div class="be" style="left:${c.break_even/120*100}%"></div>
+      </div>
+      <div class="leitura">
+        <span>Acumulado 12m: <b>${acc!=null?acc+'%':'—'}</b> · limite ${c.break_even}%</span>
+        <span>Projeção reajuste: <b>${c.projecao_reajuste!=null?'~'+c.projecao_reajuste+'%':'—'}</b></span>
+      </div>
+    </div>`);
+  });
+}
+
+async function abrir(id){
+  contratoAtual=id;
+  const r=await fetch(`${API}/contratos/${id}`); const d=await r.json();
+  document.getElementById('lista').style.display='none';
+  document.getElementById('novo').style.display='none';
+  document.getElementById('detalhe').style.display='block';
+  const c=d.contrato, u=d.ultimo;
+  document.getElementById('cabecalho').innerHTML=`
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:start">
+      <div><h3 style="font-size:22px">${esc(c.empresa)}</h3>
+      <p class="meta" style="color:var(--grafite);font-size:13px">${esc(c.operadora)}${c.produto?' · '+esc(c.produto):''} · break-even ${c.break_even}% · VCMH estimada ${c.vcmh_estimada}%</p></div>
+      <span class="tag ${d.status}">${rotulo[d.status]}</span>
+    </div>
+    <p style="margin-top:12px">Acumulado 12 meses: <b>${u&&u.acumulado12m!=null?u.acumulado12m+'%':'—'}</b> ·
+    Projeção de reajuste na renovação: <span class="proj">${d.projecao_reajuste!=null?'~'+d.projecao_reajuste+'%':'—'}</span></p>
+    <div class="link-cliente"><b>Link do cliente (RH):</b> ${location.origin}/sinistralidade/cliente.html?t=${c.token_cliente}
+      <button class="leve" style="margin-left:8px" onclick="regenerarToken(event)">revogar e gerar novo link</button></div>`;
+  const f=document.getElementById('formEditar');
+  f.vidas.value=c.vidas??''; f.break_even.value=c.break_even??'';
+  f.mes_reajuste.value=c.mes_reajuste??''; f.vcmh_estimada.value=c.vcmh_estimada??'';
+  desenhar(d); tabelas(d);
+}
+function voltar(){document.getElementById('detalhe').style.display='none';document.getElementById('lista').style.display='grid';document.getElementById('novo').style.display='block';carregarLista();}
+
+function desenhar(d){
+  const ctx=document.getElementById('grafico');
+  if(chart)chart.destroy();
+  const labels=d.serie.map(m=>m.competencia.slice(0,7));
+  chart=new Chart(ctx,{type:'bar',data:{labels,datasets:[
+    {label:'Índice do mês (%)',data:d.serie.map(m=>m.indice),backgroundColor:'#c9c2b0',borderRadius:6},
+    {label:'Acumulado 12m (%)',data:d.serie.map(m=>m.acumulado12m),type:'line',borderColor:'#1c1a17',tension:.3,pointRadius:3},
+    {label:'Break-even',data:d.serie.map(()=>Number(d.contrato.break_even)),type:'line',borderColor:'#b3402e',borderDash:[6,4],pointRadius:0}
+  ]},options:{plugins:{legend:{labels:{font:{family:'Inter',size:12}}}},scales:{y:{suggestedMax:110}}}});
+}
+
+function tabelas(d){
+  document.getElementById('tabMeses').innerHTML=
+    '<tr><th>Mês</th><th class="num">Prêmio</th><th class="num">Sinistro</th><th class="num">Índice</th><th class="num">Acum. 12m</th><th></th></tr>'+
+    d.serie.slice().reverse().map(m=>`<tr><td>${m.competencia.slice(0,7)}</td>
+      <td class="num">${fmtBR(m.premio)}</td><td class="num">${fmtBR(m.sinistro)}</td>
+      <td class="num">${m.indice}%</td><td class="num">${m.acumulado12m}%</td>
+      <td class="num"><button class="volta" onclick="apagarMes(${m.id})">excluir</button></td></tr>`).join('');
+  document.getElementById('tabArq').innerHTML=
+    (d.arquivos.length?'<tr><th>Arquivo</th><th>Competência</th><th>Cliente vê?</th><th></th></tr>':'')+
+    d.arquivos.map(a=>`<tr><td>${esc(a.nome_arquivo)}</td><td>${a.competencia?a.competencia.slice(0,7):'—'}</td>
+      <td>${a.visivel_cliente?'Sim':'Não'}</td>
+      <td class="num"><a href="${API}/arquivos/${a.id}/download">baixar</a></td></tr>`).join('');
+}
+
+async function criarContrato(e){
+  e.preventDefault();
+  const body=Object.fromEntries(new FormData(e.target).entries());
+  const r=await fetch(`${API}/contratos`,{method:'POST',
+    headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(r.ok){e.target.reset();carregarLista();}else alert('Erro ao cadastrar: '+(await r.json()).erro);
+  return false;
+}
+async function salvarContrato(e){
+  e.preventDefault();
+  const body=Object.fromEntries(new FormData(e.target).entries());
+  Object.keys(body).forEach(k=>{if(body[k]==='')delete body[k];});
+  const r=await fetch(`${API}/contratos/${contratoAtual}`,{method:'PUT',
+    headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(r.ok)abrir(contratoAtual);else alert('Erro ao salvar: '+(await r.json()).erro);
+  return false;
+}
+async function regenerarToken(e){
+  e.stopPropagation();
+  if(!confirm('O link atual do RH deixará de funcionar imediatamente. Continuar?'))return;
+  const r=await fetch(`${API}/contratos/${contratoAtual}/token`,{method:'POST'});
+  if(r.ok)abrir(contratoAtual);else alert('Erro: '+(await r.json()).erro);
+}
+async function lancarMes(e){
+  e.preventDefault();
+  const f=new FormData(e.target), body=Object.fromEntries(f.entries());
+  const r=await fetch(`${API}/contratos/${contratoAtual}/meses`,{method:'POST',
+    headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(r.ok){e.target.reset();abrir(contratoAtual);}else alert('Erro ao salvar: '+(await r.json()).erro);
+  return false;
+}
+async function apagarMes(id){
+  if(!confirm('Excluir esta competência?'))return;
+  await fetch(`${API}/meses/${id}`,{method:'DELETE'}); abrir(contratoAtual);
+}
+async function enviarArquivo(e){
+  e.preventDefault();
+  const r=await fetch(`${API}/contratos/${contratoAtual}/arquivos`,{method:'POST',body:new FormData(e.target)});
+  if(r.ok){e.target.reset();abrir(contratoAtual);}else alert('Erro no upload: '+(await r.json()).erro);
+  return false;
+}
+carregarLista();
+</script>
+</body>
+</html>
