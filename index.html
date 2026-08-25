@@ -116,7 +116,7 @@ tr:hover td { background: var(--brand-light); }
     <nav class="nav-menu">
       <div class="nav-item active" onclick="showView('dashboard',this)">📊 <span>Dashboard</span></div>
       <div class="nav-item" onclick="showView('funil',this)">🎯 <span>Funil de Vendas</span></div>
-      <div class="nav-item" onclick="showView('carteira',this)">📋 <span>Carteira</span></div>
+      <div class="nav-item" id="nav-item-carteira" onclick="showView('carteira',this)">📋 <span>Carteira</span></div>
       <div id="nav-financeiro" class="nav-item" style="display:none" onclick="showView('financeiro',this)">💰 <span>Financeiro</span></div>
       <div id="nav-admin" style="display:none">
         <div class="nav-item" onclick="showView('gestao',this)">⚙️ <span>Equipe</span></div>
@@ -298,7 +298,13 @@ function renderFunil(){
   }).join('');
 }
 
-function filtrarGlobal(q){ filtroAtivo = q.toLowerCase(); renderCarteira(); }
+function filtrarGlobal(q){
+  filtroAtivo = q.toLowerCase().trim();
+  if(filtroAtivo && document.getElementById('view-carteira').style.display === 'none'){
+    showView('carteira', document.getElementById('nav-item-carteira'));
+  }
+  renderCarteira();
+}
 
 function renderCarteira(){
   let data = getVisibleData();
