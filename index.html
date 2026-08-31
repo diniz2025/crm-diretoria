@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DCG — Painel Completo</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand: #1EAD6F; --brand-dark: #168a52; --brand-light: #eefaf4; --bg: #f8fafc;
+  --sidebar: #0f172a; --sidebar-item: #94a3b8;
+  --card: #ffffff; --text-main: #1e293b; --text-muted: #64748b; --border: #e2e8f0;
+  --danger: #ef4444; --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); height: 100vh; overflow: hidden; }
+.app-container { display: flex; height: 100vh; width: 100vw; }
+#login-screen { display:flex; align-items:center; justify-content:center; height:100vh; }
+.login-card { background:white; padding:40px; border-radius:20px; width:100%; max-width:380px; box-shadow:0 20px 40px rgba(0,0,0,0.08); text-align:center; }
+.login-card h1 { font-family:'Manrope',sans-serif; font-size:20px; margin-bottom:6px; }
+.login-card p { color:var(--text-muted); font-size:13px; margin-bottom:24px; }
+.field { text-align:left; margin-bottom:14px; }
+.field label { font-size:12px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:6px; }
+.field input { width:100%; padding:11px 14px; border-radius:10px; border:1px solid var(--border); font-size:14px; outline:none; }
+.field input:focus { border-color:var(--brand); }
+.btn-login { width:100%; background:var(--brand); color:white; padding:14px; border:none; border-radius:10px; font-size:14px; font-weight:800; cursor:pointer; margin-top:6px; }
+.btn-login:hover { background:var(--brand-dark); }
+#login-error { color:var(--danger); font-size:12px; font-weight:600; margin-top:14px; display:none; }
+
+.sidebar { width:250px; background:var(--sidebar); height:100%; display:flex; flex-direction:column; padding:24px; color:white; }
+.sidebar h1 { font-family:'Manrope',sans-serif; font-size:17px; font-weight:800; margin-bottom:36px; }
+.nav-menu { flex:1; display:flex; flex-direction:column; gap:4px; }
+.nav-item { display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:var(--radius); color:var(--sidebar-item); cursor:pointer; font-size:13.5px; font-weight:500; }
+.nav-item:hover { background:rgba(255,255,255,0.06); color:white; }
+.nav-item.active { background:var(--brand); color:white; font-weight:700; }
+.sidebar-footer .nav-item { color:var(--danger); margin-top:14px; border-top:1px solid rgba(255,255,255,0.1); padding-top:18px; }
+
+.main-view { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.top-header { height:68px; background:white; border-bottom:1px solid var(--border); display:flex; align-items:center; padding:0 28px; }
+.top-header h2 { font-family:'Manrope',sans-serif; font-size:19px; font-weight:800; }
+.content-area { flex:1; overflow-y:auto; padding:28px; }
+.view-content { display:none; }
+.view-content.active { display:block; }
+
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:20px; margin-bottom:24px; }
+.stat-card { background:white; padding:20px; border-radius:16px; border:1px solid var(--border); }
+.stat-label { font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:8px; }
+.stat-value { font-size:26px; font-weight:900; }
+
+.table-container { background:white; border-radius:16px; border:1px solid var(--border); overflow:hidden; margin-bottom:24px; }
+table { width:100%; border-collapse:collapse; }
+th { background:#fafafa; padding:14px; text-align:left; font-size:11px; font-weight:800; color:var(--text-muted); text-transform:uppercase; border-bottom:1px solid var(--border); }
+td { padding:14px; border-bottom:1px solid var(--border); font-size:13.5px; }
+tr:hover td { background:var(--brand-light); }
+.badge { padding:4px 10px; border-radius:8px; font-size:10px; font-weight:800; text-transform:uppercase; background:var(--brand-light); color:var(--brand); }
+
+.btn { padding:10px 16px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; border:none; }
+.btn-primary { background:var(--brand); color:white; }
+.btn-secondary { background:var(--bg); border:1px solid var(--border); color:var(--text-main); }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.form-row input, .form-row select, .form-row textarea, .form-full input, .form-full textarea, .form-full select {
+  width:100%; padding:10px 14px; border-radius:8px; border:1px solid var(--border); font-size:13.5px; font-family:inherit;
+}
+.form-full { margin-bottom:14px; }
+.panel { background:white; border-radius:16px; border:1px solid var(--border); padding:22px; margin-bottom:24px; }
+.panel h3 { font-size:14px; margin-bottom:16px; }
+
+.hub-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+.hub-card { background:white; border:1px solid var(--border); border-radius:14px; padding:18px; text-decoration:none; color:var(--text-main); display:flex; align-items:center; gap:12px; transition:all .15s; }
+.hub-card:hover { border-color:var(--brand); transform:translateY(-2px); }
+.hub-card .ico { font-size:22px; }
+.hub-cat { font-size:11px; font-weight:800; text-transform:uppercase; color:var(--text-muted); margin:20px 0 10px; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h1>DCG — Painel Completo</h1>
+    <p>Acesso restrito. Uso interno.</p>
+    <div class="field"><label>E-mail</label><input type="email" id="inp-email" placeholder="voce@dcgseguros.com.br"></div>
+    <div class="field"><label>Senha</label><input type="password" id="inp-pass"></div>
+    <button class="btn-login" id="btn-entrar" onclick="doLogin()">Entrar</button>
+    <p id="login-error">Acesso negado. Confira e-mail e senha.</p>
+  </div>
+</div>
+
+<div id="app" class="app-container" style="display:none">
+  <aside class="sidebar">
+    <h1>DCG · Painel</h1>
+    <nav class="nav-menu">
+      <div class="nav-item active" onclick="showView('dashboard',this)">📊 <span>Dashboard</span></div>
+      <div class="nav-item" onclick="showView('crm',this)">📋 <span>CRM</span></div>
+      <div class="nav-item" onclick="showView('prospeccao',this)">🔎 <span>Prospecção</span></div>
+      <div class="nav-item" onclick="showView('decisores',this)">🧑‍💼 <span>Decisores</span></div>
+      <div class="nav-item" onclick="showView('campanhas',this)">📣 <span>Campanhas</span></div>
+      <div class="nav-item" onclick="showView('pesquisas',this)">⭐ <span>Pesquisas</span></div>
+      <div class="nav-item" onclick="showView('geral',this)">🗂️ <span>Geral</span></div>
+    </nav>
+    <div class="sidebar-footer"><div class="nav-item" onclick="doLogout()">🚪 <span>Sair</span></div></div>
+  </aside>
+
+  <main class="main-view">
+    <header class="top-header"><h2 id="view-title">Dashboard</h2></header>
+    <div class="content-area">
+
+      <section id="view-dashboard" class="view-content active">
+        <div class="grid" id="stats-grid"></div>
+        <div class="stat-card" style="height:340px"><canvas id="chartMain"></canvas></div>
+      </section>
+
+      <section id="view-crm" class="view-content">
+        <div class="panel" style="display:flex; gap:12px; align-items:center">
+          <input type="text" id="crm-search" placeholder="Buscar por cliente, operadora ou vendedor..." oninput="filtrarCarteira(this.value)" style="flex:1; padding:10px 14px; border-radius:8px; border:1px solid var(--border)">
+          <button class="btn btn-primary" onclick="abrirNovoContrato()">+ Novo Contrato</button>
+        </div>
+        <div class="table-container">
+          <table><thead><tr><th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th><th>Renovação</th></tr></thead>
+          <tbody id="table-body-crm"></tbody></table>
+        </div>
+      </section>
+
+      <section id="view-prospeccao" class="view-content">
+        <div class="panel">
+          <h3>Buscar empresa por CNPJ (Receita Federal)</h3>
+          <div style="display:flex; gap:10px">
+            <input type="text" id="prosp-cnpj" placeholder="Somente números" style="flex:1; padding:10px 14px; border-radius:8px; border:1px solid var(--border)">
+            <button class="btn btn-primary" onclick="buscarCnpj()">Buscar</button>
+          </div>
+          <div id="prosp-resultado" style="margin-top:16px"></div>
+        </div>
+        <div class="table-container">
+          <table><thead><tr><th>Empresa</th><th>CNPJ</th><th>Segmento</th><th>Cidade/UF</th><th>Status</th><th></th></tr></thead>
+          <tbody id="table-body-empresas"></tbody></table>
+        </div>
+      </section>
+
+      <section id="view-decisores" class="view-content">
+        <div class="panel">
+          <h3>Adicionar decisor manualmente</h3>
+          <div class="form-row">
+            <select id="dec-empresa"></select>
+            <input type="text" id="dec-nome" placeholder="Nome completo">
+          </div>
+          <div class="form-row">
+            <input type="text" id="dec-cargo" placeholder="Cargo (ex: Gerente de RH)">
+            <select id="dec-prioridade">
+              <option value="🥇 1">🥇 Prioridade 1 — Sócio/RH</option>
+              <option value="🥈 2">🥈 Prioridade 2 — Financeiro</option>
+              <option value="🥉 3">🥉 Prioridade 3 — Geral</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <input type="text" id="dec-email" placeholder="E-mail">
+            <input type="text" id="dec-whatsapp" placeholder="WhatsApp">
+          </div>
+          <button class="btn btn-primary" onclick="salvarDecisor()">Salvar decisor</button>
+        </div>
+        <div class="table-container">
+          <table><thead><tr><th>Empresa</th><th>Nome</th><th>Cargo</th><th>Prioridade</th><th>Contato</th></tr></thead>
+          <tbody id="table-body-decisores"></tbody></table>
+        </div>
+      </section>
+
+      <section id="view-campanhas" class="view-content">
+        <div class="panel">
+          <h3>Nova campanha</h3>
+          <div class="form-row">
+            <input type="text" id="camp-nome" placeholder="Nome da campanha">
+            <select id="camp-canal"><option value="email">E-mail</option><option value="whatsapp">WhatsApp</option></select>
+          </div>
+          <div class="form-full"><input type="text" id="camp-assunto" placeholder="Assunto (para e-mail)"></div>
+          <div class="form-full"><textarea id="camp-corpo" rows="4" placeholder="Mensagem. Use {decisor_nome}, {empresa_nome}, {cargo} para personalizar."></textarea></div>
+          <button class="btn btn-primary" onclick="salvarCampanha()">Salvar campanha</button>
+          <p style="font-size:12px;color:var(--text-muted);margin-top:10px">Envio automático ainda não conectado — vincule uma chave da Resend/WhatsApp para ativar o disparo.</p>
+        </div>
+        <div class="table-container">
+          <table><thead><tr><th>Campanha</th><th>Canal</th><th>Status</th><th>Criada em</th></tr></thead>
+          <tbody id="table-body-campanhas"></tbody></table>
+        </div>
+      </section>
+
+      <section id="view-pesquisas" class="view-content">
+        <div class="panel">
+          <h3>Nova pesquisa</h3>
+          <div class="form-row">
+            <input type="text" id="pesq-titulo" placeholder="Título da pesquisa">
+            <select id="pesq-tipo"><option value="NPS">NPS (0–10)</option><option value="CSAT">CSAT</option></select>
+          </div>
+          <div class="form-full"><input type="text" id="pesq-pergunta" placeholder="Pergunta a ser feita ao cliente"></div>
+          <button class="btn btn-primary" onclick="salvarPesquisa()">Criar pesquisa</button>
+        </div>
+        <div class="table-container">
+          <table><thead><tr><th>Pesquisa</th><th>Tipo</th><th>Pergunta</th><th>Respostas</th><th>Nota média</th></tr></thead>
+          <tbody id="table-body-pesquisas"></tbody></table>
+        </div>
+      </section>
+
+      <section id="view-geral" class="view-content">
+        <div id="hub-content"></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+// ====== CONFIG ======
+// Projeto Supabase: dcg-client-data-enrich (org dcg-hub)
+const SUPABASE_URL = 'https://ldfefuhepxvwybkaopsi.supabase.co';
+const SUPABASE_KEY = 'COLE_AQUI_A_ANON_KEY_DO_PROJETO'; // Settings > API > anon/public key
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let contratos = [], empresas = [], decisores = [], campanhas = [], pesquisas = [], links = [];
+let filtroCarteira = '';
+let currentChart = null;
+
+async function doLogin(){
+  const email = document.getElementById('inp-email').value.trim();
+  const senha = document.getElementById('inp-pass').value.trim();
+  const btn = document.getElementById('btn-entrar'); btn.textContent = '...'; btn.disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+  btn.textContent = 'Entrar'; btn.disabled = false;
+  if(error){ document.getElementById('login-error').style.display = 'block'; return; }
+  initApp();
+}
+
+async function doLogout(){ await sb.auth.signOut(); location.reload(); }
+
+async function initApp(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session) return;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  await carregarTudo();
+  renderAll();
+}
+
+async function carregarTudo(){
+  const [c, e, d, camp, pesq, lk] = await Promise.all([
+    sb.from('contratos').select('*').order('id'),
+    sb.from('empresas').select('*').order('id',{ascending:false}),
+    sb.from('decisores').select('*').order('id',{ascending:false}),
+    sb.from('campanhas').select('*').order('id',{ascending:false}),
+    sb.from('pesquisas').select('*, respostas_pesquisa(nota)').order('id',{ascending:false}),
+    sb.from('links_hub').select('*').order('ordem')
+  ]);
+  contratos = c.data || []; empresas = e.data || []; decisores = d.data || [];
+  campanhas = camp.data || []; pesquisas = pesq.data || []; links = lk.data || [];
+}
+
+function renderAll(){
+  renderDashboard(); renderCrm(); renderEmpresas(); renderDecisores();
+  renderCampanhas(); renderPesquisas(); renderHub(); popularSelectEmpresas();
+}
+
+function showView(view, el){
+  document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.getElementById('view-title').textContent = el ? el.querySelector('span').textContent : view;
+  if(el){ document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); }
+}
+
+// ---------- DASHBOARD ----------
+function renderDashboard(){
+  const premioTotal = contratos.reduce((s,c)=>s+Number(c.premio||0),0);
+  const vidas = contratos.reduce((s,c)=>s+Number(c.vidas||0),0);
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Produção Mensal</div><div class="stat-value">R$ ${premioTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+    <div class="stat-card"><div class="stat-label">Vidas Ativas</div><div class="stat-value">${vidas}</div></div>
+    <div class="stat-card"><div class="stat-label">Empresas em Prospecção</div><div class="stat-value">${empresas.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Decisores Mapeados</div><div class="stat-value">${decisores.length}</div></div>`;
+  const ctx = document.getElementById('chartMain').getContext('2d');
+  if(currentChart) currentChart.destroy();
+  const porOperadora = {}; contratos.forEach(c => porOperadora[c.operadora] = (porOperadora[c.operadora]||0) + Number(c.premio||0));
+  currentChart = new Chart(ctx, { type:'bar', data:{ labels:Object.keys(porOperadora), datasets:[{data:Object.values(porOperadora), backgroundColor:'#1EAD6F', borderRadius:8}] }, options:{ maintainAspectRatio:false, plugins:{legend:{display:false}} } });
+}
+
+// ---------- CRM ----------
+function filtrarCarteira(q){ filtroCarteira = q.toLowerCase().trim(); renderCrm(); }
+
+function renderCrm(){
+  let data = contratos;
+  if(filtroCarteira) data = data.filter(c => (c.cliente||'').toLowerCase().includes(filtroCarteira) || (c.consultor||'').toLowerCase().includes(filtroCarteira) || (c.operadora||'').toLowerCase().includes(filtroCarteira));
+  document.getElementById('table-body-crm').innerHTML = data.map(c => `
+    <tr><td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td><td>R$ ${Number(c.premio||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+    <td><span class="badge">${c.estagio}</span></td><td>${c.data_renovacao||''}</td></tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:30px;color:#64748b">Nenhum contrato ainda</td></tr>';
+}
+
+async function abrirNovoContrato(){
+  const cliente = prompt('Nome do cliente:'); if(!cliente) return;
+  const operadora = prompt('Operadora:') || '—';
+  const premio = Number(prompt('Prêmio mensal (R$):') || 0);
+  const { error } = await sb.from('contratos').insert({ cliente, operadora, premio });
+  if(error) return alert('Erro: ' + error.message);
+  await carregarTudo(); renderAll();
+}
+
+// ---------- PROSPECÇÃO ----------
+async function buscarCnpj(){
+  const cnpj = document.getElementById('prosp-cnpj').value.replace(/\D/g,'');
+  if(cnpj.length !== 14) return alert('CNPJ inválido — informe 14 dígitos.');
+  const box = document.getElementById('prosp-resultado');
+  box.innerHTML = 'Consultando...';
+  try {
+    const r = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+    if(!r.ok) throw new Error('CNPJ não encontrado');
+    const d = await r.json();
+    box.innerHTML = `
+      <div style="border:1px solid var(--border);border-radius:10px;padding:16px">
+        <b>${d.razao_social}</b> ${d.nome_fantasia ? '('+d.nome_fantasia+')' : ''}<br>
+        <span style="font-size:12px;color:var(--text-muted)">${d.cnae_fiscal_descricao||''} · ${d.municipio}/${d.uf} · ${d.descricao_situacao_cadastral||''}</span>
+        <div style="margin-top:12px"><button class="btn btn-primary" onclick='salvarEmpresa(${JSON.stringify(d).replace(/'/g,"&apos;")})'>Salvar como empresa-alvo</button></div>
+      </div>`;
+  } catch(e){ box.innerHTML = `<span style="color:var(--danger)">${e.message}</span>`; }
+}
+
+async function salvarEmpresa(d){
+  const { error } = await sb.from('empresas').upsert({
+    cnpj: d.cnpj, razao_social: d.razao_social, nome_fantasia: d.nome_fantasia,
+    cnae_descricao: d.cnae_fiscal_descricao, cidade: d.municipio, uf: d.uf,
+    situacao_cadastral: d.descricao_situacao_cadastral, origem: 'receita_federal'
+  }, { onConflict: 'cnpj' });
+  if(error) return alert('Erro: ' + error.message);
+  await carregarTudo(); renderAll();
+  alert('Empresa salva. Vá em "Decisores" para mapear os sócios/RH.');
+}
+
+function renderEmpresas(){
+  document.getElementById('table-body-empresas').innerHTML = empresas.map(e => `
+    <tr><td><b>${e.nome_fantasia||e.razao_social}</b></td><td>${e.cnpj}</td><td>${e.cnae_descricao||''}</td>
+    <td>${e.cidade}/${e.uf}</td><td><span class="badge">${e.status_enriquecimento}</span></td>
+    <td><button class="btn btn-secondary" onclick="marcarParaEnriquecer(${e.id})">Pedir enriquecimento</button></td></tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:30px;color:#64748b">Nenhuma empresa ainda</td></tr>';
+}
+
+async function marcarParaEnriquecer(id){
+  await sb.from('empresas').update({ status_enriquecimento: 'Em Fila' }).eq('id', id);
+  await carregarTudo(); renderAll();
+  alert('Marcada como "Em Fila". Peça para o Claude processar a fila de enriquecimento nesta conversa.');
+}
+
+// ---------- DECISORES ----------
+function popularSelectEmpresas(){
+  document.getElementById('dec-empresa').innerHTML = empresas.map(e => `<option value="${e.id}">${e.nome_fantasia||e.razao_social}</option>`).join('') || '<option value="">Cadastre uma empresa primeiro</option>';
+}
+
+async function salvarDecisor(){
+  const empresa_id = document.getElementById('dec-empresa').value;
+  const nome = document.getElementById('dec-nome').value.trim();
+  if(!empresa_id || !nome) return alert('Escolha a empresa e informe o nome.');
+  const payload = {
+    empresa_id, nome,
+    cargo: document.getElementById('dec-cargo').value,
+    prioridade: document.getElementById('dec-prioridade').value,
+    email: document.getElementById('dec-email').value,
+    whatsapp: document.getElementById('dec-whatsapp').value,
+    fonte: 'manual'
+  };
+  const { error } = await sb.from('decisores').insert(payload);
+  if(error) return alert('Erro: ' + error.message);
+  document.getElementById('dec-nome').value = ''; document.getElementById('dec-email').value = ''; document.getElementById('dec-whatsapp').value = '';
+  await carregarTudo(); renderAll();
+}
+
+function renderDecisores(){
+  document.getElementById('table-body-decisores').innerHTML = decisores.map(d => {
+    const emp = empresas.find(e => e.id === d.empresa_id);
+    return `<tr><td>${emp ? (emp.nome_fantasia||emp.razao_social) : '—'}</td><td><b>${d.nome}</b></td><td>${d.cargo||''}</td>
+    <td>${d.prioridade}</td><td>${d.email||''} ${d.whatsapp?('· '+d.whatsapp):''}</td></tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;padding:30px;color:#64748b">Nenhum decisor ainda</td></tr>';
+}
+
+// ---------- CAMPANHAS ----------
+async function salvarCampanha(){
+  const nome = document.getElementById('camp-nome').value.trim();
+  if(!nome) return alert('Informe o nome da campanha.');
+  const payload = {
+    nome, canal: document.getElementById('camp-canal').value,
+    assunto: document.getElementById('camp-assunto').value,
+    corpo: document.getElementById('camp-corpo').value,
+    status: 'Rascunho'
+  };
+  const { error } = await sb.from('campanhas').insert(payload);
+  if(error) return alert('Erro: ' + error.message);
+  document.getElementById('camp-nome').value = ''; document.getElementById('camp-assunto').value = ''; document.getElementById('camp-corpo').value = '';
+  await carregarTudo(); renderAll();
+}
+
+function renderCampanhas(){
+  document.getElementById('table-body-campanhas').innerHTML = campanhas.map(c => `
+    <tr><td><b>${c.nome}</b></td><td>${c.canal}</td><td><span class="badge">${c.status}</span></td><td>${new Date(c.criado_em).toLocaleDateString('pt-BR')}</td></tr>`).join('') || '<tr><td colspan="4" style="text-align:center;padding:30px;color:#64748b">Nenhuma campanha ainda</td></tr>';
+}
+
+// ---------- PESQUISAS ----------
+async function salvarPesquisa(){
+  const titulo = document.getElementById('pesq-titulo').value.trim();
+  if(!titulo) return alert('Informe o título.');
+  const payload = { titulo, tipo: document.getElementById('pesq-tipo').value, pergunta: document.getElementById('pesq-pergunta').value };
+  const { error } = await sb.from('pesquisas').insert(payload);
+  if(error) return alert('Erro: ' + error.message);
+  document.getElementById('pesq-titulo').value = ''; document.getElementById('pesq-pergunta').value = '';
+  await carregarTudo(); renderAll();
+}
+
+function renderPesquisas(){
+  document.getElementById('table-body-pesquisas').innerHTML = pesquisas.map(p => {
+    const notas = (p.respostas_pesquisa||[]).map(r=>r.nota).filter(n=>n!=null);
+    const media = notas.length ? (notas.reduce((a,b)=>a+b,0)/notas.length).toFixed(1) : '—';
+    return `<tr><td><b>${p.titulo}</b></td><td>${p.tipo}</td><td>${p.pergunta||''}</td><td>${notas.length}</td><td>${media}</td></tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;padding:30px;color:#64748b">Nenhuma pesquisa ainda</td></tr>';
+}
+
+// ---------- GERAL (HUB) ----------
+function renderHub(){
+  const categorias = [...new Set(links.map(l => l.categoria))];
+  document.getElementById('hub-content').innerHTML = categorias.map(cat => `
+    <div class="hub-cat">${cat}</div>
+    <div class="hub-grid">${links.filter(l=>l.categoria===cat).map(l => `
+      <a class="hub-card" href="${l.url}" target="_blank" rel="noopener"><span class="ico">${l.icone}</span><span>${l.titulo}</span></a>`).join('')}
+    </div>`).join('') || '<p style="color:var(--text-muted)">Nenhum link cadastrado.</p>';
+}
+
+// ---------- BOOT ----------
+sb.auth.getSession().then(({ data:{ session } }) => { if(session) initApp(); });
+</script>
+</body>
+</html>
