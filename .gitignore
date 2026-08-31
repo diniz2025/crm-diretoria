@@ -1,0 +1,6 @@
+# Este repositório é PÚBLICO. Nunca commitar dados reais de clientes aqui
+# (nomes, CNPJ/CPF, e-mails, telefones). Arquivos de importação em lote com
+# dados reais ficam só localmente / entregues diretamente ao usuário — nunca
+# no git. Ver histórico do commit "Remove import-cronosseg.sql" para contexto.
+import-*.sql
+!import-example*.sql
