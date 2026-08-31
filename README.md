@@ -14,8 +14,10 @@ Feita para rodar em `full.dcgseguros.io`, com login exclusivo do Diniz.
 
 ## Antes de publicar — 3 passos obrigatórios
 
-1. **Rodar o schema no banco.** Abra o SQL Editor do projeto Supabase `dcg-client-data-enrich`
-   (org `dcg-hub`) e execute o conteúdo de `schema.sql` inteiro.
+1. **Rodar o schema no banco.** Abra o SQL Editor do projeto Supabase
+   `lleyoetkisvtfmmypnei` (o banco real do CRM Dental M.I, com os contratos/clientes
+   já existentes) e execute o conteúdo de `schema.sql` inteiro. As tabelas usam
+   `if not exists` — não altera nem apaga o que já existe, só adiciona as tabelas novas.
 
 2. **Criar seu usuário de login.** No mesmo projeto Supabase, vá em
    `Authentication > Users > Add user` e crie seu e-mail/senha. Esse será o único login do painel.
@@ -25,6 +27,12 @@ Feita para rodar em `full.dcgseguros.io`, com login exclusivo do Diniz.
    ```js
    const SUPABASE_KEY = 'COLE_AQUI_A_ANON_KEY_DO_PROJETO';
    ```
+
+> ⚠️ **Atenção**: o `schema.sql` ativa RLS (Row Level Security) na tabela `contratos`,
+> exigindo login para ler/gravar. Se existir *outro* site ainda no ar usando esse mesmo
+> banco sem passar por login (o CRM antigo acessava direto com a chave `anon`, sem
+> autenticação), ele vai parar de funcionar depois de rodar o `schema.sql`. Me avise se
+> ainda existir algum site assim no ar antes de rodar.
 
 ## Hospedagem
 Arquivo único estático (sem build) — mesmo padrão do CRM anterior. Pode ser servido por

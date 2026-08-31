@@ -1,5 +1,9 @@
 -- Painel Completo DCG (full.dcgseguros.io) — uso interno, exclusivo do Diniz.
--- Banco: projeto Supabase "dcg-client-data-enrich" (org dcg-hub).
+-- Banco: projeto Supabase real do CRM Dental M.I (ref lleyoetkisvtfmmypnei),
+-- já contém contratos/clientes existentes. As tabelas abaixo usam
+-- "if not exists": a tabela "contratos" já existente NÃO é alterada nem
+-- recriada — só as tabelas novas (empresas, decisores, campanhas etc.) são
+-- adicionadas por cima, sem mexer nos seus dados atuais.
 -- Rode este arquivo inteiro no SQL Editor do Supabase antes de publicar o app.
 
 -- ==========================================================================
