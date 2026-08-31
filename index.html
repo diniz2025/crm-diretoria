@@ -120,10 +120,11 @@ tr:hover td { background:var(--brand-light); }
       <section id="view-crm" class="view-content">
         <div class="panel" style="display:flex; gap:12px; align-items:center">
           <input type="text" id="crm-search" placeholder="Buscar por cliente, operadora ou vendedor..." oninput="filtrarCarteira(this.value)" style="flex:1; padding:10px 14px; border-radius:8px; border:1px solid var(--border)">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-muted);white-space:nowrap"><input type="checkbox" id="crm-mostrar-inativos" onchange="renderCrm()"> Mostrar inativos</label>
           <button class="btn btn-primary" onclick="abrirNovoContrato()">+ Novo Contrato</button>
         </div>
         <div class="table-container">
-          <table><thead><tr><th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th><th>Renovação</th></tr></thead>
+          <table><thead><tr><th>Cliente</th><th>Operadora</th><th>Vidas</th><th>Prêmio</th><th>Estágio</th><th>Renovação</th><th>Status</th><th></th></tr></thead>
           <tbody id="table-body-crm"></tbody></table>
         </div>
       </section>
@@ -292,17 +293,21 @@ function showView(view, el){
 }
 
 // ---------- DASHBOARD ----------
+function contratosAtivos(){ return contratos.filter(c => c.status_manual !== 'inativo'); }
+
 function renderDashboard(){
-  const premioTotal = contratos.reduce((s,c)=>s+Number(c.premio||0),0);
-  const vidas = contratos.reduce((s,c)=>s+Number(c.vidas||0),0);
+  const ativos = contratosAtivos();
+  const premioTotal = ativos.reduce((s,c)=>s+Number(c.premio||0),0);
+  const vidas = ativos.reduce((s,c)=>s+Number(c.vidas||0),0);
+  const inativos = contratos.length - ativos.length;
   document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-card"><div class="stat-label">Produção Mensal</div><div class="stat-value">R$ ${premioTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+    <div class="stat-card"><div class="stat-label">Produção Mensal (ativos)</div><div class="stat-value">R$ ${premioTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
     <div class="stat-card"><div class="stat-label">Vidas Ativas</div><div class="stat-value">${vidas}</div></div>
     <div class="stat-card"><div class="stat-label">Empresas em Prospecção</div><div class="stat-value">${empresas.length}</div></div>
-    <div class="stat-card"><div class="stat-label">Decisores Mapeados</div><div class="stat-value">${decisores.length}</div></div>`;
+    <div class="stat-card"><div class="stat-label">Contratos Inativos/Histórico</div><div class="stat-value">${inativos}</div></div>`;
   const ctx = document.getElementById('chartMain').getContext('2d');
   if(currentChart) currentChart.destroy();
-  const porOperadora = {}; contratos.forEach(c => porOperadora[c.operadora] = (porOperadora[c.operadora]||0) + Number(c.premio||0));
+  const porOperadora = {}; ativos.forEach(c => porOperadora[c.operadora] = (porOperadora[c.operadora]||0) + Number(c.premio||0));
   currentChart = new Chart(ctx, { type:'bar', data:{ labels:Object.keys(porOperadora), datasets:[{data:Object.values(porOperadora), backgroundColor:'#1EAD6F', borderRadius:8}] }, options:{ maintainAspectRatio:false, plugins:{legend:{display:false}} } });
 }
 
@@ -310,11 +315,21 @@ function renderDashboard(){
 function filtrarCarteira(q){ filtroCarteira = q.toLowerCase().trim(); renderCrm(); }
 
 function renderCrm(){
-  let data = contratos;
+  const mostrarInativos = document.getElementById('crm-mostrar-inativos').checked;
+  let data = mostrarInativos ? contratos : contratosAtivos();
   if(filtroCarteira) data = data.filter(c => (c.cliente||'').toLowerCase().includes(filtroCarteira) || (c.consultor||'').toLowerCase().includes(filtroCarteira) || (c.operadora||'').toLowerCase().includes(filtroCarteira));
-  document.getElementById('table-body-crm').innerHTML = data.map(c => `
-    <tr><td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td><td>R$ ${Number(c.premio||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-    <td><span class="badge">${c.estagio}</span></td><td>${c.data_renovacao||''}</td></tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:30px;color:#64748b">Nenhum contrato ainda</td></tr>';
+  document.getElementById('table-body-crm').innerHTML = data.map(c => {
+    const inativo = c.status_manual === 'inativo';
+    return `<tr><td><b>${c.cliente}</b></td><td>${c.operadora}</td><td>${c.vidas}</td><td>R$ ${Number(c.premio||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+    <td><span class="badge">${c.estagio}</span></td><td>${c.data_renovacao||''}</td>
+    <td><span class="badge" style="${inativo ? 'background:#fee2e2;color:#991b1b' : ''}">${inativo ? 'Inativo' : 'Ativo'}</span></td>
+    <td><button class="btn btn-secondary" style="padding:6px 10px;font-size:11px" onclick="alternarStatusContrato(${c.id}, '${inativo ? 'ativo' : 'inativo'}')">${inativo ? 'Ativar' : 'Inativar'}</button></td></tr>`;
+  }).join('') || '<tr><td colspan="8" style="text-align:center;padding:30px;color:#64748b">Nenhum contrato ainda</td></tr>';
+}
+
+async function alternarStatusContrato(id, novoStatus){
+  await sb.from('contratos').update({ status_manual: novoStatus }).eq('id', id);
+  await carregarTudo(); renderAll();
 }
 
 async function abrirNovoContrato(){

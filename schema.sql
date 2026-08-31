@@ -34,6 +34,9 @@ create table if not exists contratos (
   criado_em timestamptz default now()
 );
 
+-- Rastreia de qual importação em lote cada contrato veio (nulo/'manual' = cadastro direto no painel)
+alter table contratos add column if not exists origem_import text default 'manual';
+
 -- ==========================================================================
 -- Prospecção — empresas-alvo (Receita Federal / busca manual)
 -- ==========================================================================
