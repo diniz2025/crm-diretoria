@@ -6,6 +6,7 @@
 <title>DCG — Painel Completo</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -72,6 +73,11 @@ tr:hover td { background:var(--brand-light); }
 .hub-card:hover { border-color:var(--brand); transform:translateY(-2px); }
 .hub-card .ico { font-size:22px; }
 .hub-cat { font-size:11px; font-weight:800; text-transform:uppercase; color:var(--text-muted); margin:20px 0 10px; }
+
+.google-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:28px; }
+.google-col { background:white; border:1px solid var(--border); border-radius:14px; padding:18px; max-height:320px; overflow-y:auto; }
+.google-col h4 { font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:12px; }
+@media(max-width:900px){ .google-grid { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -199,6 +205,18 @@ tr:hover td { background:var(--brand-light); }
       </section>
 
       <section id="view-geral" class="view-content">
+        <div class="panel" style="display:flex; align-items:center; justify-content:space-between; gap:14px">
+          <div>
+            <h3 style="margin-bottom:4px">Google (Gmail, Calendar, Drive)</h3>
+            <p style="font-size:12px;color:var(--text-muted)" id="google-status-text">Não conectado.</p>
+          </div>
+          <button class="btn btn-primary" id="btn-google-connect" onclick="conectarGoogle()">Conectar Google</button>
+        </div>
+        <div class="google-grid" id="google-panels" style="display:none">
+          <div class="google-col"><h4>📧 Gmail — recentes</h4><div id="gmail-list">Carregando...</div></div>
+          <div class="google-col"><h4>📅 Calendar — próximos</h4><div id="calendar-list">Carregando...</div></div>
+          <div class="google-col"><h4>📁 Drive — recentes</h4><div id="drive-list">Carregando...</div></div>
+        </div>
         <div id="hub-content"></div>
       </section>
 
@@ -212,6 +230,16 @@ tr:hover td { background:var(--brand-light); }
 const SUPABASE_URL = 'https://lleyoetkisvtfmmypnei.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_xRUj2f0WVBrQbx0VJSz7XQ_OnxAFmG7'; // chave pública (publishable) — segura para uso no client-side
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Google OAuth (client-side, sem backend) — Gmail/Calendar/Drive, somente leitura
+const GOOGLE_CLIENT_ID = '472163712649-ko8sm5c6qmavshrrfde1nlm831bhq1n4.apps.googleusercontent.com';
+const GOOGLE_SCOPES = [
+  'https://www.googleapis.com/auth/gmail.readonly',
+  'https://www.googleapis.com/auth/calendar.readonly',
+  'https://www.googleapis.com/auth/drive.readonly'
+].join(' ');
+let googleAccessToken = null;
+let googleTokenClient = null;
 
 let contratos = [], empresas = [], decisores = [], campanhas = [], pesquisas = [], links = [];
 let filtroCarteira = '';
@@ -422,8 +450,74 @@ function renderHub(){
     </div>`).join('') || '<p style="color:var(--text-muted)">Nenhum link cadastrado.</p>';
 }
 
+// ---------- GOOGLE (Gmail / Calendar / Drive) ----------
+function initGoogle(){
+  if(!window.google || !window.google.accounts){ setTimeout(initGoogle, 300); return; }
+  googleTokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: GOOGLE_SCOPES,
+    callback: (resp) => {
+      if(resp.error){ alert('Erro ao conectar com o Google: ' + resp.error); return; }
+      googleAccessToken = resp.access_token;
+      document.getElementById('google-status-text').textContent = 'Conectado.';
+      document.getElementById('btn-google-connect').textContent = 'Reconectar';
+      document.getElementById('google-panels').style.display = 'grid';
+      carregarGoogle();
+    }
+  });
+}
+
+function conectarGoogle(){
+  if(!googleTokenClient) return alert('Google ainda carregando — tente de novo em 1 segundo.');
+  googleTokenClient.requestAccessToken();
+}
+
+async function carregarGoogle(){
+  const headers = { Authorization: 'Bearer ' + googleAccessToken };
+
+  try {
+    const listUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?' + new URLSearchParams({ maxResults: 5, q: 'in:inbox' });
+    const listRes = await fetch(listUrl, { headers });
+    const listData = await listRes.json();
+    const msgs = await Promise.all((listData.messages||[]).map(m => {
+      const url = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?` + new URLSearchParams({ format: 'metadata', metadataHeaders: 'Subject' }) + '&metadataHeaders=From';
+      return fetch(url, { headers }).then(r=>r.json());
+    }));
+    document.getElementById('gmail-list').innerHTML = msgs.map(m => {
+      const h = (m.payload && m.payload.headers) || [];
+      const subj = (h.find(x=>x.name==='Subject')||{}).value || '(sem assunto)';
+      const from = (h.find(x=>x.name==='From')||{}).value || '';
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--border)"><b style="font-size:13px">${subj}</b><br><span style="font-size:11px;color:var(--text-muted)">${from}</span></div>`;
+    }).join('') || '<p style="color:var(--text-muted);font-size:13px">Caixa vazia.</p>';
+  } catch(e){ document.getElementById('gmail-list').innerHTML = '<p style="color:var(--danger);font-size:12px">Erro ao carregar Gmail.</p>'; }
+
+  try {
+    const calUrl = 'https://www.googleapis.com/calendar/v3/calendars/primary/events?' + new URLSearchParams({
+      maxResults: 5, orderBy: 'startTime', singleEvents: 'true', timeMin: new Date().toISOString()
+    });
+    const calRes = await fetch(calUrl, { headers });
+    const calData = await calRes.json();
+    document.getElementById('calendar-list').innerHTML = (calData.items||[]).map(ev => {
+      const start = (ev.start && (ev.start.dateTime || ev.start.date)) || '';
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--border)"><b style="font-size:13px">${ev.summary||'(sem título)'}</b><br><span style="font-size:11px;color:var(--text-muted)">${start ? new Date(start).toLocaleString('pt-BR') : ''}</span></div>`;
+    }).join('') || '<p style="color:var(--text-muted);font-size:13px">Nenhum evento próximo.</p>';
+  } catch(e){ document.getElementById('calendar-list').innerHTML = '<p style="color:var(--danger);font-size:12px">Erro ao carregar Calendar.</p>'; }
+
+  try {
+    const driveUrl = 'https://www.googleapis.com/drive/v3/files?' + new URLSearchParams({
+      pageSize: 5, orderBy: 'modifiedTime desc', fields: 'files(id,name,modifiedTime,webViewLink)'
+    });
+    const driveRes = await fetch(driveUrl, { headers });
+    const driveData = await driveRes.json();
+    document.getElementById('drive-list').innerHTML = (driveData.files||[]).map(f =>
+      `<a href="${f.webViewLink}" target="_blank" rel="noopener" style="display:block;padding:10px 0;border-bottom:1px solid var(--border);color:var(--text-main);text-decoration:none"><b style="font-size:13px">${f.name}</b><br><span style="font-size:11px;color:var(--text-muted)">${new Date(f.modifiedTime).toLocaleString('pt-BR')}</span></a>`
+    ).join('') || '<p style="color:var(--text-muted);font-size:13px">Nenhum arquivo recente.</p>';
+  } catch(e){ document.getElementById('drive-list').innerHTML = '<p style="color:var(--danger);font-size:12px">Erro ao carregar Drive.</p>'; }
+}
+
 // ---------- BOOT ----------
 sb.auth.getSession().then(({ data:{ session } }) => { if(session) initApp(); });
+initGoogle();
 </script>
 </body>
 </html>
