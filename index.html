@@ -246,6 +246,8 @@ let contratos = [], empresas = [], decisores = [], campanhas = [], pesquisas = [
 let filtroCarteira = '';
 let currentChart = null;
 
+const ALLOWED_EMAIL = 'dcgseguros@gmail.com'; // único e-mail autorizado a usar o painel
+
 async function doLogin(){
   const email = document.getElementById('inp-email').value.trim();
   const senha = document.getElementById('inp-pass').value.trim();
@@ -261,6 +263,12 @@ async function doLogout(){ await sb.auth.signOut(); location.reload(); }
 async function initApp(){
   const { data:{ session } } = await sb.auth.getSession();
   if(!session) return;
+  if((session.user.email || '').toLowerCase() !== ALLOWED_EMAIL){
+    await sb.auth.signOut();
+    document.getElementById('login-error').textContent = 'Essa conta (' + session.user.email + ') não tem acesso a este painel.';
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   await carregarTudo();
