@@ -34,6 +34,29 @@ Feita para rodar em `full.dcgseguros.io`, com login exclusivo do Diniz.
 > autenticação), ele vai parar de funcionar depois de rodar o `schema.sql`. Me avise se
 > ainda existir algum site assim no ar antes de rodar.
 
+## Importar dados reais (CronosSeg, Vitalício, Espigão)
+
+Os 4 arquivos `.json` com os dados reais (clientes CronosSeg ativos/inativos,
+carteira Vitalício, empresas e decisores da planilha Espigão) foram entregues
+diretamente a você pelo chat — **nunca comitados neste repositório público**.
+
+Na VPS:
+
+1. Copie os 4 arquivos `.json` para uma pasta (ex: `~/dados-import/`).
+2. Rode:
+   ```bash
+   cd ~/dados-import/
+   export SUPABASE_SERVICE_ROLE_KEY='sb_secret_...'   # Settings > API > service_role, cole só aqui
+   python3 /opt/dcg-painel-completo/importar-dados.py
+   ```
+3. O script importa contratos, empresas e decisores, resolve o vínculo
+   empresa↔decisor pelo CNPJ, e cria/atualiza seu login (`dcgseguros@gmail.com`
+   / `dcg2026`) no mesmo passo. No final ele imprime quantos registros de cada
+   tabela foram inseridos com sucesso.
+
+> ⚠️ A `service_role` key é uma chave de administrador total do banco — nunca
+> cole ela no chat, só direto no terminal da VPS.
+
 ## Hospedagem
 Arquivo único estático (sem build) — mesmo padrão do CRM anterior. Pode ser servido por
 qualquer Nginx/static host apontando para esta pasta. Falta configurar o registro DNS de
